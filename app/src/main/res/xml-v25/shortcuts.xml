@@ -1,0 +1,17 @@
+<?xml version ="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Add shortcuts that launch your app to a specific screen or task. -->
+    <!-- Learn more at https://developer.android.com/guide/topics/ui/shortcuts/creating-shortcuts -->
+    <shortcut
+        android:enabled="true"
+        android:shortcutDisabledMessage="@string/short_cut"
+        android:shortcutId="test"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutLongLabel="@string/short_cut"
+        android:shortcutShortLabel="@string/short_cut">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.donut.mixfile.activity.FileServerActivity"
+            android:targetPackage="com.donut.mixfile" />
+    </shortcut>
+</shortcuts>

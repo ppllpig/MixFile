@@ -1,0 +1,169 @@
+package com.donut.mixfile.server.utils.bean
+
+
+import com.donut.mixfile.server.Uploader
+import com.donut.mixfile.server.uploadClient
+import com.donut.mixfile.ui.routes.getLocalServerAddress
+import com.donut.mixfile.ui.routes.serverAddress
+import com.donut.mixfile.util.CacheUtil
+import com.donut.mixfile.util.basen.BigIntBaseN
+import com.donut.mixfile.util.compressGzip
+import com.donut.mixfile.util.decompressGzip
+import com.donut.mixfile.util.decryptAES
+import com.donut.mixfile.util.encryptAES
+import com.donut.mixfile.util.getFileExtension
+import com.donut.mixfile.util.hashMD5
+import com.donut.mixmessage.util.encode.basen.Alphabet
+import com.github.amr.mimetypes.MimeTypes
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
+import io.ktor.client.request.header
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsChannel
+import java.net.URLEncoder
+
+
+data class MixShareInfo(
+    @SerializedName("f") val fileName: String,
+    @SerializedName("s") val fileSize: Long,
+    @SerializedName("h") val headSize: Int,
+    @SerializedName("u") val url: String,
+    @SerializedName("k") val key: String,
+    @SerializedName("r") val referer: String,
+) {
+
+
+    companion object {
+
+        val ENCODER =
+            BigIntBaseN(Alphabet.fromString("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+
+        fun fromString(string: String) = fromJson(dec(string))
+
+        fun tryFromString(string: String) = try {
+            fromString(string)
+        } catch (e: Exception) {
+            null
+        }
+
+        private fun fromJson(json: String): MixShareInfo =
+            Gson().fromJson(json, MixShareInfo::class.java)
+
+        private fun enc(input: String): String {
+            val bytes = input.encodeToByteArray()
+            val result = encryptAES(bytes, "123".hashMD5(), iv = "123".hashMD5().copyOf(12))
+            return ENCODER.encode(result)
+        }
+
+        private fun dec(input: String): String {
+            val bytes = ENCODER.decode(input)
+            val result = decryptAES(bytes, "123".hashMD5())
+            return result!!.decodeToString()
+        }
+    }
+
+    val downloadUrl: String
+        get() {
+            return "${getLocalServerAddress()}/api/download?s=${
+                URLEncoder.encode(
+                    this.toString(),
+                    "UTF-8"
+                )
+            }"
+        }
+
+    val lanUrl: String
+        get() {
+            return "${serverAddress}/api/download?s=${
+                URLEncoder.encode(
+                    this.toString(),
+                    "UTF-8"
+                )
+            }"
+        }
+
+    override fun toString(): String {
+        return enc(toJson())
+    }
+
+    private fun toJson(): String = Gson().toJson(this)
+
+    suspend fun fetchFile(url: String): ByteArray? {
+        val transformedUrl = Uploader.transformUrl(url)
+        val cachedFileData = CacheUtil.get(transformedUrl)
+        if (cachedFileData != null) {
+            return cachedFileData
+        }
+        val transformedReferer = Uploader.transformReferer(referer)
+        val result: ByteArray? = uploadClient.prepareGet(transformedUrl) {
+            if (transformedReferer.trim().isNotEmpty()) {
+                header("Referer", transformedReferer)
+            }
+        }.execute {
+            val channel = it.bodyAsChannel()
+            channel.discard(headSize.toLong())
+            decryptAES(channel, ENCODER.decode(key))
+        }
+        if (result != null) {
+            CacheUtil.put(transformedUrl, result)
+        }
+        return result
+    }
+
+    override fun hashCode(): Int {
+        return url.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is MixShareInfo) {
+            return url == other.url
+        }
+        return false
+    }
+
+    fun contentType(): String = MimeTypes.getInstance()
+        .getByExtension(fileName.getFileExtension())?.mimeType ?: "application/octet-stream"
+
+    suspend fun fetchMixFile(): MixFile? {
+        val decryptedBytes = fetchFile(url) ?: return null
+        return MixFile.fromBytes(decryptedBytes)
+    }
+
+}
+
+
+data class MixFile(
+    @SerializedName("chunk_size") val chunkSize: Long,
+    @SerializedName("file_size") val fileSize: Long,
+    @SerializedName("version") val version: Long,
+    @SerializedName("file_list") val fileList: List<String>,
+) {
+
+    companion object {
+        fun fromBytes(data: ByteArray) = Gson().fromJson(decompressGzip(data), MixFile::class.java)
+    }
+
+    fun getFileListByRange(range: LongRange): List<Pair<String, Int>> {
+        val start = range.first / chunkSize
+        val end = range.last / chunkSize
+        val rangeFileList = fileList.subList(start.toInt(), end.toInt() + 1)
+
+        val startOffset = range.first % chunkSize
+        val endOffset = -(range.last % chunkSize + 1)
+        val result = mutableListOf<Pair<String, Int>>()
+        for (i in rangeFileList.indices) {
+            val file = rangeFileList[i]
+            val offset = when (i) {
+                0 -> startOffset
+                rangeFileList.size - 1 -> endOffset
+                else -> 0
+            }
+            result.add(Pair(file, offset.toInt()))
+        }
+        return result
+    }
+
+
+    fun toBytes() = compressGzip(Gson().toJson(this))
+
+}

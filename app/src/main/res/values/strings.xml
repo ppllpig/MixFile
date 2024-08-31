@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MixFile</string>
+    <string name="short_cut">运行服务器</string>
+</resources>

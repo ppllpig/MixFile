@@ -1,0 +1,69 @@
+package com.donut.mixfile.server
+
+import com.donut.mixfile.server.uploaders.A3Uploader
+import com.donut.mixfile.server.uploaders.hidden.A1Uploader
+import com.donut.mixfile.server.uploaders.hidden.A2Uploader
+import com.donut.mixfile.server.utils.createBlankBitmap
+import com.donut.mixfile.server.utils.toGif
+import com.donut.mixfile.ui.routes.increaseUploadData
+import com.donut.mixfile.util.cachedMutableOf
+import com.donut.mixfile.util.debug
+import com.donut.mixfile.util.encryptAES
+import com.donut.mixfile.util.hashSHA256
+
+val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader)
+
+var currentUploader by cachedMutableOf(A1Uploader.name, "current_uploader")
+
+
+fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name == currentUploader } ?: A1Uploader
+
+abstract class Uploader(val name: String) {
+
+    open val referer = ""
+    open val chunkSize = 1024L * 1024L
+
+    abstract suspend fun doUpload(fileData: ByteArray): String?
+
+    companion object {
+        val urlTransforms = mutableMapOf<String, (String) -> String>()
+        val refererTransforms = mutableMapOf<String, (String) -> String>()
+
+        fun transformUrl(url: String): String {
+            return urlTransforms.entries.fold(url) { acc, (name, transform) ->
+                transform(acc)
+            }
+        }
+
+        fun transformReferer(url: String): String {
+            return refererTransforms.entries.fold(url) { acc, (name, transform) ->
+                transform(acc)
+            }
+        }
+
+        fun registerUrlTransform(name: String, transform: (String) -> String) {
+            urlTransforms[name] = transform
+        }
+
+        fun registerRefererTransform(name: String, transform: (String) -> String) {
+            refererTransforms[name] = transform
+        }
+    }
+
+    suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String? {
+        val encryptedData = encryptBytes(head, fileData, key)
+        try {
+            return doUpload(encryptedData).also {
+                debug("上传成功: ${it} ${encryptedData.size} ${encryptedData.hashSHA256()}")
+            }
+        } finally {
+            increaseUploadData(encryptedData.size.toLong())
+        }
+    }
+
+    open fun genHead() = createBlankBitmap().toGif()
+    private fun encryptBytes(head: ByteArray, fileData: ByteArray, key: ByteArray): ByteArray {
+        return head + (encryptAES(fileData, key))
+    }
+
+}
