@@ -10,6 +10,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.toLowerCase
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -232,7 +233,7 @@ fun String.encodeURL(): String? {
 
 fun String.getFileExtension(): String {
     val index = this.lastIndexOf('.')
-    return if (index == -1) "" else this.substring(index + 1)
+    return if (index == -1) "" else this.substring(index + 1).lowercase()
 }
 
 inline fun catchError(tag: String = "", block: () -> Unit) {
