@@ -3,6 +3,7 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.gms.google-services")
     id("kotlin-parcelize")
 }
 
@@ -13,8 +14,8 @@ android {
         applicationId = "com.donut.mixfile"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -88,11 +89,13 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
+    implementation(libs.firebase.analytics)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.network)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
