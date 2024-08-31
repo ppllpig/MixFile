@@ -8,12 +8,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.util.Log
-import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.toLowerCase
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
-import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import io.ktor.client.request.forms.FormBuilder
 import io.ktor.http.Headers
 import io.ktor.http.quote
@@ -327,12 +323,7 @@ inline fun errorDialog(title: String, block: () -> Unit) {
             return
         }
         appScope.launch(Dispatchers.Main) {
-            MixDialogBuilder(title).apply {
-                setContent {
-                    Text(text = "${e.message} ${e.stackTraceToString()}", color = Color.Red)
-                }
-                show()
-            }
+            showErrorDialog(e, title)
         }
     }
 }

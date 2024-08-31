@@ -26,6 +26,7 @@ import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.objects.MixActivity
 import com.donut.mixfile.util.showError
+import com.donut.mixfile.util.showErrorDialog
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -59,30 +60,7 @@ class App : Application(), ImageLoaderFactory {
             if (Looper.myLooper() == null) {
                 return@setDefaultUncaughtExceptionHandler
             }
-
-            MixDialogBuilder("发生错误").apply {
-                setContent {
-                    Column(
-                        modifier = Modifier
-                            .heightIn(0.dp, 400.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = e.message ?: "未知错误",
-                            color = Color.Red,
-                            fontSize = 20.sp
-                        )
-                        Text(text = e.stackTraceToString())
-                    }
-                }
-                setPositiveButton("复制错误信息") {
-                    e.stackTraceToString().copyToClipboard()
-                }
-                setNegativeButton("关闭") {
-                    closeDialog()
-                }
-                show()
-            }
+           showErrorDialog(e)
         }
         innerApp = this
         MMKV.initialize(this)

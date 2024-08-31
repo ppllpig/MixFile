@@ -7,8 +7,12 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.donut.mixfile.appScope
 import com.donut.mixfile.currentActivity
+import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.MainTheme
 
 import kotlinx.coroutines.CoroutineScope
@@ -156,4 +161,30 @@ fun GenWebViewClient(modifier: Modifier = Modifier, block: WebView.() -> Unit) =
             block()
         }
     }, modifier = modifier)
+
+fun showErrorDialog(e: Throwable, title: String = "发生错误") {
+    MixDialogBuilder(title).apply {
+        setContent {
+            Column(
+                modifier = Modifier
+                    .heightIn(0.dp, 400.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    text = e.message ?: "未知错误",
+                    color = Color.Red,
+                    fontSize = 20.sp
+                )
+                Text(text = e.stackTraceToString())
+            }
+        }
+        setPositiveButton("复制错误信息") {
+            e.stackTraceToString().copyToClipboard()
+        }
+        setNegativeButton("关闭") {
+            closeDialog()
+        }
+        show()
+    }
+}
 
