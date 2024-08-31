@@ -5,7 +5,6 @@ import com.donut.mixfile.server.Uploader
 import com.donut.mixfile.server.uploadClient
 import com.donut.mixfile.ui.routes.getLocalServerAddress
 import com.donut.mixfile.ui.routes.serverAddress
-import com.donut.mixfile.util.CacheUtil
 import com.donut.mixfile.util.basen.BigIntBaseN
 import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decompressGzip
@@ -90,10 +89,6 @@ data class MixShareInfo(
 
     suspend fun fetchFile(url: String): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
-        val cachedFileData = CacheUtil.get(transformedUrl)
-        if (cachedFileData != null) {
-            return cachedFileData
-        }
         val transformedReferer = Uploader.transformReferer(referer)
         val result: ByteArray? = uploadClient.prepareGet(transformedUrl) {
             if (transformedReferer.trim().isNotEmpty()) {
@@ -103,9 +98,6 @@ data class MixShareInfo(
             val channel = it.bodyAsChannel()
             channel.discard(headSize.toLong())
             decryptAES(channel, ENCODER.decode(key))
-        }
-        if (result != null) {
-            CacheUtil.put(transformedUrl, result)
         }
         return result
     }

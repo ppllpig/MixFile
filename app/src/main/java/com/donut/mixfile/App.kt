@@ -6,15 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Looper
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
@@ -22,23 +13,17 @@ import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
-import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.objects.MixActivity
 import com.donut.mixfile.util.showError
 import com.donut.mixfile.util.showErrorDialog
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
 
 val appScope by lazy { MainScope() }
 
 lateinit var kv: MMKV
-
-lateinit var cacheKv: MMKV
 
 private lateinit var innerApp: Application
 
@@ -60,19 +45,11 @@ class App : Application(), ImageLoaderFactory {
             if (Looper.myLooper() == null) {
                 return@setDefaultUncaughtExceptionHandler
             }
-           showErrorDialog(e)
+            showErrorDialog(e)
         }
         innerApp = this
         MMKV.initialize(this)
         kv = MMKV.defaultMMKV()
-        cacheKv = MMKV.mmkvWithID("cache", app.cacheDir.absolutePath)
-        cacheKv.enableAutoKeyExpire(MMKV.ExpireInMinute)
-        appScope.launch {
-            while (true) {
-                cacheKv.allNonExpireKeys()
-                delay(1000 * 60)
-            }
-        }
         startService(Intent(this, FileService::class.java))
     }
 
