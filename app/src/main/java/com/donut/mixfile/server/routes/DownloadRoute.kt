@@ -104,7 +104,11 @@ private suspend fun responseFileStream(
                             else -> dataBytes.copyOfRange(range, dataBytes.size)
                         }
                         increaseDownloadData(dataToWrite.size.toLong())
-                        writeFully(dataToWrite)
+                        try {
+                            writeFully(dataToWrite)
+                        } catch (e: Exception) {
+                            close(e)
+                        }
                     }
                     sortedTask.execute()
                 })

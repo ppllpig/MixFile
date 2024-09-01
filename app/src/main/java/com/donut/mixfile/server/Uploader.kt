@@ -7,9 +7,7 @@ import com.donut.mixfile.server.utils.createBlankBitmap
 import com.donut.mixfile.server.utils.toGif
 import com.donut.mixfile.ui.routes.increaseUploadData
 import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.debug
 import com.donut.mixfile.util.encryptAES
-import com.donut.mixfile.util.hashSHA256
 
 val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader)
 
@@ -27,7 +25,7 @@ abstract class Uploader(val name: String) {
 
     companion object {
         val urlTransforms = mutableMapOf<String, (String) -> String>()
-        val refererTransforms = mutableMapOf<String, (String) -> String>()
+        val refererTransforms = mutableMapOf<String, (url: String, referer: String) -> String>()
 
         fun transformUrl(url: String): String {
             return urlTransforms.entries.fold(url) { acc, (name, transform) ->
@@ -35,9 +33,9 @@ abstract class Uploader(val name: String) {
             }
         }
 
-        fun transformReferer(url: String): String {
-            return refererTransforms.entries.fold(url) { acc, (name, transform) ->
-                transform(acc)
+        fun transformReferer(url: String, referer: String): String {
+            return refererTransforms.entries.fold(referer) { acc, (name, transform) ->
+                transform(url, acc)
             }
         }
 
@@ -45,7 +43,10 @@ abstract class Uploader(val name: String) {
             urlTransforms[name] = transform
         }
 
-        fun registerRefererTransform(name: String, transform: (String) -> String) {
+        fun registerRefererTransform(
+            name: String,
+            transform: (url: String, referer: String) -> String,
+        ) {
             refererTransforms[name] = transform
         }
     }

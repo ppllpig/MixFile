@@ -1,7 +1,6 @@
 package com.donut.mixfile.server.routes
 
 import com.donut.mixfile.app
-import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.server.utils.concurrencyLimit
 import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.uploadLogs
@@ -66,7 +65,10 @@ fun getRoutes(): Routing.() -> Unit {
                 }
                 val shareInfo = resolveMixShareInfo(shareInfoStr)
                 if (shareInfo == null) {
-                    call.respondText("分享信息解析失败", status = HttpStatusCode.InternalServerError)
+                    call.respondText(
+                        "分享信息解析失败",
+                        status = HttpStatusCode.InternalServerError
+                    )
                     return@get
                 }
                 call.respondText(JsonObject().apply {

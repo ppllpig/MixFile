@@ -89,7 +89,7 @@ data class MixShareInfo(
 
     suspend fun fetchFile(url: String): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
-        val transformedReferer = Uploader.transformReferer(referer)
+        val transformedReferer = Uploader.transformReferer(url, referer)
         val result: ByteArray? = uploadClient.prepareGet(transformedUrl) {
             if (transformedReferer.trim().isNotEmpty()) {
                 header("Referer", transformedReferer)

@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.uploaders;
+package com.donut.mixfile.server.uploaders
 
 import com.donut.mixfile.server.Uploader
 import com.donut.mixfile.server.uploadClient
@@ -8,7 +8,6 @@ import com.google.gson.JsonObject
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
-import io.ktor.http.quote
 
 object A3Uploader : Uploader("线路A3") {
 

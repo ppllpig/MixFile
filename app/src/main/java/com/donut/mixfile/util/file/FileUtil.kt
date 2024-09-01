@@ -30,7 +30,6 @@ import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.server.StreamContent
 import com.donut.mixfile.server.localClient
-import com.donut.mixfile.server.uploadClient
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.getLocalServerAddress

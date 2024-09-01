@@ -33,6 +33,7 @@ class SortedTask(limit: Int) {
                     block()
                 } catch (e: Exception) {
                     showError(e)
+                    break
                 } finally {
                     semaphore.release()
                 }
