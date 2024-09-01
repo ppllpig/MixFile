@@ -3,7 +3,6 @@ package com.donut.mixfile.server.routes
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.routes.increaseDownloadData
 import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.debug
 import com.donut.mixfile.util.encodeURL
 import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.objects.SortedTask
@@ -90,7 +89,6 @@ private suspend fun responseFileStream(
                 tasks.add(async {
                     val url = currentMeta.first
                     val dataBytes = shareInfo.fetchFile(url)
-                    debug("下载成功: ${url}")
                     val range = currentMeta.second
                     if (dataBytes == null) {
                         call.respondText(

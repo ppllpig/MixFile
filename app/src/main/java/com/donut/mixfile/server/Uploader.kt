@@ -53,9 +53,7 @@ abstract class Uploader(val name: String) {
     suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String? {
         val encryptedData = encryptBytes(head, fileData, key)
         try {
-            return doUpload(encryptedData).also {
-                debug("上传成功: ${it} ${encryptedData.size} ${encryptedData.hashSHA256()}")
-            }
+            return doUpload(encryptedData)
         } finally {
             increaseUploadData(encryptedData.size.toLong())
         }
