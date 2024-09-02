@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import com.donut.mixfile.util.formatFileSize
 import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.Response
@@ -32,19 +33,6 @@ import java.util.Locale
 import kotlin.math.log10
 import kotlin.math.pow
 
-fun formatFileSize(bytes: Long): String {
-    if (bytes <= 0) return "0 B"
-
-    val units = arrayOf("B", "KB", "MB", "GB", "TB")
-    val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt()
-
-    return String.format(
-        Locale.US,
-        "%.1f %s",
-        bytes / 1024.0.pow(digitGroups.toDouble()),
-        units[digitGroups]
-    )
-}
 
 class ProgressInterceptor(private val progressListener: ProgressListener) : Interceptor {
 
@@ -178,7 +166,13 @@ fun LoadingBar(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Text(text = "${tip}: ${formatFileSize(bytesWritten)}/${formatFileSize(contentLength)}")
+                Text(
+                    text = "${tip}: ${formatFileSize(bytesWritten, true)}/${
+                        formatFileSize(
+                            contentLength
+                        )
+                    }"
+                )
             }
         }
     }

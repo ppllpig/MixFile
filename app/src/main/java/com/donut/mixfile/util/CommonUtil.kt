@@ -55,9 +55,15 @@ fun readClipBoardText(): String {
 }
 
 
-fun formatFileSize(bytes: Long): String {
+fun formatFileSize(bytes: Long, mb: Boolean = false): String {
     if (bytes <= 0) return "0 B"
-
+    if (mb) {
+        return String.format(
+            Locale.US,
+            "%.2f MB",
+            bytes / 1024.0 / 1024.0
+        )
+    }
     val units = arrayOf("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt()
 
