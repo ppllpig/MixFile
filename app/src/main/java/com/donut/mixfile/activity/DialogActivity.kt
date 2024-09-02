@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,11 +25,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.CommonColumn
-import com.donut.mixfile.ui.routes.FileCard
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.resolveMixShareInfo
-import com.donut.mixfile.util.file.toDataLog
+import com.donut.mixfile.util.file.showFileShareDialog
 import com.donut.mixfile.util.objects.MixActivity
 
 class FileDialogActivity : MixActivity("file_dialog") {
@@ -64,12 +64,19 @@ class FileDialogActivity : MixActivity("file_dialog") {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val shareData = intent.data?.getQueryParameter("file") ?: ""
+        val shareData = intent.data?.host ?: ""
         val shareInfo = resolveMixShareInfo(shareData)
         setContent {
             MainTheme {
-                DialogContainer {
-                    if (shareInfo == null) {
+                LaunchedEffect(Unit) {
+                    if (shareInfo != null) {
+                        showFileShareDialog(shareInfo) {
+                            finish()
+                        }
+                    }
+                }
+                if (shareInfo == null){
+                    DialogContainer {
                         Text(
                             text = "无效分享码",
                             modifier = Modifier.fillMaxWidth(),
@@ -78,17 +85,7 @@ class FileDialogActivity : MixActivity("file_dialog") {
                             fontSize = 20.sp,
                             color = colorScheme.error
                         )
-                        return@DialogContainer
                     }
-                    Text(
-                        text = "文件解析成功",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = colorScheme.primary
-                    )
-                    FileCard(fileDataLog = shareInfo.toDataLog())
                 }
             }
         }

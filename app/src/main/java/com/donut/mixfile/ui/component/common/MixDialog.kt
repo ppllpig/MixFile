@@ -28,6 +28,7 @@ class MixDialogBuilder(
     private var negativeButton = @Composable {}
     private var neutralButton = @Composable {}
     private var close: () -> Unit = {}
+    private val disMissListeners = mutableListOf<() -> Unit>()
 
     companion object {
         val dialogCache = mutableMapOf<String, () -> Unit>()
@@ -35,6 +36,10 @@ class MixDialogBuilder(
 
     fun setContent(content: @Composable () -> Unit) {
         this.content = content
+    }
+
+    fun onDismiss(listener: () -> Unit) {
+        disMissListeners.add(listener)
     }
 
     fun closeDialog() {
@@ -85,7 +90,12 @@ class MixDialogBuilder(
             positiveButton,
             negativeButton,
             neutralButton,
-            properties
+            properties,
+            onDismiss = {
+                disMissListeners.forEach {
+                    it()
+                }
+            }
         )
         dialogCache[tag]?.invoke()
         dialogCache[tag] = close
@@ -100,6 +110,7 @@ fun showAlertDialog(
     dismissButton: (@Composable () -> Unit)? = null,
     neutralButton: @Composable () -> Unit = {},
     properties: DialogProperties = DialogProperties(),
+    onDismiss: () -> Unit = {},
 ): () -> Unit {
     return addComposeView { removeView ->
         val mixedDismissButton = @Composable {
@@ -122,6 +133,7 @@ fun showAlertDialog(
             },
             onDismissRequest = {
                 removeView()
+                onDismiss()
             },
             text = {
                 Column(

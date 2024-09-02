@@ -177,8 +177,9 @@ suspend fun saveFileToStorage(
 
 
 @OptIn(ExperimentalLayoutApi::class)
-fun showFileShareDialog(shareInfo: MixShareInfo) {
+fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
     MixDialogBuilder("文件信息").apply {
+        onDismiss(onDismiss)
         setContent {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),

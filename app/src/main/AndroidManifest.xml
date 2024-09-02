@@ -88,8 +88,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="open"
-                    android:scheme="mfile" />
+                    android:host="*"
+                    android:scheme="mf" />
             </intent-filter>
         </activity>
 

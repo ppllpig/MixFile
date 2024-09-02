@@ -168,7 +168,7 @@ val Home = MixNavPage(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun FileCard(fileDataLog: FileDataLog, longClick: () -> Unit = {}) {
+fun FileCard(fileDataLog: FileDataLog, showDate: Boolean = true, longClick: () -> Unit = {}) {
     HorizontalDivider()
     Card(
         colors = CardDefaults.cardColors(
@@ -198,11 +198,13 @@ fun FileCard(fileDataLog: FileDataLog, longClick: () -> Unit = {}) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 InfoText(key = "大小: ", value = formatFileSize(fileDataLog.size))
-                Text(
-                    text = formatTime(fileDataLog.time),
-                    color = Color.Gray,
-                    fontSize = 14.sp
-                )
+                if (showDate) {
+                    Text(
+                        text = formatTime(fileDataLog.time),
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                }
             }
         }
     }
