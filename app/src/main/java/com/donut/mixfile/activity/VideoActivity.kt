@@ -3,6 +3,7 @@ package com.donut.mixfile.activity
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -58,6 +59,8 @@ class VideoActivity : MixActivity("video") {
 
         val videoPlayerUrl = intent.getStringExtra("url") ?: ""
         enterFullScreen()
+        // 设置保持屏幕常亮
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         enableEdgeToEdge()
         var seeked = false
         setContent {

@@ -10,6 +10,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
+import com.github.amr.mimetypes.MimeTypes
 import io.ktor.client.request.forms.FormBuilder
 import io.ktor.http.Headers
 import io.ktor.http.quote
@@ -237,6 +238,9 @@ fun String.getFileExtension(): String {
     val index = this.lastIndexOf('.')
     return if (index == -1) "" else this.substring(index + 1).lowercase()
 }
+
+fun String.parseFileMimeType() = MimeTypes.getInstance()
+    .getByExtension(this.getFileExtension())?.mimeType ?: "application/octet-stream"
 
 inline fun catchError(tag: String = "", block: () -> Unit) {
     try {

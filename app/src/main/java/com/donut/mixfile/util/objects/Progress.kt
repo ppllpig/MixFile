@@ -29,9 +29,6 @@ import okio.BufferedSource
 import okio.ForwardingSource
 import okio.Source
 import okio.buffer
-import java.util.Locale
-import kotlin.math.log10
-import kotlin.math.pow
 
 
 class ProgressInterceptor(private val progressListener: ProgressListener) : Interceptor {

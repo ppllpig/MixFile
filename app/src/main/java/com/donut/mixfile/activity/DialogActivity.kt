@@ -75,7 +75,7 @@ class FileDialogActivity : MixActivity("file_dialog") {
                         }
                     }
                 }
-                if (shareInfo == null){
+                if (shareInfo == null) {
                     DialogContainer {
                         Text(
                             text = "无效分享码",

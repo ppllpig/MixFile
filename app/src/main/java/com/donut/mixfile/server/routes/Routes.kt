@@ -4,14 +4,13 @@ import com.donut.mixfile.app
 import com.donut.mixfile.server.utils.concurrencyLimit
 import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.uploadLogs
+import com.donut.mixfile.util.parseFileMimeType
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.defaultForFilePath
 import io.ktor.server.application.call
 import io.ktor.server.request.path
-import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytesWriter
 import io.ktor.server.response.respondText
@@ -29,21 +28,11 @@ fun getRoutes(): Routing.() -> Unit {
             val file = call.request.path().substring(1).ifEmpty {
                 "index.html"
             }
-            call.response.apply {
-                header("Content-Type", ContentType.defaultForFilePath(file).contentType.run {
-                    val extension = file.substringAfterLast(".")
-                    when (extension) {
-                        "js" -> "text/javascript"
-                        "html" -> "text/html"
-                        "css" -> "text/css"
-                        else -> this
-                    }
-                })
-            }
-
             try {
                 val fileStream = app.assets.open(file)
-                call.respondBytesWriter {
+                call.respondBytesWriter(
+                    contentType = ContentType.parse(file.parseFileMimeType())
+                ) {
                     fileStream.copyTo(this.toOutputStream())
                 }
             } catch (e: FileNotFoundException) {

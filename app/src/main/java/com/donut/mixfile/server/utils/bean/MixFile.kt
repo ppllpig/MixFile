@@ -10,10 +10,9 @@ import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.decryptAES
 import com.donut.mixfile.util.encryptAES
-import com.donut.mixfile.util.getFileExtension
 import com.donut.mixfile.util.hashMD5
+import com.donut.mixfile.util.parseFileMimeType
 import com.donut.mixmessage.util.encode.basen.Alphabet
-import com.github.amr.mimetypes.MimeTypes
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import io.ktor.client.request.header
@@ -113,8 +112,7 @@ data class MixShareInfo(
         return false
     }
 
-    fun contentType(): String = MimeTypes.getInstance()
-        .getByExtension(fileName.getFileExtension())?.mimeType ?: "application/octet-stream"
+    fun contentType(): String = fileName.parseFileMimeType()
 
     suspend fun fetchMixFile(): MixFile? {
         val decryptedBytes = fetchFile(url) ?: return null
