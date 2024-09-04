@@ -58,7 +58,7 @@ fun readClipBoardText(): String {
 
 fun formatFileSize(bytes: Long, mb: Boolean = false): String {
     if (bytes <= 0) return "0 B"
-    if (mb) {
+    if (mb && bytes > 1024 * 1024) {
         return String.format(
             Locale.US,
             "%.2f MB",
