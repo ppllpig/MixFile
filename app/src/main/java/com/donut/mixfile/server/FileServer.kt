@@ -47,6 +47,10 @@ fun startServer() {
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
+                    call.respondText(
+                        "发生错误: ${cause.message} ${cause.stackTraceToString()}",
+                        status = HttpStatusCode.InternalServerError
+                    )
                     if (cause is IOException) {
                         return@exception
                     }
@@ -54,10 +58,6 @@ fun startServer() {
                         "服务器达到并发限制" -> Unit
                         else -> showError(cause)
                     }
-                    call.respondText(
-                        "发生错误: ${cause.message} ${cause.stackTraceToString()}",
-                        status = HttpStatusCode.InternalServerError
-                    )
                 }
             }
         }.start(wait = false)
