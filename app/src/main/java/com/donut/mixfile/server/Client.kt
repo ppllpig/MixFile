@@ -17,7 +17,6 @@ import io.ktor.utils.io.jvm.javaio.toOutputStream
 import java.io.InputStream
 
 val uploadClient = HttpClient(CIO).config {
-
     install(ContentNegotiation) {
         gson()
         register(ContentType.Text.Html, GsonConverter(GsonBuilder().create()))
