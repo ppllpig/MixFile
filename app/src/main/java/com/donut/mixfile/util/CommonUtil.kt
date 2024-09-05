@@ -249,8 +249,7 @@ inline fun catchError(tag: String = "", block: () -> Unit) {
         showError(e, tag)
     }
 }
-
-inline fun <T> ignoreError(tag: String = "", block: () -> T): T? {
+inline fun <T> ignoreError(block: () -> T): T? {
     try {
         return block()
     } catch (_: Exception) {
@@ -258,6 +257,7 @@ inline fun <T> ignoreError(tag: String = "", block: () -> T): T? {
     }
     return null
 }
+
 
 
 fun getCurrentDate(reverseDays: Long = 0): String {

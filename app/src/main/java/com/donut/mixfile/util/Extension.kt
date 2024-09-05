@@ -151,7 +151,7 @@ fun Int.toBytes(): ByteArray =
 fun ByteArray.toInt(): Int =
     ByteBuffer.wrap(this).int
 
-fun <T> T.toJsonString(): String = Gson().toJson(this).toString()
+fun <T> T.toJsonString(): String = Gson().toJson(this)
 
 
 infix fun <T> T?.default(value: T) = this ?: value
