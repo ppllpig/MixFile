@@ -20,9 +20,6 @@ object A3Uploader : Uploader("线路A3") {
             formData {
                 add("file", fileData, fileFormHeaders())
             }) {
-            timeout {
-                requestTimeoutMillis = 1000 * 120
-            }
         }.body<JsonObject>()
         val code = result.get("code").asInt
         if (code != 200) {
