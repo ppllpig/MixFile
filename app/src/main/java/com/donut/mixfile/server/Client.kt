@@ -1,5 +1,6 @@
 package com.donut.mixfile.server
 
+import com.donut.mixfile.util.cachedMutableOf
 import com.google.gson.GsonBuilder
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -16,13 +17,15 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.jvm.javaio.toOutputStream
 import java.io.InputStream
 
+var UPLOAD_RETRY_TIMES by cachedMutableOf(3,"UPLOAD_RETRY_TIMES")
+
 val uploadClient = HttpClient(CIO).config {
     install(ContentNegotiation) {
         gson()
         register(ContentType.Text.Html, GsonConverter(GsonBuilder().create()))
     }
     install(HttpRequestRetry) {
-        retryOnExceptionOrServerErrors(3)
+        retryOnExceptionOrServerErrors(UPLOAD_RETRY_TIMES.toInt())
         delayMillis { retry ->
             retry * 100L
         }

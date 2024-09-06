@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.server.UPLOADERS
+import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
 import com.donut.mixfile.server.currentUploader
 import com.donut.mixfile.server.routes.DOWNLOAD_TASK_COUNT
 import com.donut.mixfile.server.routes.UPLOAD_TASK_COUNT
@@ -88,6 +89,21 @@ val Settings = MixNavPage(
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {
                 UPLOAD_TASK_COUNT = (it * 10).toLong().coerceAtLeast(1)
+            }
+        )
+    }
+    Column {
+        Text(
+            modifier = Modifier.padding(10.dp, 0.dp),
+            text = "上传失败重试次数(单个分片): ${UPLOAD_RETRY_TIMES}",
+            color = MaterialTheme.colorScheme.primary
+        )
+        Slider(
+            value = UPLOAD_RETRY_TIMES.toFloat() / 20f,
+            steps = 20,
+            modifier = Modifier.fillMaxWidth(),
+            onValueChange = {
+                UPLOAD_RETRY_TIMES = (it * 20).toLong().coerceAtLeast(0)
             }
         )
     }
