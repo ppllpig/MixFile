@@ -1,6 +1,7 @@
 package com.donut.mixfile.server
 
 import com.donut.mixfile.server.uploaders.A3Uploader
+import com.donut.mixfile.server.uploaders.CustomUploader
 import com.donut.mixfile.server.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.uploaders.hidden.A2Uploader
 import com.donut.mixfile.server.utils.createBlankBitmap
@@ -9,7 +10,7 @@ import com.donut.mixfile.ui.routes.increaseUploadData
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.encryptAES
 
-val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader)
+val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
 var currentUploader by cachedMutableOf(A1Uploader.name, "current_uploader")
 
@@ -60,7 +61,7 @@ abstract class Uploader(val name: String) {
         }
     }
 
-    open fun genHead() = createBlankBitmap().toGif()
+    open suspend fun genHead() = createBlankBitmap().toGif()
     private fun encryptBytes(head: ByteArray, fileData: ByteArray, key: ByteArray): ByteArray {
         return head + (encryptAES(fileData, key))
     }

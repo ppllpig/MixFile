@@ -6,7 +6,6 @@ import com.donut.mixfile.server.utils.fileFormHeaders
 import com.donut.mixfile.util.add
 import com.google.gson.JsonObject
 import io.ktor.client.call.body
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 

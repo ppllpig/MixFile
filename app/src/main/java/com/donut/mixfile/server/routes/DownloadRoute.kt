@@ -1,7 +1,6 @@
 package com.donut.mixfile.server.routes
 
 import com.donut.mixfile.server.utils.bean.MixShareInfo
-import com.donut.mixfile.ui.routes.increaseDownloadData
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.encodeURL
 import com.donut.mixfile.util.file.resolveMixShareInfo
@@ -29,6 +28,7 @@ var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 fun getDownloadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
     return route@{
         val shareInfoData = call.request.queryParameters["s"]
+        val referer = call.request.queryParameters["referer"]
         if (shareInfoData == null) {
             call.respondText("分享信息为空", status = HttpStatusCode.InternalServerError)
             return@route
@@ -64,7 +64,7 @@ fun getDownloadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) ->
             }
             contentLength = range.last - range.first + 1
         }
-        responseFileStream(call, fileList, contentLength, shareInfo)
+        responseFileStream(call, fileList, contentLength, shareInfo, referer)
     }
 }
 
@@ -73,6 +73,7 @@ private suspend fun responseFileStream(
     fileDataList: List<Pair<String, Int>>,
     contentLength: Long,
     shareInfo: MixShareInfo,
+    referer: String?,
 ) {
     coroutineScope {
         val fileList = fileDataList.toMutableList()
@@ -88,7 +89,7 @@ private suspend fun responseFileStream(
                 sortedTask.prepareTask(taskOrder)
                 tasks.add(async {
                     val url = currentMeta.first
-                    val dataBytes = shareInfo.fetchFile(url)
+                    val dataBytes = shareInfo.fetchFile(url, referer ?: shareInfo.referer)
                     val range = currentMeta.second
                     if (dataBytes == null) {
                         call.respondText(
@@ -103,7 +104,6 @@ private suspend fun responseFileStream(
                             range < 0 -> dataBytes.copyOfRange(0, -range)
                             else -> dataBytes.copyOfRange(range, dataBytes.size)
                         }
-                        increaseDownloadData(dataToWrite.size.toLong())
                         try {
                             writeFully(dataToWrite)
                         } catch (e: Exception) {

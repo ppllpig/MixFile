@@ -86,7 +86,7 @@ data class MixShareInfo(
 
     private fun toJson(): String = Gson().toJson(this)
 
-    suspend fun fetchFile(url: String): ByteArray? {
+    suspend fun fetchFile(url: String, referer: String = this.referer): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
         val transformedReferer = Uploader.transformReferer(url, referer)
         val result: ByteArray? = uploadClient.prepareGet(transformedUrl) {

@@ -17,7 +17,7 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.jvm.javaio.toOutputStream
 import java.io.InputStream
 
-var UPLOAD_RETRY_TIMES by cachedMutableOf(3,"UPLOAD_RETRY_TIMES")
+var UPLOAD_RETRY_TIMES by cachedMutableOf(3, "UPLOAD_RETRY_TIMES")
 
 val uploadClient = HttpClient(CIO).config {
     install(ContentNegotiation) {

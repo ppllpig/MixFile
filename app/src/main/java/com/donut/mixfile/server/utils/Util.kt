@@ -66,13 +66,16 @@ fun getRandomEncKey() = generateRandomByteArray(256)
 
 fun Bitmap.compressToByteArray(
     useWebp: Boolean = true,
-    lossless: Boolean = false,
-    gifHeader: Boolean = false,
 ): ByteArray {
     val bitmap = this
     val stream = ByteArrayOutputStream()
 
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 0, stream)
+    if (useWebp) {
+        bitmap.compress(Bitmap.CompressFormat.WEBP, 0, stream)
+    } else {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 0, stream)
+    }
+
     return stream.toByteArray()
 }
 

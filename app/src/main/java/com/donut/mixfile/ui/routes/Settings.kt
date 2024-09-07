@@ -11,17 +11,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
 import com.donut.mixfile.server.currentUploader
+import com.donut.mixfile.server.getCurrentUploader
 import com.donut.mixfile.server.routes.DOWNLOAD_TASK_COUNT
 import com.donut.mixfile.server.routes.UPLOAD_TASK_COUNT
+import com.donut.mixfile.server.uploaders.CUSTOM_REFERER
+import com.donut.mixfile.server.uploaders.CUSTOM_UPLOAD_URL
+import com.donut.mixfile.server.uploaders.CustomUploader
 import com.donut.mixfile.server.uploaders.hidden.A1Uploader
 import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -115,9 +121,6 @@ val Settings = MixNavPage(
     CommonSwitch(checked = useShortCode, text = "使用短分享码(空白字符编码信息):") {
         useShortCode = it
     }
-    SettingButton(text = "上传线路: $currentUploader") {
-        selectUploader()
-    }
     HorizontalDivider()
     ElevatedButton(onClick = {
         MixDialogBuilder("确定清除记录?").apply {
@@ -134,6 +137,27 @@ val Settings = MixNavPage(
         }
     }, modifier = Modifier.fillMaxWidth()) {
         Text(text = "清除上传记录")
+    }
+    SettingButton(text = "上传线路: $currentUploader") {
+        selectUploader()
+    }
+    if (getCurrentUploader() == CustomUploader) {
+        OutlinedTextField(value = CUSTOM_UPLOAD_URL, onValueChange = {
+            CUSTOM_UPLOAD_URL = it
+        }, label = { Text(text = "请求地址") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = CUSTOM_REFERER, onValueChange = {
+            CUSTOM_REFERER = it
+        }, label = { Text(text = "referer") }, modifier = Modifier.fillMaxWidth())
+        Text(
+            color = Color.Gray,
+            text = """
+        自定义线路请自行实现,app会使用put方式发送请求
+        请求体为GIF图片二进制,成功请返回200状态码,内容直接返回url
+        失败返回403状态码
+        另外需要实现get方法返回填充图片,推荐gif格式
+        图片尺寸不宜过大,否则影响上传速度
+    """.trimIndent()
+        )
     }
 }
 
