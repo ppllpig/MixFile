@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.donut.mixfile.ui.routes.About
 import com.donut.mixfile.ui.routes.Favorites
 import com.donut.mixfile.ui.routes.Home
-import com.donut.mixfile.ui.routes.Settings
+import com.donut.mixfile.ui.routes.MixSettings
 import com.donut.mixfile.util.OnDispose
 import kotlinx.coroutines.launch
 
@@ -80,7 +80,7 @@ fun NavComponent() {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     NavButton("主页", Icons.Outlined.Home, Home.name)
                     NavButton("收藏", Icons.Outlined.Star, Favorites.name)
-                    NavButton("设置", Icons.Outlined.Settings, Settings.name)
+                    NavButton("设置", Icons.Outlined.Settings, MixSettings.name)
                     NavButton("关于", Icons.Outlined.Info, About.name)
                 }
             }

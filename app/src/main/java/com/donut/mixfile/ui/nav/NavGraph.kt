@@ -14,7 +14,7 @@ import androidx.navigation.compose.NavHost
 import com.donut.mixfile.ui.routes.About
 import com.donut.mixfile.ui.routes.Favorites
 import com.donut.mixfile.ui.routes.Home
-import com.donut.mixfile.ui.routes.Settings
+import com.donut.mixfile.ui.routes.MixSettings
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -32,7 +32,7 @@ fun NavContent(innerPaddingValues: PaddingValues) {
             startDestination = Home.name
         ) {
             Home(this)
-            Settings(this)
+            MixSettings(this)
             About(this)
             Favorites(this)
         }

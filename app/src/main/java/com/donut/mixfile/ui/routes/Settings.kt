@@ -1,5 +1,11 @@
 package com.donut.mixfile.ui.routes
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -15,10 +21,16 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.donut.mixfile.appScope
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
 import com.donut.mixfile.server.currentUploader
@@ -33,10 +45,14 @@ import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
+import com.donut.mixfile.util.OnResume
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 var useShortCode by cachedMutableOf(true, "use_short_code")
 
@@ -62,9 +78,21 @@ fun SettingButton(text: String, buttonText: String = "设置", onClick: () -> Un
     }
 }
 
+fun isIgnoringBatteryOptimizations(context: Context = currentActivity): Boolean {
+    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+}
+
+@SuppressLint("BatteryLife")
+fun openBatteryOptimizationSettings(context: Context = currentActivity) {
+    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+        data = Uri.parse("package:${context.packageName}")
+    }
+    context.startActivity(intent)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
-val Settings = MixNavPage(
+val MixSettings = MixNavPage(
     gap = 10.dp,
     horizontalAlignment = Alignment.CenterHorizontally
 ) {
@@ -82,6 +110,7 @@ val Settings = MixNavPage(
                 DOWNLOAD_TASK_COUNT = (it * 10).toLong().coerceAtLeast(1)
             }
         )
+
     }
     Column {
         Text(
@@ -137,6 +166,16 @@ val Settings = MixNavPage(
         }
     }, modifier = Modifier.fillMaxWidth()) {
         Text(text = "清除上传记录")
+    }
+    val batteryOptimization by remember {
+        mutableStateOf(isIgnoringBatteryOptimizations())
+    }
+    if (!batteryOptimization) {
+        ElevatedButton(onClick = {
+            openBatteryOptimizationSettings()
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text(text = "省电限制未设置!")
+        }
     }
     SettingButton(text = "上传线路: $currentUploader") {
         selectUploader()
