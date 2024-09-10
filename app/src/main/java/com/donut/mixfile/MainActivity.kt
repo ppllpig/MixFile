@@ -1,6 +1,5 @@
 package com.donut.mixfile
 
-import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Build
@@ -9,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationManagerCompat
-import com.donut.mixfile.server.FileService
 import com.donut.mixfile.ui.component.MainContent
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.util.file.MixFileSelector
@@ -27,7 +25,6 @@ class MainActivity : MixActivity(MAIN_ID) {
         super.onDestroy()
         mixFileSelector.unregister()
         unregisterReceiver(networkChangeReceiver)
-        startService(Intent(this, FileService::class.java))
     }
 
     private val requestNotificationPermissionLauncher =

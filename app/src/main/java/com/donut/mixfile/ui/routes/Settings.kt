@@ -24,12 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.donut.mixfile.appScope
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
@@ -45,13 +43,10 @@ import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
-import com.donut.mixfile.util.OnResume
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 var useShortCode by cachedMutableOf(true, "use_short_code")

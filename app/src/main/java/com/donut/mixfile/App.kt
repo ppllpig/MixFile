@@ -50,7 +50,9 @@ class App : Application(), ImageLoaderFactory {
         innerApp = this
         MMKV.initialize(this)
         kv = MMKV.defaultMMKV()
-        startService(Intent(this, FileService::class.java))
+        startService(Intent(this, FileService::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        })
     }
 
     override fun newImageLoader(): ImageLoader {
