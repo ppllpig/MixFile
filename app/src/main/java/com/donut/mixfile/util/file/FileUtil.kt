@@ -211,7 +211,6 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
 
                     if (shareInfo.contentType().startsWith("video/")) {
                         AssistChip(onClick = {
-                            closeDialog()
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 putExtra("url", shareInfo.downloadUrl)
@@ -230,7 +229,6 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                     }
 
                     AssistChip(onClick = {
-                        closeDialog()
                         shareInfo.lanUrl.copyToClipboard()
                     }, label = {
                         Text(text = "复制局域网地址", color = colorScheme.primary)
@@ -239,7 +237,6 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
             }
         }
         setPositiveButton("下载文件") {
-            closeDialog()
             downloadFile(shareInfo)
         }
         show()
