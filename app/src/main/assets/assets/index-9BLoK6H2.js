@@ -191,6 +191,7 @@ To suppress this warning, you need to explicitly provide the \`palette.${t}Chann
     gap: 10px;
     flex-direction: column;
     color: #8e2afe;
+    word-break: break-all;
 
     button {
         font-size: max(.6rem, 14px);
