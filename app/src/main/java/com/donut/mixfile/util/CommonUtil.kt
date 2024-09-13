@@ -339,8 +339,8 @@ inline fun errorDialog(title: String, block: () -> Unit) {
 }
 
 @OptIn(InternalAPI::class)
-fun FormBuilder.add(key: String, value: Any, headers: Headers = Headers.Empty) {
-    append(key.quote(), value, headers)
+fun FormBuilder.add(key: String, value: Any?, headers: Headers = Headers.Empty) {
+    append(key.quote(), value ?: "", headers)
 }
 
 fun formatTime(date: Date): String {

@@ -7,6 +7,7 @@ import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.objects.SortedTask
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.ranges
@@ -78,7 +79,7 @@ private suspend fun responseFileStream(
     coroutineScope {
         val fileList = fileDataList.toMutableList()
         call.respondBytesWriter(
-            contentType = ContentType.parse(shareInfo.contentType()),
+            contentType = ContentType.parse(shareInfo.contentType()).withCharset(Charsets.UTF_8),
             contentLength = contentLength
         ) {
             val sortedTask = SortedTask(DOWNLOAD_TASK_COUNT.toInt())
