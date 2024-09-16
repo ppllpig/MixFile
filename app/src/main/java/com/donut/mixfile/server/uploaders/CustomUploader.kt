@@ -10,6 +10,8 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.readBytes
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 var CUSTOM_UPLOAD_URL by cachedMutableOf("", "CUSTOM_UPLOAD_URL")
 
@@ -20,6 +22,13 @@ object CustomUploader : Uploader("自定义") {
     override suspend fun genHead(): ByteArray {
         return uploadClient.get {
             url(CUSTOM_UPLOAD_URL)
+        }.also {
+            val referer = it.headers["referer"]
+            if (!referer.isNullOrEmpty()) {
+                withContext(Dispatchers.Main) {
+                    CUSTOM_REFERER = referer
+                }
+            }
         }.readBytes()
     }
 
