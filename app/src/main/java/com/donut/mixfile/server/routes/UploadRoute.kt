@@ -30,6 +30,7 @@ fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> U
     return route@{
         val key = generateRandomByteArray(16)
         val name = call.request.queryParameters["name"]
+        val add = call.request.queryParameters["add"] ?: "true"
         if (name.isNullOrEmpty()) {
             call.respondText("需要文件名称", status = HttpStatusCode.InternalServerError)
             return@route
@@ -55,7 +56,9 @@ fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> U
                 key = MixShareInfo.ENCODER.encode(key),
                 referer = uploader.referer
             )
-        addUploadLog(mixShareInfo)
+        if (add.toBoolean()) {
+            addUploadLog(mixShareInfo)
+        }
         call.respondText(mixShareInfo.toString())
     }
 }

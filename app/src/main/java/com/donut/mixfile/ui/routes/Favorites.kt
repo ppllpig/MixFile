@@ -34,17 +34,22 @@ import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.compressGzip
+import com.donut.mixfile.util.decodeHex
 import com.donut.mixfile.util.decompressGzip
+import com.donut.mixfile.util.encodeToBase64
 import com.donut.mixfile.util.file.FileDataLog
 import com.donut.mixfile.util.file.deleteFavoriteLog
 import com.donut.mixfile.util.file.doUploadFile
 import com.donut.mixfile.util.file.favCategories
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile
-import com.donut.mixfile.util.ignoreError
+import com.donut.mixfile.util.formatFileSize
+import com.donut.mixfile.util.hashSHA256
 import com.donut.mixfile.util.objects.ProgressContent
+import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
 import com.donut.mixfile.util.toJsonString
+import com.donut.mixfile.util.truncate
 import com.google.gson.Gson
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.plugins.timeout
@@ -69,19 +74,55 @@ fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
         setPositiveButton("添加分类") {
             createCategory()
         }
-        if (default.isNotEmpty()) {
-            setNegativeButton("删除分类") {
-                if (default.contentEquals("默认")) {
-                    showToast("不能删除默认分类")
+        if (favCategories.contains(default)) {
+            setNegativeButton("编辑分类") {
+                editCategory(default) {
+                    closeDialog()
+                    openCategorySelect(it, onSelect)
                 }
-                deleteCategory(default)
             }
         }
         show()
     }
 }
 
-fun deleteCategory(name: String) {
+fun editCategory(name: String, callback: (String) -> Unit = {}) {
+    MixDialogBuilder("编辑分类").apply {
+        var newName by mutableStateOf(name)
+
+        setContent {
+            OutlinedTextField(value = newName, onValueChange = {
+                newName = it.substring(0, minOf(it.length, 20)).trim()
+            }, modifier = Modifier.fillMaxWidth())
+        }
+        setNegativeButton("删除分类") {
+            deleteCategory(name) {
+                callback(name)
+                closeDialog()
+            }
+        }
+        setPositiveButton("确定") {
+            if (newName.trim().isEmpty()) {
+                showToast("分类名不能为空")
+                return@setPositiveButton
+            }
+            favCategories -= name
+            favCategories += newName
+            currentCategory = newName
+            showToast("修改分类名称成功")
+            favorites.forEach {
+                if (it.category.contentEquals(name)) {
+                    it.updateCategory(newName)
+                }
+            }
+            closeDialog()
+            callback(newName)
+        }
+        show()
+    }
+}
+
+fun deleteCategory(name: String, callback: (String) -> Unit = {}) {
     MixDialogBuilder("确定删除分类?").apply {
         setContent {
             Text(text = "分类: ${name}")
@@ -95,6 +136,7 @@ fun deleteCategory(name: String) {
             }
             showToast("删除分类成功")
             closeDialog()
+            callback(name)
         }
         show()
     }
@@ -109,6 +151,10 @@ fun createCategory() {
             }, modifier = Modifier.fillMaxWidth())
         }
         setPositiveButton("确认") {
+            if (name.trim().isEmpty()) {
+                showToast("分类名不能为空")
+                return@setPositiveButton
+            }
             favCategories += name
             showToast("添加分类成功")
             closeDialog()
@@ -121,7 +167,11 @@ fun createCategory() {
 fun exportFileList(fileList: List<FileDataLog>) {
     val strData = fileList.toJsonString()
     val compressedData = compressGzip(strData)
-    doUploadFile(compressedData, "__mixfile_list")
+    doUploadFile(
+        compressedData,
+        "__mixfile_list_${compressedData.hashSHA256().decodeHex().encodeToBase64().take(8)}",
+        false
+    )
 }
 
 fun showFileList(fileList: List<FileDataLog>) {
@@ -184,8 +234,8 @@ fun importFileList(url: String) {
 }
 
 suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<FileDataLog>? {
-    return ignoreError {
-        localClient.prepareGet {
+    try {
+        return localClient.prepareGet {
             timeout {
                 requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
             }
@@ -205,7 +255,12 @@ suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<F
             val extractedData = decompressGzip(data)
             return@execute Gson().fromJson(extractedData, Array<FileDataLog>::class.java)
         }
+    } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+            showErrorDialog(e, "解析分享列表失败!")
+        }
     }
+    return null
 }
 
 var currentCategory: String by mutableStateOf("")
@@ -244,6 +299,10 @@ val Favorites = MixNavPage(
         searchVal = it
     }, label = { Text(text = "搜索") }, modifier = Modifier.fillMaxWidth())
 
+    Text(
+        text = "文件总大小: ${formatFileSize(result.sumOf { it.size })}",
+        color = colorScheme.primary
+    )
 
     LaunchedEffect(key1 = searchVal, currentCategory, favorites) {
         result = if (searchVal.trim().isNotEmpty()) {
@@ -271,7 +330,7 @@ val Favorites = MixNavPage(
                 .weight(1.0f)
                 .padding(10.dp, 0.dp)
         ) {
-            Text(text = "筛选分类: ${currentCategory.ifEmpty { "全部" }}")
+            Text(text = "分类: ${currentCategory.ifEmpty { "全部" }.truncate(3)}")
         }
         Button(
             onClick = {
@@ -335,6 +394,4 @@ val Favorites = MixNavPage(
             }
         }
     }
-
-
 }

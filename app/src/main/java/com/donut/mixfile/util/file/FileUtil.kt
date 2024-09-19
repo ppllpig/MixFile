@@ -64,7 +64,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
 
 
-fun doUploadFile(data: Any?, name: String) {
+fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
     MixDialogBuilder(
         "上传中", properties = DialogProperties(
             dismissOnClickOutside = false,
@@ -91,6 +91,7 @@ fun doUploadFile(data: Any?, name: String) {
                         url("${getLocalServerAddress()}/api/upload")
                         onUpload(progressContent.ktorListener)
                         parameter("name", name)
+                        parameter("add", add)
                         setBody(data)
                     }
                     val message = response.bodyAsText()
@@ -201,7 +202,7 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                     }, label = {
                         Text(text = "复制分享码", color = colorScheme.primary)
                     })
-                    if (shareInfo.fileName.contentEquals("__mixfile_list")) {
+                    if (shareInfo.fileName.startsWith("__mixfile_list")) {
                         AssistChip(onClick = {
                             importFileList(shareInfo.downloadUrl)
                         }, label = {

@@ -7,12 +7,40 @@ import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.currentCategory
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.showToast
+import com.google.gson.TypeAdapter
+import com.google.gson.annotations.JsonAdapter
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonToken
+import com.google.gson.stream.JsonWriter
+import java.io.IOException
 import java.util.Date
+
+
+class TimestampAdapter : TypeAdapter<Date?>() {
+    @Throws(IOException::class)
+    override fun write(out: JsonWriter, value: Date?) {
+        if (value == null) {
+            out.nullValue()
+            return
+        }
+        out.value(value.time)
+    }
+
+    @Throws(IOException::class)
+    override fun read(`in`: JsonReader): Date? {
+        if (`in`.peek() === JsonToken.NULL) {
+            `in`.nextNull()
+            return null
+        }
+        return Date(`in`.nextLong())
+    }
+}
 
 data class FileDataLog(
     val shareInfoData: String,
     val name: String,
     val size: Long,
+    @JsonAdapter(TimestampAdapter::class)
     val time: Date = Date(),
     var category: String = "默认",
 ) {
