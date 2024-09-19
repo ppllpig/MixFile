@@ -50,6 +50,7 @@ import com.donut.mixfile.util.showToast
 
 
 var useShortCode by cachedMutableOf(true, "use_short_code")
+var autoAddFavorite by cachedMutableOf(true, "auto_add_favorite")
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -144,6 +145,9 @@ val MixSettings = MixNavPage(
     )
     CommonSwitch(checked = useShortCode, text = "使用短分享码(空白字符编码信息):") {
         useShortCode = it
+    }
+    CommonSwitch(checked = autoAddFavorite, text = "上传后自动添加文件到默认收藏:") {
+        autoAddFavorite = it
     }
     HorizontalDivider()
     ElevatedButton(onClick = {

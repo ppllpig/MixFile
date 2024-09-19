@@ -95,6 +95,7 @@ fun NavComponent() {
             }
         }
         Scaffold(
+            floatingActionButton = currentFloatingButtons,
             topBar = {
                 TopAppBar(
                     modifier = Modifier.clickable {

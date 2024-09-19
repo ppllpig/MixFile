@@ -17,6 +17,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,9 @@ import com.donut.mixfile.util.genRandomString
 import com.donut.mixfile.util.isNotNull
 import java.lang.ref.WeakReference
 
+
+var currentFloatingButtons: @Composable () -> Unit by mutableStateOf({})
+
 @Suppress("MemberVisibilityCanBePrivate")
 class MixNavPage(
     val name: String = genRandomString(),
@@ -40,6 +45,7 @@ class MixNavPage(
     val modifier: Modifier = Modifier,
     val useTransition: Boolean = false,
     val horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    val floatingButton: @Composable () -> Unit = {},
     val content: @Composable (NavBackStackEntry) -> Unit,
 ) {
 
@@ -63,6 +69,7 @@ class MixNavPage(
                     horizontalAlignment = horizontalAlignment
                 ) {
                     content(it)
+                    currentFloatingButtons = floatingButton
                 }
             }
         }

@@ -33,6 +33,8 @@ import com.donut.mixfile.server.localClient
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.getLocalServerAddress
+import com.donut.mixfile.ui.routes.importFileList
+import com.donut.mixfile.ui.routes.openCategorySelect
 import com.donut.mixfile.ui.routes.tryResolveFile
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.UseEffect
@@ -62,64 +64,68 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
 
 
+fun doUploadFile(data: Any?, name: String) {
+    MixDialogBuilder(
+        "上传中", properties = DialogProperties(
+            dismissOnClickOutside = false,
+            dismissOnBackPress = false
+        )
+    ).apply {
+        setContent {
+            val progressContent = remember {
+                ProgressContent("上传中")
+            }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                progressContent.LoadingContent()
+            }
+            UseEffect {
+                errorDialog("上传失败") {
+                    val response = localClient.put {
+                        timeout {
+                            requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
+                        }
+                        url("${getLocalServerAddress()}/api/upload")
+                        onUpload(progressContent.ktorListener)
+                        parameter("name", name)
+                        setBody(data)
+                    }
+                    val message = response.bodyAsText()
+                    if (!response.status.isSuccess()) {
+                        throw Exception("上传失败: $message")
+                    }
+                    withContext(Dispatchers.Main) {
+                        tryResolveFile(message)
+                    }
+                    showToast("上传成功!")
+                }
+                closeDialog()
+            }
+        }
+        setNegativeButton("取消") {
+            showToast("上传已取消")
+            closeDialog()
+        }
+        show()
+    }
+}
+
 @SuppressLint("Recycle")
 fun selectAndUploadFile() {
     MainActivity.mixFileSelector.openSelect { uri ->
-        MixDialogBuilder(
-            "上传中", properties = DialogProperties(
-                dismissOnClickOutside = false,
-                dismissOnBackPress = false
-            )
-        ).apply {
-            setContent {
-                val progressContent = remember {
-                    ProgressContent("上传中")
-                }
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    progressContent.LoadingContent()
-                }
-                UseEffect {
-                    val resolver = app.contentResolver
-                    val fileDescriptor: AssetFileDescriptor? =
-                        resolver.openAssetFileDescriptor(uri, "r")
-                    val fileSize = fileDescriptor?.length ?: 0
-                    errorDialog("上传失败") {
-                        val response = localClient.put {
-                            timeout {
-                                requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
-                            }
-                            url("${getLocalServerAddress()}/api/upload")
-                            onUpload(progressContent.ktorListener)
-                            val fileStream = resolver.openInputStream(uri)
-                            if (fileStream == null) {
-                                showToast("打开文件失败")
-                                return@put
-                            }
-                            parameter("name", uri.getFileName())
-                            setBody(StreamContent(fileStream, fileSize))
-                        }
-                        val message = response.bodyAsText()
-                        if (!response.status.isSuccess()) {
-                            throw Exception("上传失败: $message")
-                        }
-                        withContext(Dispatchers.Main) {
-                            tryResolveFile(message)
-                        }
-                        showToast("上传成功!")
-                    }
-                    closeDialog()
-                }
-            }
-            setNegativeButton("取消") {
-                showToast("上传已取消")
-                closeDialog()
-            }
-            show()
+        val resolver = app.contentResolver
+        val fileDescriptor: AssetFileDescriptor? =
+            resolver.openAssetFileDescriptor(uri, "r")
+        val fileSize = fileDescriptor?.length ?: 0
+        val fileStream = resolver.openInputStream(uri)
+        if (fileStream == null) {
+            showToast("打开文件失败")
+            return@openSelect
         }
+        doUploadFile(StreamContent(fileStream, fileSize), uri.getFileName())
     }
 }
 
@@ -195,6 +201,13 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                     }, label = {
                         Text(text = "复制分享码", color = colorScheme.primary)
                     })
+                    if (shareInfo.fileName.contentEquals("__mixfile_list")) {
+                        AssistChip(onClick = {
+                            importFileList(shareInfo.downloadUrl)
+                        }, label = {
+                            Text(text = "文件列表", color = colorScheme.primary)
+                        })
+                    }
                     if (!isFavorite(shareInfo)) {
                         AssistChip(onClick = {
                             addFavoriteLog(shareInfo)
@@ -202,10 +215,23 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                             Text(text = "收藏", color = colorScheme.primary)
                         })
                     } else {
+                        val dataLog = remember(shareInfo) {
+                            favorites.firstOrNull { it == shareInfo.toDataLog() }
+                        }
                         AssistChip(onClick = {
                             deleteFavoriteLog(shareInfo.toDataLog())
                         }, label = {
                             Text(text = "取消收藏", color = colorScheme.primary)
+                        })
+                        AssistChip(onClick = {
+                            openCategorySelect(dataLog?.category ?: "默认") {
+                                dataLog?.updateCategory(it)
+                            }
+                        }, label = {
+                            Text(
+                                text = "分类: ${dataLog?.category}",
+                                color = colorScheme.primary
+                            )
                         })
                     }
 

@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -114,7 +113,7 @@ fun TipText(content: String, onClick: () -> Unit = {}) {
 
 @Composable
 fun OnResume(block: () -> Unit) {
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val lifecycleObserver = remember {
         LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
