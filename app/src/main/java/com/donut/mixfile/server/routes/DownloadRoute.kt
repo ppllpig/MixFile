@@ -63,7 +63,7 @@ fun getDownloadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) ->
                 status(HttpStatusCode.PartialContent)
                 contentRange(range, mixFile.fileSize)
             }
-            contentLength = range.last - range.first + 1
+            contentLength = mixFile.fileSize - range.first
         }
         responseFileStream(call, fileList, contentLength, shareInfo, referer)
     }
