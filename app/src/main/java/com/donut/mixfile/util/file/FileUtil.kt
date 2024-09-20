@@ -29,6 +29,7 @@ import com.donut.mixfile.MainActivity
 import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.server.StreamContent
+import com.donut.mixfile.server.accessKey
 import com.donut.mixfile.server.localClient
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -92,6 +93,7 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
                         onUpload(progressContent.ktorListener)
                         parameter("name", name)
                         parameter("add", add)
+                        parameter("accessKey", accessKey)
                         setBody(data)
                     }
                     val message = response.bodyAsText()

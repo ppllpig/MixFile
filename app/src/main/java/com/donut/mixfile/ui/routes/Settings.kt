@@ -32,6 +32,7 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
 import com.donut.mixfile.server.currentUploader
+import com.donut.mixfile.server.enableAccessKey
 import com.donut.mixfile.server.getCurrentUploader
 import com.donut.mixfile.server.routes.DOWNLOAD_TASK_COUNT
 import com.donut.mixfile.server.routes.UPLOAD_TASK_COUNT
@@ -148,6 +149,13 @@ val MixSettings = MixNavPage(
     }
     CommonSwitch(checked = autoAddFavorite, text = "上传后自动添加文件到默认收藏:") {
         autoAddFavorite = it
+    }
+    CommonSwitch(
+        checked = enableAccessKey,
+        text = "禁止网页端访问:",
+        description = "开启后网页端将禁止访问"
+    ) {
+        enableAccessKey = it
     }
     HorizontalDivider()
     ElevatedButton(onClick = {

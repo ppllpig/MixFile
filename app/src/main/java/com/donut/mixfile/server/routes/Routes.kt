@@ -2,12 +2,11 @@ package com.donut.mixfile.server.routes
 
 import com.donut.mixfile.app
 import com.donut.mixfile.server.utils.concurrencyLimit
+import com.donut.mixfile.util.debug
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.resolveMixShareInfo
-import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.parseFileMimeType
 import com.donut.mixfile.util.toJsonString
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -26,7 +25,9 @@ import java.io.FileNotFoundException
 fun getRoutes(): Routing.() -> Unit {
 
     return {
+
         get("{param...}") {
+            debug("牛逼")
             val file = call.request.path().substring(1).ifEmpty {
                 "index.html"
             }

@@ -2,6 +2,7 @@ package com.donut.mixfile.server.utils.bean
 
 
 import com.donut.mixfile.server.Uploader
+import com.donut.mixfile.server.accessKey
 import com.donut.mixfile.server.uploadClient
 import com.donut.mixfile.ui.routes.getLocalServerAddress
 import com.donut.mixfile.ui.routes.serverAddress
@@ -67,7 +68,7 @@ data class MixShareInfo(
                     this.toString(),
                     "UTF-8"
                 )
-            }"
+            }&accessKey=${accessKey}"
         }
 
     val lanUrl: String
@@ -133,21 +134,14 @@ data class MixFile(
         fun fromBytes(data: ByteArray) = Gson().fromJson(decompressGzip(data), MixFile::class.java)
     }
 
-    fun getFileListByRange(range: LongRange): List<Pair<String, Int>> {
-        val start = range.first / chunkSize
-        val end = range.last / chunkSize
-        val rangeFileList = fileList.subList(start.toInt(), end.toInt() + 1)
-
-        val startOffset = range.first % chunkSize
-        val endOffset = -(range.last % chunkSize + 1)
+    fun getFileListByStartRange(startRange: Long): List<Pair<String, Int>> {
+        val start = startRange / chunkSize
+        val rangeFileList = fileList.subList(start.toInt(), fileList.size)
+        val startOffset = startRange % chunkSize
         val result = mutableListOf<Pair<String, Int>>()
         for (i in rangeFileList.indices) {
             val file = rangeFileList[i]
-            val offset = when (i) {
-                0 -> startOffset
-                rangeFileList.size - 1 -> endOffset
-                else -> 0
-            }
+            val offset = if (i == 0) startOffset else 0
             result.add(Pair(file, offset.toInt()))
         }
         return result

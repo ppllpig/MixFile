@@ -5,12 +5,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.routes.getRoutes
+import com.donut.mixfile.util.cachedMutableOf
+import com.donut.mixfile.util.genRandomString
 import com.donut.mixfile.util.ignoreError
 import com.donut.mixfile.util.showError
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.gson.gson
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
@@ -25,11 +29,20 @@ import java.io.IOException
 import java.net.ServerSocket
 
 var serverPort by mutableIntStateOf(4719)
+val accessKey = genRandomString(32)
+var enableAccessKey by cachedMutableOf(false, "enable_mix_file_access_key")
+
 fun startServer() {
     appScope.launch(Dispatchers.IO) {
         serverPort = findAvailablePort(serverPort) ?: serverPort
         embeddedServer(CIO, port = serverPort, watchPaths = emptyList()) {
-            routing(getRoutes())
+            intercept(ApplicationCallPipeline.Call) {
+                val key = call.request.queryParameters["accessKey"]
+                if (enableAccessKey && !key.contentEquals(accessKey)) {
+                    call.respondText("网页端已被禁止访问,请到APP设置中开启")
+                    finish()
+                }
+            }
             install(ContentNegotiation) {
                 gson()
             }
@@ -60,6 +73,7 @@ fun startServer() {
                     }
                 }
             }
+            routing(getRoutes())
         }.start(wait = false)
     }
 }
