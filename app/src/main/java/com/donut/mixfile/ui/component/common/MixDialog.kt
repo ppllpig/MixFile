@@ -1,8 +1,10 @@
 package com.donut.mixfile.ui.component.common
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +20,7 @@ import com.donut.mixfile.util.addComposeView
 
 class MixDialogBuilder(
     private var title: String,
+    private val subtitle: String = "",
     private val tag: String = title,
     private val properties: DialogProperties = DialogProperties(
 //        usePlatformDefaultWidth = false
@@ -86,6 +89,7 @@ class MixDialogBuilder(
     fun show() {
         close = showAlertDialog(
             title,
+            subtitle,
             content,
             positiveButton,
             negativeButton,
@@ -105,6 +109,7 @@ class MixDialogBuilder(
 
 fun showAlertDialog(
     title: String,
+    subtitle: String = "",
     content: @Composable () -> Unit,
     confirmButton: @Composable () -> Unit = {},
     dismissButton: (@Composable () -> Unit)? = null,
@@ -137,10 +142,18 @@ fun showAlertDialog(
             },
             text = {
                 Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(0.dp)
                 ) {
-                    content()
+                    if (subtitle.isNotEmpty()){
+                        Text(text = subtitle, modifier = Modifier.fillMaxWidth())
+                    }
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        content()
+                    }
                 }
             },
             confirmButton = confirmButton,

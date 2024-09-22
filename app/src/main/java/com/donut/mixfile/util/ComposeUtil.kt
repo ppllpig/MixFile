@@ -37,7 +37,6 @@ import com.donut.mixfile.appScope
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.MainTheme
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -183,6 +182,21 @@ fun GenWebViewClient(modifier: Modifier = Modifier, block: WebView.() -> Unit) =
             block()
         }
     }, modifier = modifier)
+
+
+fun showConfirmDialog(title: String, onConfirm: () -> Unit) {
+    MixDialogBuilder(title).apply {
+        setPositiveButton("确定") {
+            onConfirm()
+            closeDialog()
+        }
+        setNegativeButton("取消") {
+            closeDialog()
+        }
+        show()
+    }
+
+}
 
 fun showErrorDialog(e: Throwable, title: String = "发生错误") {
     MixDialogBuilder(title).apply {

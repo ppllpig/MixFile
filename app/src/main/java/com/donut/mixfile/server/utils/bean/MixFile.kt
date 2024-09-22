@@ -4,8 +4,8 @@ package com.donut.mixfile.server.utils.bean
 import com.donut.mixfile.server.Uploader
 import com.donut.mixfile.server.accessKey
 import com.donut.mixfile.server.uploadClient
-import com.donut.mixfile.ui.routes.getLocalServerAddress
-import com.donut.mixfile.ui.routes.serverAddress
+import com.donut.mixfile.ui.routes.home.getLocalServerAddress
+import com.donut.mixfile.ui.routes.home.serverAddress
 import com.donut.mixfile.util.basen.BigIntBaseN
 import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decompressGzip
@@ -73,7 +73,7 @@ data class MixShareInfo(
 
     val lanUrl: String
         get() {
-            return "${serverAddress}/api/download?s=${
+            return "$serverAddress/api/download?s=${
                 URLEncoder.encode(
                     this.toString(),
                     "UTF-8"

@@ -44,7 +44,7 @@ fun getRoutes(): Routing.() -> Unit {
         }
         route("/api") {
             get("/download", concurrencyLimit(DOWNLOAD_TASK_COUNT.toInt(), getDownloadRoute()))
-            put("/upload", concurrencyLimit(UPLOAD_TASK_COUNT.toInt(), getUploadRoute()))
+            put("/upload", getUploadRoute())
             get("/upload_history") {
                 call.respond(favorites.take(1000).toJsonString())
             }

@@ -1,33 +1,30 @@
-package com.donut.mixfile.ui.routes
+package com.donut.mixfile.ui.routes.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,29 +32,76 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.serverPort
+import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.nav.MixNavPage
+import com.donut.mixfile.ui.routes.favorites.FileCard
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
-import com.donut.mixfile.util.file.FileDataLog
-import com.donut.mixfile.util.file.InfoText
+import com.donut.mixfile.util.file.cancelAllMultiUpload
 import com.donut.mixfile.util.file.deleteUploadLog
 import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showFileShareDialog
 import com.donut.mixfile.util.file.uploadLogs
-import com.donut.mixfile.util.formatFileSize
-import com.donut.mixfile.util.formatTime
+import com.donut.mixfile.util.file.uploadQueue
 import com.donut.mixfile.util.getIpAddressInLocalNetwork
 import com.donut.mixfile.util.isFalse
 import com.donut.mixfile.util.readClipBoardText
+import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 
 var serverAddress by mutableStateOf("http://${getIpAddressInLocalNetwork()}:${serverPort}")
+
+fun showUploadTaskWindow() {
+    MixDialogBuilder("上传中的文件").apply {
+        setContent {
+            if (uploadTasks.isEmpty()) {
+                Text(text = "没有上传中的文件")
+                return@setContent
+            }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                if (uploadQueue > 0) {
+                    Text(
+                        text = "排队中: ${uploadQueue}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    modifier = Modifier.padding(0.dp)
+                ) {
+                    uploadTasks.forEach {
+                        TaskCard(uploadTask = it) {
+                            it.delete()
+                        }
+                    }
+                }
+            }
+        }
+        setPositiveButton("清除失败任务") {
+            uploadTasks = uploadTasks.filter { !it.stopped }
+            showToast("清除成功")
+        }
+        setNegativeButton("全部取消") {
+            showConfirmDialog("确定取消全部上传任务?") {
+                cancelAllMultiUpload()
+                showToast("取消成功")
+            }
+        }
+        show()
+    }
+}
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 val Home = MixNavPage(
@@ -109,7 +153,7 @@ val Home = MixNavPage(
     )
 
     Text(
-        text = "局域网地址: ${serverAddress}",
+        text = "局域网地址: $serverAddress",
         color = colorScheme.primary,
         modifier = Modifier.clickable {
             serverAddress.copyToClipboard()
@@ -142,7 +186,32 @@ val Home = MixNavPage(
             Text(text = "解析文件")
         }
     }
-
+    AnimatedVisibility(visible = uploadTasks.any { it.uploading }) {
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .clickable {
+                        showUploadTaskWindow()
+                    }
+                    .fillMaxSize()
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${uploadTasks.filter { it.uploading }.size} 个文件正在上传中",
+                    modifier = Modifier,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                )
+                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+            }
+        }
+    }
     if (uploadLogs.isNotEmpty()) {
         ElevatedCard(
             modifier = Modifier.fillMaxSize(),
@@ -179,53 +248,6 @@ val Home = MixNavPage(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
-@Composable
-fun FileCard(
-    fileDataLog: FileDataLog,
-    showDate: Boolean = true,
-    longClick: () -> Unit = {},
-) {
-    HorizontalDivider()
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color(107, 218, 246, 0),
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onLongClick = {
-                    longClick()
-                }
-            ) {
-                tryResolveFile(fileDataLog.shareInfoData)
-            }
-    ) {
-        Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            Text(
-                text = fileDataLog.name.trim(),
-                color = colorScheme.primary,
-                fontSize = 16.sp,
-            )
-            FlowRow(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                InfoText(key = "大小: ", value = formatFileSize(fileDataLog.size))
-                if (showDate) {
-                    Text(
-                        text = formatTime(fileDataLog.time),
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-        }
-    }
-}
 
 fun tryResolveFile(text: String): Boolean {
     val fileInfo = resolveMixShareInfo(text.trim())

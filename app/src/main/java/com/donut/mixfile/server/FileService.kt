@@ -11,7 +11,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.R
-import com.donut.mixfile.ui.routes.serverAddress
+import com.donut.mixfile.ui.routes.home.serverAddress
 
 
 class FileService : Service() {
@@ -39,7 +39,7 @@ class FileService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("MixFile局域网服务器")
-            .setContentText("运行中: ${serverAddress}")
+            .setContentText("运行中: $serverAddress")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .build()

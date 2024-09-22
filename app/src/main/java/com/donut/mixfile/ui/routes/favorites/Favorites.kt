@@ -1,7 +1,12 @@
-package com.donut.mixfile.ui.routes
+package com.donut.mixfile.ui.routes.favorites
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,12 +16,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,26 +33,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.localClient
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
+import com.donut.mixfile.ui.routes.home.tryResolveFile
 import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decodeHex
 import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.encodeToBase64
 import com.donut.mixfile.util.file.FileDataLog
+import com.donut.mixfile.util.file.InfoText
 import com.donut.mixfile.util.file.deleteFavoriteLog
 import com.donut.mixfile.util.file.doUploadFile
 import com.donut.mixfile.util.file.favCategories
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile
+import com.donut.mixfile.util.file.updateMark
 import com.donut.mixfile.util.formatFileSize
+import com.donut.mixfile.util.formatTime
 import com.donut.mixfile.util.hashSHA256
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
@@ -63,107 +75,6 @@ import io.ktor.utils.io.core.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
-    MixDialogBuilder("收藏分类").apply {
-        setContent {
-            SingleSelectItemList(favCategories.toList(), default) {
-                onSelect(it)
-                closeDialog()
-            }
-        }
-        setPositiveButton("添加分类") {
-            createCategory()
-        }
-        if (favCategories.contains(default)) {
-            setNegativeButton("编辑分类") {
-                editCategory(default) {
-                    closeDialog()
-                    openCategorySelect(it, onSelect)
-                }
-            }
-        }
-        show()
-    }
-}
-
-fun editCategory(name: String, callback: (String) -> Unit = {}) {
-    MixDialogBuilder("编辑分类").apply {
-        var newName by mutableStateOf(name)
-
-        setContent {
-            OutlinedTextField(value = newName, onValueChange = {
-                newName = it.substring(0, minOf(it.length, 20)).trim()
-            }, modifier = Modifier.fillMaxWidth())
-        }
-        setNegativeButton("删除分类") {
-            deleteCategory(name) {
-                callback(name)
-                closeDialog()
-            }
-        }
-        setPositiveButton("确定") {
-            if (newName.trim().isEmpty()) {
-                showToast("分类名不能为空")
-                return@setPositiveButton
-            }
-            favCategories -= name
-            favCategories += newName
-            currentCategory = newName
-            showToast("修改分类名称成功")
-            favorites.forEach {
-                if (it.category.contentEquals(name)) {
-                    it.updateCategory(newName)
-                }
-            }
-            closeDialog()
-            callback(newName)
-        }
-        show()
-    }
-}
-
-fun deleteCategory(name: String, callback: (String) -> Unit = {}) {
-    MixDialogBuilder("确定删除分类?").apply {
-        setContent {
-            Text(text = "分类: ${name}")
-            Text(text = "删除后将会移除此分类下所有文件!")
-        }
-        setDefaultNegative()
-        setPositiveButton("确定") {
-            favCategories -= name
-            favorites = favorites.filter {
-                it.category != name
-            }
-            showToast("删除分类成功")
-            closeDialog()
-            callback(name)
-        }
-        show()
-    }
-}
-
-fun createCategory() {
-    MixDialogBuilder("新建分类").apply {
-        var name by mutableStateOf("")
-        setContent {
-            OutlinedTextField(value = name, onValueChange = {
-                name = it.substring(0, minOf(it.length, 20)).trim()
-            }, modifier = Modifier.fillMaxWidth())
-        }
-        setPositiveButton("确认") {
-            if (name.trim().isEmpty()) {
-                showToast("分类名不能为空")
-                return@setPositiveButton
-            }
-            favCategories += name
-            showToast("添加分类成功")
-            closeDialog()
-        }
-        setDefaultNegative()
-        show()
-    }
-}
-
 fun exportFileList(fileList: List<FileDataLog>) {
     val strData = fileList.toJsonString()
     val compressedData = compressGzip(strData)
@@ -175,7 +86,11 @@ fun exportFileList(fileList: List<FileDataLog>) {
 }
 
 fun showFileList(fileList: List<FileDataLog>) {
-    MixDialogBuilder("文件列表").apply {
+    val fileTotalSize = fileList.sumOf { it.size }
+    MixDialogBuilder(
+        "文件列表",
+        "共 ${fileList.size} 个文件 总大小: ${formatFileSize(fileTotalSize)}"
+    ).apply {
         setContent {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -201,36 +116,11 @@ fun showFileList(fileList: List<FileDataLog>) {
                 favCategories += it.category
             }
             favorites += fileList
-            favorites = favorites.distinct()
             showToast("导入了 ${favorites.size - prevSize} 个文件")
             closeDialog()
         }
         show()
     }
-}
-
-fun importFileList(url: String) {
-    val progress = ProgressContent()
-    MixDialogBuilder("解析中").apply {
-        setContent {
-            UseEffect {
-                val fileList = loadFileList(url, progress)
-                if (fileList == null) {
-                    showToast("解析分享列表失败!")
-                    closeDialog()
-                    return@UseEffect
-                }
-                withContext(Dispatchers.Main) {
-                    showFileList(fileList.toList())
-                    closeDialog()
-                }
-            }
-            progress.LoadingContent()
-        }
-        setDefaultNegative()
-        show()
-    }
-
 }
 
 suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<FileDataLog>? {
@@ -285,6 +175,10 @@ val Favorites = MixNavPage(
         mutableStateOf(favorites.reversed())
     }
 
+    var sort by remember {
+        mutableStateOf("最新")
+    }
+
     if (favorites.isEmpty()) {
         Text(
             text = "暂未收藏文件",
@@ -300,11 +194,11 @@ val Favorites = MixNavPage(
     }, label = { Text(text = "搜索") }, modifier = Modifier.fillMaxWidth())
 
     Text(
-        text = "文件总大小: ${formatFileSize(result.sumOf { it.size })}",
+        text = "文件数量: ${result.size} 总大小: ${formatFileSize(result.sumOf { it.size })}",
         color = colorScheme.primary
     )
 
-    LaunchedEffect(key1 = searchVal, currentCategory, favorites) {
+    LaunchedEffect(searchVal, currentCategory, favorites, updateMark, sort) {
         result = if (searchVal.trim().isNotEmpty()) {
             favorites.filter {
                 it.name.contains(searchVal)
@@ -314,6 +208,12 @@ val Favorites = MixNavPage(
         }
         result = result.filter {
             currentCategory.isEmpty() || it.category == currentCategory
+        }
+        when (sort) {
+            "最新" -> result = result.sortedByDescending { it.time }
+            "最旧" -> result = result.sortedBy { it.time }
+            "最大" -> result = result.sortedByDescending { it.size }
+            "最小" -> result = result.sortedBy { it.size }
         }
     }
     Row {
@@ -368,8 +268,13 @@ val Favorites = MixNavPage(
         modifier = Modifier.fillMaxSize(),
     ) {
         Text(
-            text = "收藏的文件",
+            text = "排序:${sort}",
             modifier = Modifier
+                .clickable {
+                    openSortSelect(sort) {
+                        sort = it
+                    }
+                }
                 .fillMaxWidth()
                 .padding(10.dp),
             fontSize = 18.sp,
@@ -390,6 +295,54 @@ val Favorites = MixNavPage(
                     FileCard(result[index]) {
                         deleteFavoriteLog(result[index])
                     }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@Composable
+fun FileCard(
+    fileDataLog: FileDataLog,
+    showDate: Boolean = true,
+    longClick: () -> Unit = {},
+) {
+    HorizontalDivider()
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color(107, 218, 246, 0),
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onLongClick = {
+                    longClick()
+                }
+            ) {
+                tryResolveFile(fileDataLog.shareInfoData)
+            }
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Text(
+                text = fileDataLog.name.trim(),
+                color = colorScheme.primary,
+                fontSize = 16.sp,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                InfoText(key = "大小: ", value = formatFileSize(fileDataLog.size))
+                if (showDate) {
+                    Text(
+                        text = formatTime(fileDataLog.time),
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
                 }
             }
         }

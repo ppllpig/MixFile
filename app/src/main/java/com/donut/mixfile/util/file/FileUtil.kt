@@ -3,7 +3,6 @@ package com.donut.mixfile.util.file
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
-import android.content.res.AssetFileDescriptor
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -17,7 +16,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,21 +32,26 @@ import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
+import com.donut.mixfile.appScope
 import com.donut.mixfile.server.StreamContent
 import com.donut.mixfile.server.accessKey
 import com.donut.mixfile.server.localClient
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.routes.getLocalServerAddress
-import com.donut.mixfile.ui.routes.importFileList
-import com.donut.mixfile.ui.routes.openCategorySelect
-import com.donut.mixfile.ui.routes.tryResolveFile
+import com.donut.mixfile.ui.routes.favorites.importFileList
+import com.donut.mixfile.ui.routes.favorites.openCategorySelect
+import com.donut.mixfile.ui.routes.home.getLocalServerAddress
+import com.donut.mixfile.ui.routes.home.tryResolveFile
+import com.donut.mixfile.ui.routes.home.uploadTasks
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.UseEffect
+import com.donut.mixfile.util.cachedMutableOf
+import com.donut.mixfile.util.catchError
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getFileName
+import com.donut.mixfile.util.getFileSize
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import io.ktor.client.plugins.onDownload
@@ -58,11 +67,42 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
+
+suspend fun putUploadFile(
+    data: Any?,
+    name: String,
+    add: Boolean = true,
+    progressContent: ProgressContent = ProgressContent(),
+): String {
+    val response = localClient.put {
+        timeout {
+            requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
+        }
+        url("${getLocalServerAddress()}/api/upload")
+        onUpload(progressContent.ktorListener)
+        parameter("name", name)
+        parameter("add", add)
+        parameter("accessKey", accessKey)
+        setBody(data)
+    }
+    val message = response.bodyAsText()
+    if (!response.status.isSuccess()) {
+        throw Exception("上传失败: $message")
+    }
+    return message
+}
 
 
 fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
@@ -72,6 +112,7 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
             dismissOnBackPress = false
         )
     ).apply {
+        var job: Job? = null
         setContent {
             val progressContent = remember {
                 ProgressContent("上传中")
@@ -83,32 +124,28 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
             ) {
                 progressContent.LoadingContent()
             }
-            UseEffect {
-                errorDialog("上传失败") {
-                    val response = localClient.put {
-                        timeout {
-                            requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
+            val scope = rememberCoroutineScope()
+            LaunchedEffect(Unit) {
+                job = appScope.launch(Dispatchers.IO) {
+                    errorDialog("上传失败") {
+                        val message = putUploadFile(data, name, add, progressContent)
+                        if (!scope.coroutineContext.isActive) {
+                            return@launch
                         }
-                        url("${getLocalServerAddress()}/api/upload")
-                        onUpload(progressContent.ktorListener)
-                        parameter("name", name)
-                        parameter("add", add)
-                        parameter("accessKey", accessKey)
-                        setBody(data)
+                        withContext(Dispatchers.Main) {
+                            tryResolveFile(message)
+                        }
+                        showToast("上传成功!")
                     }
-                    val message = response.bodyAsText()
-                    if (!response.status.isSuccess()) {
-                        throw Exception("上传失败: $message")
-                    }
-                    withContext(Dispatchers.Main) {
-                        tryResolveFile(message)
-                    }
-                    showToast("上传成功!")
+                    closeDialog()
                 }
-                closeDialog()
             }
         }
+        setPositiveButton("后台上传") {
+            closeDialog()
+        }
         setNegativeButton("取消") {
+            job?.cancel()
             showToast("上传已取消")
             closeDialog()
         }
@@ -116,19 +153,64 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
     }
 }
 
+var multiUploadTaskCount by cachedMutableOf(5, "mix_file_multi_upload_task_count")
+
+val uploadSemaphore = Semaphore(multiUploadTaskCount.toInt())
+var uploadQueue by mutableIntStateOf(0)
+private val multiUploadJobs = mutableListOf<Job>()
+
+fun cancelAllMultiUpload() {
+    uploadQueue = 0
+    multiUploadJobs.forEach { it.cancel() }
+    multiUploadJobs.clear()
+    uploadTasks.forEach { it.stop() }
+}
+
+inline fun uploadUri(uri: Uri, uploader: (StreamContent, String) -> Unit) {
+    val resolver = app.contentResolver
+    val fileSize = uri.getFileSize()
+    val fileStream = resolver.openInputStream(uri)
+    if (fileStream == null) {
+        showToast("打开文件失败")
+        return
+    }
+    val stream = StreamContent(fileStream, fileSize)
+    val fileName = uri.getFileName()
+    uploader(stream, fileName)
+}
+
 @SuppressLint("Recycle")
 fun selectAndUploadFile() {
-    MainActivity.mixFileSelector.openSelect { uri ->
-        val resolver = app.contentResolver
-        val fileDescriptor: AssetFileDescriptor? =
-            resolver.openAssetFileDescriptor(uri, "r")
-        val fileSize = fileDescriptor?.length ?: 0
-        val fileStream = resolver.openInputStream(uri)
-        if (fileStream == null) {
-            showToast("打开文件失败")
+    MainActivity.mixFileSelector.openSelect { uriList ->
+        val taskList = mutableListOf<suspend () -> Unit>()
+        uploadQueue += uriList.size
+        uriList.forEach { uri ->
+            taskList.add {
+                uploadUri(uri) { stream, name ->
+                    putUploadFile(stream, name)
+                }
+            }
+        }
+        if (taskList.isEmpty()) {
             return@openSelect
         }
-        doUploadFile(StreamContent(fileStream, fileSize), uri.getFileName())
+        val job = appScope.launch(Dispatchers.IO) {
+            val deferredList = mutableListOf<Deferred<Unit>>()
+            taskList.forEach { task ->
+                uploadSemaphore.acquire()
+                withContext(Dispatchers.Main) {
+                    uploadQueue--
+                }
+                deferredList.add(async {
+                    catchError {
+                        task()
+                    }
+                    uploadSemaphore.release()
+                })
+            }
+            deferredList.awaitAll()
+        }
+        multiUploadJobs.add(job)
     }
 }
 
@@ -212,14 +294,16 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                         })
                     }
                     if (!isFavorite(shareInfo)) {
+
                         AssistChip(onClick = {
                             addFavoriteLog(shareInfo)
                         }, label = {
                             Text(text = "收藏", color = colorScheme.primary)
                         })
                     } else {
-                        val dataLog = remember(shareInfo) {
-                            favorites.firstOrNull { it == shareInfo.toDataLog() }
+                        val dataLog = remember(shareInfo, updateMark) {
+                            val log = shareInfo.toDataLog()
+                            favorites.firstOrNull { it == log }
                         }
                         AssistChip(onClick = {
                             deleteFavoriteLog(shareInfo.toDataLog())
@@ -228,7 +312,7 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                         })
                         AssistChip(onClick = {
                             openCategorySelect(dataLog?.category ?: "默认") {
-                                dataLog?.updateCategory(it)
+                                dataLog?.category = it
                             }
                         }, label = {
                             Text(
@@ -236,6 +320,7 @@ fun showFileShareDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                                 color = colorScheme.primary
                             )
                         })
+
                     }
 
                     if (shareInfo.contentType().startsWith("video/")) {

@@ -30,9 +30,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.ui.routes.About
-import com.donut.mixfile.ui.routes.Favorites
-import com.donut.mixfile.ui.routes.Home
 import com.donut.mixfile.ui.routes.MixSettings
+import com.donut.mixfile.ui.routes.favorites.Favorites
+import com.donut.mixfile.ui.routes.home.Home
 import com.donut.mixfile.util.OnDispose
 import kotlinx.coroutines.launch
 

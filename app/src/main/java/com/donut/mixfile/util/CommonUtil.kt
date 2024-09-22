@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.EOFException
 import java.net.NetworkInterface
 import java.net.URL
 import java.net.URLEncoder
@@ -329,8 +330,10 @@ inline fun errorDialog(title: String, block: () -> Unit) {
     try {
         block()
     } catch (e: Exception) {
-        if (e is CancellationException) {
-            return
+        when (e) {
+            is CancellationException,
+            is EOFException,
+            -> return
         }
         appScope.launch(Dispatchers.Main) {
             showErrorDialog(e, title)
@@ -357,3 +360,5 @@ fun Uri.getFileName(): String {
     }
     return fileName
 }
+
+fun Uri.getFileSize() = app.contentResolver.openAssetFileDescriptor(this, "r")?.use { it.length } ?: 0

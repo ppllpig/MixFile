@@ -46,6 +46,7 @@ import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
+import com.donut.mixfile.util.file.multiUploadTaskCount
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
 
@@ -116,11 +117,26 @@ val MixSettings = MixNavPage(
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
-            value = UPLOAD_TASK_COUNT.toFloat() / 10f,
+            value = UPLOAD_TASK_COUNT.toFloat() / 100f,
+            steps = 100,
+            modifier = Modifier.fillMaxWidth(),
+            onValueChange = {
+                UPLOAD_TASK_COUNT = (it * 100).toLong().coerceAtLeast(1)
+            }
+        )
+    }
+    Column {
+        Text(
+            modifier = Modifier.padding(10.dp, 0.dp),
+            text = "批量上传并发: ${multiUploadTaskCount}",
+            color = MaterialTheme.colorScheme.primary
+        )
+        Slider(
+            value = multiUploadTaskCount.toFloat() / 10f,
             steps = 10,
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {
-                UPLOAD_TASK_COUNT = (it * 10).toLong().coerceAtLeast(1)
+                multiUploadTaskCount = (it * 10).toLong().coerceAtLeast(1)
             }
         )
     }
@@ -147,7 +163,7 @@ val MixSettings = MixNavPage(
     CommonSwitch(checked = useShortCode, text = "使用短分享码(空白字符编码信息):") {
         useShortCode = it
     }
-    CommonSwitch(checked = autoAddFavorite, text = "上传后自动添加文件到默认收藏:") {
+    CommonSwitch(checked = autoAddFavorite, text = "上传后自动添加文件到收藏:") {
         autoAddFavorite = it
     }
     CommonSwitch(
@@ -163,10 +179,9 @@ val MixSettings = MixNavPage(
             setContent {
                 Text(text = "确定清除所有上传历史记录?")
             }
-            setDefaultNegative()
             setPositiveButton("确定") {
                 closeDialog()
-                uploadLogs = listOf()
+                uploadLogs = emptyList()
                 showToast("清除成功!")
             }
             show()

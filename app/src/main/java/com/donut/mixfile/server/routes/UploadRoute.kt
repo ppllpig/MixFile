@@ -4,8 +4,8 @@ import com.donut.mixfile.server.Uploader
 import com.donut.mixfile.server.getCurrentUploader
 import com.donut.mixfile.server.utils.bean.MixFile
 import com.donut.mixfile.server.utils.bean.MixShareInfo
+import com.donut.mixfile.ui.routes.home.UploadTask
 import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.file.addUploadLog
 import com.donut.mixfile.util.generateRandomByteArray
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -17,10 +17,14 @@ import io.ktor.util.pipeline.PipelineContext
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withContext
 import kotlin.math.ceil
 
 var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
@@ -35,14 +39,20 @@ fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> U
             call.respondText("需要文件名称", status = HttpStatusCode.InternalServerError)
             return@route
         }
-        val uploader = getCurrentUploader()
-        val head = uploader.genHead()
         val size = call.request.contentLength() ?: 0
         if (size <= 0L) {
             call.respondText("文件大小不合法", status = HttpStatusCode.InternalServerError)
             return@route
         }
-        val mixUrl = uploadFile(call.receiveChannel(), head, uploader, key, fileSize = size)
+        val uploadTask = UploadTask(call, name, size, add = add.toBoolean())
+        currentCoroutineContext().job.invokeOnCompletion {
+            uploadTask.error = it
+            uploadTask.stopped = true
+        }
+        val uploader = getCurrentUploader()
+        val head = uploader.genHead()
+        val mixUrl =
+            uploadFile(call.receiveChannel(), head, uploader, key, fileSize = size, uploadTask)
         if (mixUrl == null) {
             call.respondText("上传失败", status = HttpStatusCode.InternalServerError)
             return@route
@@ -56,12 +66,12 @@ fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> U
                 key = MixShareInfo.ENCODER.encode(key),
                 referer = uploader.referer
             )
-        if (add.toBoolean()) {
-            addUploadLog(mixShareInfo)
-        }
         call.respondText(mixShareInfo.toString())
+        uploadTask.complete(mixShareInfo)
     }
 }
+
+val semaphore = Semaphore(UPLOAD_TASK_COUNT.toInt())
 
 suspend fun uploadFile(
     channel: ByteReadChannel,
@@ -69,6 +79,7 @@ suspend fun uploadFile(
     uploader: Uploader,
     secret: ByteArray,
     fileSize: Long,
+    uploadTask: UploadTask,
 ): String? {
     return coroutineScope {
         val chunkSize = uploader.chunkSize
@@ -77,8 +88,6 @@ suspend fun uploadFile(
         val fileList = List(fileListLength) { "" }.toMutableList()
         var fileIndex = 0
         val tasks = mutableListOf<Deferred<Unit?>>()
-
-        val semaphore = Semaphore(UPLOAD_TASK_COUNT.toInt())
 
         while (!channel.isClosedForRead) {
             semaphore.acquire()
@@ -89,6 +98,9 @@ suspend fun uploadFile(
                 try {
                     val url = uploader.upload(head, fileData, secret) ?: return@async null
                     fileList[currentIndex] = url
+                    withContext(Dispatchers.Main) {
+                        uploadTask.progress.updateProgress(channel.totalBytesRead, fileSize)
+                    }
                 } finally {
                     semaphore.release()
                 }

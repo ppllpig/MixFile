@@ -1,6 +1,8 @@
 package com.donut.mixfile
 
 import com.donut.mixfile.server.uploaders.hidden.A2Uploader
+import com.donut.mixfile.server.uploaders.hidden.sCode
+import com.donut.mixfile.ui.routes.home.UploadTask
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -13,10 +15,12 @@ import org.junit.Test
 class ExampleUnitTest {
 
 
-
     @Test
     fun main() {
+        runBlocking {
 
+
+        }
     }
 
 
