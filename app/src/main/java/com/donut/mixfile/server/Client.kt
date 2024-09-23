@@ -25,7 +25,9 @@ val uploadClient = HttpClient(CIO).config {
         register(ContentType.Text.Html, GsonConverter(GsonBuilder().create()))
     }
     install(HttpRequestRetry) {
-        retryOnExceptionOrServerErrors(UPLOAD_RETRY_TIMES.toInt())
+        maxRetries = UPLOAD_RETRY_TIMES.toInt()
+        retryOnException(retryOnTimeout = true)
+        retryOnServerErrors()
         delayMillis { retry ->
             retry * 100L
         }
