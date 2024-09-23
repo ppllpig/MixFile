@@ -116,7 +116,7 @@ class UploadTask(
     @Composable
     fun State() {
         if (stopped) {
-            if (error == null){
+            if (error == null) {
                 return Text(text = "上传取消", color = colorScheme.error)
             }
             return Text(text = "上传失败", color = colorScheme.error)

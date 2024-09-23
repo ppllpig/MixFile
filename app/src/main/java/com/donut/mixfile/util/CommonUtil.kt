@@ -361,4 +361,5 @@ fun Uri.getFileName(): String {
     return fileName
 }
 
-fun Uri.getFileSize() = app.contentResolver.openAssetFileDescriptor(this, "r")?.use { it.length } ?: 0
+fun Uri.getFileSize() =
+    app.contentResolver.openAssetFileDescriptor(this, "r")?.use { it.length } ?: 0

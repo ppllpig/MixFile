@@ -23,7 +23,7 @@ import java.net.URLEncoder
 
 
 data class MixShareInfo(
-    @SerializedName("f") val fileName: String,
+    @SerializedName("f") var fileName: String,
     @SerializedName("s") val fileSize: Long,
     @SerializedName("h") val headSize: Int,
     @SerializedName("u") val url: String,

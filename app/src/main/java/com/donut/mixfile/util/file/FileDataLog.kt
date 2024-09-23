@@ -1,25 +1,27 @@
 package com.donut.mixfile.util.file
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.favorites.currentCategory
 import com.donut.mixfile.util.TimestampAdapter
 import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.genRandomString
 import com.donut.mixfile.util.showToast
 import com.google.gson.annotations.JsonAdapter
 import java.util.Date
 
 
 data class FileDataLog(
-    val shareInfoData: String,
-    val name: String,
+    var shareInfoData: String,
+    var name: String,
     val size: Long,
     @JsonAdapter(TimestampAdapter::class)
     val time: Date = Date(),
@@ -32,6 +34,30 @@ data class FileDataLog(
             category = category.substring(0, 20)
         }
         category = category.trim()
+    }
+
+    fun rename() {
+        val shareInfo = resolveMixShareInfo(shareInfoData) ?: return
+        MixDialogBuilder("重命名文件").apply {
+            var name by mutableStateOf(shareInfo.fileName)
+            setContent {
+                OutlinedTextField(value = name, onValueChange = {
+                    name = it
+                }, modifier = Modifier.fillMaxWidth(), label = {
+                    Text(text = "输入文件名")
+                })
+            }
+            setDefaultNegative()
+            setPositiveButton("确定") {
+                shareInfo.fileName = name
+                this@FileDataLog.shareInfoData = shareInfo.toString()
+                this@FileDataLog.name = name
+                updateFavorites()
+                showToast("重命名文件成功!")
+                closeDialog()
+            }
+            show()
+        }
     }
 
     override fun hashCode(): Int {
@@ -48,6 +74,12 @@ data class FileDataLog(
 var favorites by cachedMutableOf(listOf<FileDataLog>(), "favorite_file_logs")
 
 var updateMark by mutableIntStateOf(0)
+    private set
+
+fun updateFavorites() {
+    favorites = favorites
+    updateMark++
+}
 
 var uploadLogs by cachedMutableOf(listOf<FileDataLog>(), "upload_file_logs")
 
@@ -58,9 +90,6 @@ fun isFavorite(shareInfo: MixShareInfo): Boolean {
 }
 
 fun addUploadLog(shareInfo: MixShareInfo) {
-//    while (favorites.size < 10000) {
-//        favorites += FileDataLog(genRandomString(100), genRandomString(5), 0, category = "默认")
-//    }
     if (autoAddFavorite) {
         addFavoriteLog(shareInfo)
     }

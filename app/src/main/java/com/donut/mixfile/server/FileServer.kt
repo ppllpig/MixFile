@@ -2,6 +2,7 @@ package com.donut.mixfile.server
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.routes.getRoutes
@@ -24,6 +25,7 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.ServerSocket
@@ -31,6 +33,7 @@ import java.net.ServerSocket
 var serverPort by mutableIntStateOf(4719)
 val accessKey = genRandomString(32)
 var enableAccessKey by cachedMutableOf(false, "enable_mix_file_access_key")
+var serverStarted by mutableStateOf(false)
 
 fun startServer() {
     appScope.launch(Dispatchers.IO) {
@@ -75,6 +78,8 @@ fun startServer() {
             }
             routing(getRoutes())
         }.start(wait = false)
+        delay(1000)
+        serverStarted = true
     }
 }
 

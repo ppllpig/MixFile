@@ -46,6 +46,7 @@ import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
+import com.donut.mixfile.util.file.enablePreview
 import com.donut.mixfile.util.file.multiUploadTaskCount
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
@@ -172,6 +173,13 @@ val MixSettings = MixNavPage(
         description = "开启后网页端将禁止访问"
     ) {
         enableAccessKey = it
+    }
+    CommonSwitch(
+        checked = enablePreview,
+        text = "开启文件预览:",
+        description = "开启后可预览图片和视频(<20mb),将占用流量和储存空间"
+    ) {
+        enablePreview = it
     }
     HorizontalDivider()
     ElevatedButton(onClick = {

@@ -1,5 +1,6 @@
 package com.donut.mixfile.util.file
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,10 +24,15 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.donut.mixfile.genImageLoader
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
+import com.donut.mixfile.util.isTrue
 import com.donut.mixfile.util.objects.ProgressContent
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
+import okhttp3.CacheControl
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.internal.headersContentLength
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun ErrorMessage(msg: String) {
@@ -57,11 +64,42 @@ fun showImageDialog(url: String) {
         }
         show()
     }
+
 }
+
+val forceCacheInterceptor = Interceptor { chain ->
+    val response = chain.proceed(chain.request())
+    val cacheControl = CacheControl.Builder()
+        .maxAge(10, TimeUnit.MINUTES)
+        .build()
+    response.newBuilder()
+        .removeHeader("Pragma")
+        .removeHeader("Cache-Control")
+        .header("Cache-Control", cacheControl.toString())
+        .build()
+}
+
+val videoDecodeInterceptor = Interceptor { chain ->
+    val response = chain.proceed(chain.request())
+    if (response.header("content-type")?.startsWith("video/").isTrue()) {
+        if (response.headersContentLength() > 1024 * 1024 * 5) {
+            return@Interceptor response.newBuilder()
+                .header("Content-Length", "${1024 * 1024 * 3}")
+                .body(response.peekBody(1024 * 1024 * 3))
+                .build()
+        }
+    }
+    response
+}
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ImageContent(imageUrl: String) {
+fun ImageContent(
+    imageUrl: String,
+    @SuppressLint("ModifierParameter") modifier: Modifier? = null,
+    scale: ContentScale = ContentScale.Fit,
+) {
     val progress = remember {
         ProgressContent(tip = "图片加载中")
     }
@@ -69,6 +107,7 @@ private fun ImageContent(imageUrl: String) {
     SubcomposeAsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
+//            .videoFrameMillis(0)
             .crossfade(true)
             .build(),
         error = {
@@ -79,13 +118,16 @@ private fun ImageContent(imageUrl: String) {
             initializer = {
                 OkHttpClient.Builder()
                     .addNetworkInterceptor(progress.interceptor)
+                    .addNetworkInterceptor(forceCacheInterceptor)
+                    .addNetworkInterceptor(videoDecodeInterceptor)
                     .build()
             }),
         loading = {
             progress.LoadingContent()
         },
         contentDescription = "图片",
-        modifier = Modifier
+        contentScale = scale,
+        modifier = modifier ?: Modifier
             .fillMaxWidth()
             .heightIn(400.dp, 1000.dp)
             .zoomable(zoomState)

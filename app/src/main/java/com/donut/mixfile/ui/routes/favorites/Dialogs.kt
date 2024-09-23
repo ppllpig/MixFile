@@ -12,7 +12,9 @@ import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.file.favCategories
 import com.donut.mixfile.util.file.favorites
-import com.donut.mixfile.util.file.updateMark
+import com.donut.mixfile.util.file.loadFileList
+import com.donut.mixfile.util.file.showFileList
+import com.donut.mixfile.util.file.updateFavorites
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +25,7 @@ fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
         setContent {
             SingleSelectItemList(favCategories.toList(), default) {
                 onSelect(it)
-                updateMark++
+                updateFavorites()
                 closeDialog()
             }
         }
@@ -45,9 +47,9 @@ fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
 fun openSortSelect(default: String = "", onSelect: (String) -> Unit) {
     MixDialogBuilder("排序选择").apply {
         setContent {
-            SingleSelectItemList(listOf("最新", "最旧", "最大", "最小"), default) {
+            SingleSelectItemList(listOf("最新", "最旧", "最大", "最小", "名称"), default) {
                 onSelect(it)
-                updateMark++
+                updateFavorites()
                 closeDialog()
             }
         }
@@ -84,7 +86,7 @@ fun editCategory(name: String, callback: (String) -> Unit = {}) {
                     it.category = newName
                 }
             }
-            updateMark++
+            updateFavorites()
             closeDialog()
             callback(newName)
         }

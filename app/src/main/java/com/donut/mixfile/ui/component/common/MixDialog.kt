@@ -145,7 +145,7 @@ fun showAlertDialog(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.padding(0.dp)
                 ) {
-                    if (subtitle.isNotEmpty()){
+                    if (subtitle.isNotEmpty()) {
                         Text(text = subtitle, modifier = Modifier.fillMaxWidth())
                     }
                     Column(
