@@ -50,6 +50,7 @@ fun showFileList(fileList: List<FileDataLog>) {
                 favCategories += it.category
             }
             favorites += fileList
+            favorites = favorites.distinct()
             showToast("导入了 ${favorites.size - prevSize} 个文件")
             closeDialog()
         }
