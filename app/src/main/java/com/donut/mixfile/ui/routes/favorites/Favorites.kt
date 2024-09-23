@@ -28,6 +28,7 @@ import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.routes.UploadDialogCard
 import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.exportFileList
 import com.donut.mixfile.util.file.favorites
@@ -37,6 +38,9 @@ import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.truncate
 
 var currentCategory: String by mutableStateOf("")
+
+private var favoriteSort by cachedMutableOf("最新", "mix_favorite_sort")
+
 
 val Favorites = MixNavPage(
     gap = 10.dp,
@@ -58,10 +62,6 @@ val Favorites = MixNavPage(
         mutableStateOf(favorites.reversed())
     }
 
-    var sort by remember {
-        mutableStateOf("最新")
-    }
-
     if (favorites.isEmpty()) {
         Text(
             text = "暂未收藏文件",
@@ -81,7 +81,7 @@ val Favorites = MixNavPage(
         color = colorScheme.primary
     )
 
-    LaunchedEffect(searchVal, currentCategory, favorites, updateMark, sort) {
+    LaunchedEffect(searchVal, currentCategory, favorites, updateMark, favoriteSort) {
         result = if (searchVal.trim().isNotEmpty()) {
             favorites.filter {
                 it.name.contains(searchVal)
@@ -92,7 +92,7 @@ val Favorites = MixNavPage(
         result = result.filter {
             currentCategory.isEmpty() || it.category == currentCategory
         }
-        when (sort) {
+        when (favoriteSort) {
             "最新" -> result = result.sortedByDescending { it.time }
             "最旧" -> result = result.sortedBy { it.time }
             "最大" -> result = result.sortedByDescending { it.size }
@@ -158,11 +158,11 @@ val Favorites = MixNavPage(
         modifier = Modifier.fillMaxSize(),
     ) {
         Text(
-            text = "排序:${sort}",
+            text = "排序:${favoriteSort}",
             modifier = Modifier
                 .clickable {
-                    openSortSelect(sort) {
-                        sort = it
+                    openSortSelect(favoriteSort) {
+                        favoriteSort = it
                     }
                 }
                 .fillMaxWidth()
