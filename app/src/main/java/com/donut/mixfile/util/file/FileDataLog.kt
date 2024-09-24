@@ -25,7 +25,7 @@ data class FileDataLog(
     val size: Long,
     @JsonAdapter(TimestampAdapter::class)
     val time: Date = Date(),
-    var category: String = "默认",
+    var category: String = currentCategory,
 ) {
 
     init {

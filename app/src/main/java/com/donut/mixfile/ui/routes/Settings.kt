@@ -118,11 +118,11 @@ val MixSettings = MixNavPage(
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
-            value = UPLOAD_TASK_COUNT.toFloat() / 100f,
-            steps = 100,
+            value = UPLOAD_TASK_COUNT.toFloat() / 10f,
+            steps = 10,
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {
-                UPLOAD_TASK_COUNT = (it * 100).toLong().coerceAtLeast(1)
+                UPLOAD_TASK_COUNT = (it * 10).toLong().coerceAtLeast(1)
             }
         )
     }
@@ -148,11 +148,11 @@ val MixSettings = MixNavPage(
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
-            value = UPLOAD_RETRY_TIMES.toFloat() / 20f,
-            steps = 20,
+            value = UPLOAD_RETRY_TIMES.toFloat() / 10f,
+            steps = 10,
             modifier = Modifier.fillMaxWidth(),
             onValueChange = {
-                UPLOAD_RETRY_TIMES = (it * 20).toLong().coerceAtLeast(0)
+                UPLOAD_RETRY_TIMES = (it * 10).toLong().coerceAtLeast(0)
             }
         )
     }
@@ -181,6 +181,27 @@ val MixSettings = MixNavPage(
     ) {
         enablePreview = it
     }
+    SettingButton(text = "上传线路: $currentUploader") {
+        selectUploader()
+    }
+    if (getCurrentUploader() == CustomUploader) {
+        OutlinedTextField(value = CUSTOM_UPLOAD_URL, onValueChange = {
+            CUSTOM_UPLOAD_URL = it
+        }, label = { Text(text = "请求地址") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = CUSTOM_REFERER, onValueChange = {
+            CUSTOM_REFERER = it
+        }, label = { Text(text = "referer") }, modifier = Modifier.fillMaxWidth())
+        Text(
+            color = Color.Gray,
+            text = """
+        自定义线路请自行实现,app会使用put方式发送请求
+        请求体为图片二进制,成功请返回200状态码,内容直接返回url
+        失败返回403或500(会重试)状态码
+        另外需要实现get方法返回填充图片,推荐gif格式
+        图片尺寸不宜过大,否则影响上传速度
+    """.trimIndent()
+        )
+    }
     HorizontalDivider()
     ElevatedButton(onClick = {
         MixDialogBuilder("确定清除记录?").apply {
@@ -206,27 +227,6 @@ val MixSettings = MixNavPage(
         }, modifier = Modifier.fillMaxWidth()) {
             Text(text = "省电限制未设置!")
         }
-    }
-    SettingButton(text = "上传线路: $currentUploader") {
-        selectUploader()
-    }
-    if (getCurrentUploader() == CustomUploader) {
-        OutlinedTextField(value = CUSTOM_UPLOAD_URL, onValueChange = {
-            CUSTOM_UPLOAD_URL = it
-        }, label = { Text(text = "请求地址") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = CUSTOM_REFERER, onValueChange = {
-            CUSTOM_REFERER = it
-        }, label = { Text(text = "referer") }, modifier = Modifier.fillMaxWidth())
-        Text(
-            color = Color.Gray,
-            text = """
-        自定义线路请自行实现,app会使用put方式发送请求
-        请求体为图片二进制,成功请返回200状态码,内容直接返回url
-        失败返回403或500(会重试)状态码
-        另外需要实现get方法返回填充图片,推荐gif格式
-        图片尺寸不宜过大,否则影响上传速度
-    """.trimIndent()
-        )
     }
 }
 

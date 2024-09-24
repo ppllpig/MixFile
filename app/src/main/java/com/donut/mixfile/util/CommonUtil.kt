@@ -8,20 +8,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.util.Log
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
-import com.donut.mixfile.ui.theme.colorScheme
 import com.github.amr.mimetypes.MimeTypes
 import io.ktor.client.request.forms.FormBuilder
 import io.ktor.http.Headers
@@ -306,6 +294,8 @@ fun decompressGzip(compressed: ByteArray): String {
         return gzip.bufferedReader().use { it.readText() }
     }
 }
+
+fun readRawFile(id: Int) = app.resources.openRawResource(id).readBytes()
 
 
 fun isValidUri(uriString: String): Boolean {

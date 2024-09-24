@@ -153,10 +153,10 @@ val Home = MixNavPage(
 fun tryResolveFileList(text: String): Boolean {
     val textList = text.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
     val fileList = textList.mapNotNull { resolveMixShareInfo(it) }
-    if (fileList.isEmpty()){
+    if (fileList.isEmpty()) {
         return false
     }
-    if (fileList.size == 1){
+    if (fileList.size == 1) {
         showFileInfoDialog(fileList.first())
         return true
     }

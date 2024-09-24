@@ -14,7 +14,7 @@ object A3Uploader : Uploader("线路A3") {
     override val referer: String
         get() = ""
 
-    override suspend fun doUpload(fileData: ByteArray): String? {
+    override suspend fun doUpload(fileData: ByteArray): String {
         val result = uploadClient.submitFormWithBinaryData("https://pic.2xb.cn/uppic.php?type=qq",
             formData {
                 add("file", fileData, fileFormHeaders())
@@ -22,7 +22,7 @@ object A3Uploader : Uploader("线路A3") {
         }.body<JsonObject>()
         val code = result.get("code").asInt
         if (code != 200) {
-            return null
+            throw Exception("上传失败: $code")
         }
 
         return result.get("url").asString

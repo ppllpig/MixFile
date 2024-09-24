@@ -22,7 +22,7 @@ abstract class Uploader(val name: String) {
     open val referer = ""
     open val chunkSize = 1024L * 1024L
 
-    abstract suspend fun doUpload(fileData: ByteArray): String?
+    abstract suspend fun doUpload(fileData: ByteArray): String
 
     companion object {
         val urlTransforms = mutableMapOf<String, (String) -> String>()
@@ -52,7 +52,7 @@ abstract class Uploader(val name: String) {
         }
     }
 
-    suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String? {
+    suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String {
         val encryptedData = encryptBytes(head, fileData, key)
         try {
             return doUpload(encryptedData)

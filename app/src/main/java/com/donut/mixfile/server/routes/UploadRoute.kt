@@ -96,7 +96,7 @@ suspend fun uploadFile(
             fileIndex++
             tasks.add(async {
                 try {
-                    val url = uploader.upload(head, fileData, secret) ?: return@async null
+                    val url = uploader.upload(head, fileData, secret)
                     fileList[currentIndex] = url
                     withContext(Dispatchers.Main) {
                         uploadTask.progress.updateProgress(channel.totalBytesRead, fileSize)
@@ -114,7 +114,6 @@ suspend fun uploadFile(
             MixFile(chunkSize = chunkSize, version = 0, fileList = fileList, fileSize = fileSize)
         val mixFileUrl =
             uploader.upload(head, mixFile.toBytes(), secret)
-                ?: return@coroutineScope null
         return@coroutineScope mixFileUrl
     }
 }

@@ -22,7 +22,7 @@ var UPLOAD_RETRY_TIMES by cachedMutableOf(3, "UPLOAD_RETRY_TIMES")
 val uploadClient = HttpClient(CIO).config {
     install(ContentNegotiation) {
         gson()
-        register(ContentType.Text.Html, GsonConverter(GsonBuilder().create()))
+        register(ContentType.Any, GsonConverter(GsonBuilder().create()))
     }
     install(HttpRequestRetry) {
         maxRetries = UPLOAD_RETRY_TIMES.toInt()

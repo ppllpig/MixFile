@@ -76,7 +76,7 @@ fun showUploadTaskWindow() {
 
 @Composable
 fun UploadDialogCard() {
-    AnimatedVisibility(visible = uploadTasks.any { it.uploading }) {
+    AnimatedVisibility(visible = uploadTasks.isNotEmpty()) {
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -91,14 +91,26 @@ fun UploadDialogCard() {
                     .padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "${uploadTasks.filter { it.uploading }.size} 个文件正在上传中",
-                    modifier = Modifier,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
-                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                val uploading = uploadTasks.filter { it.uploading }.size
+                if (uploading > 0) {
+                    Text(
+                        text = "$uploading 个文件正在上传中",
+                        modifier = Modifier,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    val failed = uploadTasks.filter { !it.uploading }.size
+                    Text(
+                        text = "$failed 个文件上传失败",
+                        modifier = Modifier,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.error
+                    )
+                }
             }
         }
     }
