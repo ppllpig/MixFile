@@ -1,12 +1,14 @@
 package com.donut.mixfile.ui.routes.favorites
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
@@ -72,9 +74,28 @@ val Favorites = MixNavPage(
         )
         return@MixNavPage
     }
-    OutlinedTextField(value = searchVal, onValueChange = {
-        searchVal = it
-    }, label = { Text(text = "搜索") }, modifier = Modifier.fillMaxWidth())
+
+    OutlinedTextField(
+        value = searchVal,
+        onValueChange = {
+            searchVal = it
+        },
+        label = { Text(text = "搜索") },
+        modifier = Modifier.fillMaxWidth(),
+        trailingIcon = {
+            if (searchVal.isNotEmpty()) {
+                Icon(
+                    Icons.Outlined.Close,
+                    tint = colorScheme.primary,
+                    contentDescription = "clear",
+
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) {
+                        searchVal = ""
+                    })
+            }
+        })
 
     Text(
         text = "文件数量: ${result.size} 总大小: ${formatFileSize(result.sumOf { it.size })}",

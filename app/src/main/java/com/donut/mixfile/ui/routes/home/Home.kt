@@ -37,6 +37,8 @@ import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showFileInfoDialog
+import com.donut.mixfile.util.file.showFileList
+import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.getIpAddressInLocalNetwork
 import com.donut.mixfile.util.isFalse
@@ -102,7 +104,7 @@ val Home = MixNavPage(
         })
 
     LaunchedEffect(key1 = text) {
-        isError = text.isNotEmpty() && !tryResolveFile(text.trim())
+        isError = text.isNotEmpty() && !tryResolveFileList(text.trim())
     }
 
     Row {
@@ -117,7 +119,7 @@ val Home = MixNavPage(
         }
         Button(
             onClick = {
-                tryResolveFile(text.trim()).isFalse {
+                tryResolveFileList(text.trim()).isFalse {
                     showToast("解析失败!")
                 }
             },
@@ -146,6 +148,21 @@ val Home = MixNavPage(
         }
     }
 
+}
+
+fun tryResolveFileList(text: String): Boolean {
+    val textList = text.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+    val fileList = textList.mapNotNull { resolveMixShareInfo(it) }
+    if (fileList.isEmpty()){
+        return false
+    }
+    if (fileList.size == 1){
+        showFileInfoDialog(fileList.first())
+        return true
+    }
+    val fileDataList = fileList.map { it.toDataLog() }
+    showFileList(fileDataList)
+    return true
 }
 
 
