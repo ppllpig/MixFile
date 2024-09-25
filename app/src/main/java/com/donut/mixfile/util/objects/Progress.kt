@@ -136,6 +136,39 @@ class ProgressContent(
 }
 
 @Composable
+fun AnimatedLoadingBar(
+    progress: Float,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    color: Color = Color.Unspecified,
+    label: String = "",
+) {
+    val progressValue: Float by animateFloatAsState(
+        targetValue = progress,
+        label = "progress",
+        animationSpec = spring(stiffness = 25f)
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        LinearProgressIndicator(
+            progress = { progressValue },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (label.isNotEmpty()) {
+            Text(
+                fontSize = fontSize,
+                color = color,
+                text = label
+            )
+        }
+    }
+}
+
+@Composable
 fun LoadingBar(
     progress: Float,
     bytesWritten: Long,
@@ -148,12 +181,6 @@ fun LoadingBar(
 ) {
 
     val sizeDp by animateDpAsState(if (show) 600.dp else 0.dp, label = "progress")
-
-    val progressValue: Float by animateFloatAsState(
-        targetValue = progress,
-        label = "progress",
-        animationSpec = spring(stiffness = 25f)
-    )
 
     Column(
         modifier = Modifier
@@ -172,27 +199,16 @@ fun LoadingBar(
                     CircularProgressIndicator()
                 }
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                LinearProgressIndicator(
-                    progress = { progressValue },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    fontSize = fontSize,
-                    color = color,
-                    text = "${tip}: ${formatFileSize(bytesWritten, true)}/${
-                        formatFileSize(
-                            contentLength
-                        )
-                    }"
-                )
-            }
+            AnimatedLoadingBar(
+                progress,
+                fontSize,
+                color,
+                "${tip}: ${formatFileSize(bytesWritten, true)}/${
+                    formatFileSize(
+                        contentLength
+                    )
+                }"
+            )
         }
     }
 }

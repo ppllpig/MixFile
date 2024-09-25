@@ -139,6 +139,8 @@ var multiUploadTaskCount by cachedMutableOf(5, "mix_file_multi_upload_task_count
 
 val uploadSemaphore = Semaphore(multiUploadTaskCount.toInt())
 var uploadQueue by mutableIntStateOf(0)
+var totalFileCount by mutableIntStateOf(0)
+var successFileCount by mutableIntStateOf(0)
 private val multiUploadJobs = mutableListOf<Job>()
 
 fun cancelAllMultiUpload() {
@@ -146,6 +148,8 @@ fun cancelAllMultiUpload() {
     multiUploadJobs.forEach { it.cancel() }
     multiUploadJobs.clear()
     uploadTasks.forEach { it.stop() }
+    totalFileCount = 0
+    successFileCount = 0
 }
 
 inline fun uploadUri(uri: Uri, uploader: (StreamContent, String) -> Unit) {
@@ -166,6 +170,7 @@ fun selectAndUploadFile() {
     MainActivity.mixFileSelector.openSelect { uriList ->
         val taskList = mutableListOf<suspend () -> Unit>()
         uploadQueue += uriList.size
+        totalFileCount += uriList.size
         uriList.forEach { uri ->
             taskList.add {
                 uploadUri(uri) { stream, name ->
@@ -186,11 +191,18 @@ fun selectAndUploadFile() {
                 deferredList.add(async {
                     catchError {
                         task()
+                        successFileCount++
                     }
                     uploadSemaphore.release()
                 })
             }
             deferredList.awaitAll()
+            withContext(Dispatchers.Main) {
+                if (uploadQueue == 0) {
+                    totalFileCount = 0
+                    successFileCount = 0
+                }
+            }
         }
         multiUploadJobs.add(job)
     }

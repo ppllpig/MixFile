@@ -46,7 +46,7 @@ import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.file.enablePreview
+import com.donut.mixfile.util.file.filePreview
 import com.donut.mixfile.util.file.multiUploadTaskCount
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
@@ -161,10 +161,16 @@ val MixSettings = MixNavPage(
         部分设置可能需要重启后才能生效
     """.trimIndent()
     )
-    CommonSwitch(checked = useShortCode, text = "使用短分享码(空白字符编码信息):") {
+    CommonSwitch(
+        checked = useShortCode,
+        text = "使用短分享码(空白字符编码信息):"
+    ) {
         useShortCode = it
     }
-    CommonSwitch(checked = autoAddFavorite, text = "上传后自动添加文件到收藏:") {
+    CommonSwitch(
+        checked = autoAddFavorite,
+        text = "上传后自动添加文件到收藏:"
+    ) {
         autoAddFavorite = it
     }
     CommonSwitch(
@@ -174,23 +180,28 @@ val MixSettings = MixNavPage(
     ) {
         enableAccessKey = it
     }
-    CommonSwitch(
-        checked = enablePreview,
-        text = "开启文件预览:",
-        description = "开启后可预览图片和视频(<20mb),将占用流量和储存空间"
-    ) {
-        enablePreview = it
-    }
     SettingButton(text = "上传线路: $currentUploader") {
         selectUploader()
     }
+    SettingButton(text = "文件预览: $filePreview") {
+        selectFilePreview()
+    }
     if (getCurrentUploader() == CustomUploader) {
-        OutlinedTextField(value = CUSTOM_UPLOAD_URL, onValueChange = {
-            CUSTOM_UPLOAD_URL = it
-        }, label = { Text(text = "请求地址") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = CUSTOM_REFERER, onValueChange = {
-            CUSTOM_REFERER = it
-        }, label = { Text(text = "referer") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = CUSTOM_UPLOAD_URL,
+            onValueChange = {
+                CUSTOM_UPLOAD_URL = it
+            },
+            label = { Text(text = "请求地址") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = CUSTOM_REFERER,
+            onValueChange = {
+                CUSTOM_REFERER = it
+            }, label = { Text(text = "referer") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Text(
             color = Color.Gray,
             text = """
@@ -203,6 +214,16 @@ val MixSettings = MixNavPage(
         )
     }
     HorizontalDivider()
+    val batteryOptimization by remember {
+        mutableStateOf(isIgnoringBatteryOptimizations())
+    }
+    if (!batteryOptimization) {
+        ElevatedButton(onClick = {
+            openBatteryOptimizationSettings()
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text(text = "省电限制未设置!")
+        }
+    }
     ElevatedButton(onClick = {
         MixDialogBuilder("确定清除记录?").apply {
             setContent {
@@ -218,15 +239,20 @@ val MixSettings = MixNavPage(
     }, modifier = Modifier.fillMaxWidth()) {
         Text(text = "清除上传记录")
     }
-    val batteryOptimization by remember {
-        mutableStateOf(isIgnoringBatteryOptimizations())
-    }
-    if (!batteryOptimization) {
-        ElevatedButton(onClick = {
-            openBatteryOptimizationSettings()
-        }, modifier = Modifier.fillMaxWidth()) {
-            Text(text = "省电限制未设置!")
+}
+
+fun selectFilePreview() {
+    MixDialogBuilder("上传线路").apply {
+        setContent {
+            SingleSelectItemList(
+                items = listOf("开启", "关闭", "仅Wifi"),
+                currentOption = filePreview
+            ) { option ->
+                filePreview = option
+                closeDialog()
+            }
         }
+        show()
     }
 }
 

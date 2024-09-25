@@ -23,9 +23,13 @@ import com.donut.mixfile.ui.routes.home.TaskCard
 import com.donut.mixfile.ui.routes.home.uploadTasks
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.cancelAllMultiUpload
+import com.donut.mixfile.util.file.successFileCount
+import com.donut.mixfile.util.file.totalFileCount
 import com.donut.mixfile.util.file.uploadQueue
+import com.donut.mixfile.util.objects.AnimatedLoadingBar
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
+
 
 fun showUploadTaskWindow() {
     MixDialogBuilder("上传中的文件").apply {
@@ -37,15 +41,13 @@ fun showUploadTaskWindow() {
             Column(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                if (uploadQueue > 0) {
-                    Text(
-                        text = "排队中: $uploadQueue",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary
+                if (totalFileCount > 1) {
+                    val progress = successFileCount.toFloat() / totalFileCount
+                    AnimatedLoadingBar(
+                        progress = progress,
+                        label = "总进度: ${successFileCount}/${totalFileCount} " +
+                                "正在上传: ${uploadTasks.filter { it.uploading }.size} " +
+                                "排队中: $uploadQueue"
                     )
                 }
                 Column(
@@ -103,13 +105,15 @@ fun UploadDialogCard() {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
                 } else {
                     val failed = uploadTasks.filter { !it.uploading }.size
-                    Text(
-                        text = "$failed 个文件上传失败",
-                        modifier = Modifier,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.error
-                    )
+                    if (failed > 0) {
+                        Text(
+                            text = "$failed 个文件上传失败",
+                            modifier = Modifier,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.error
+                        )
+                    }
                 }
             }
         }

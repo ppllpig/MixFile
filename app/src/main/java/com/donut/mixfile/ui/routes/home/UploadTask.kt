@@ -32,6 +32,7 @@ import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respondText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -94,6 +95,8 @@ class UploadTask(
     val time: Date = Date(),
 ) {
     var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
+
+    var onStop = {}
 
 
     var stopped by mutableStateOf(false)
@@ -163,8 +166,9 @@ class UploadTask(
             return
         }
         stopped = true
-        appScope.launch {
+        appScope.launch(Dispatchers.IO) {
             call?.respondText("上传已取消")
+            onStop()
         }
     }
 

@@ -16,10 +16,12 @@ import io.ktor.server.response.respondText
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
@@ -82,6 +84,10 @@ suspend fun uploadFile(
     uploadTask: UploadTask,
 ): String? {
     return coroutineScope {
+        val context = currentCoroutineContext()
+        uploadTask.onStop = {
+            context.cancel()
+        }
         val chunkSize = uploader.chunkSize
         //固定大小string list
         val fileListLength = ceil(fileSize.toDouble() / chunkSize).toInt()

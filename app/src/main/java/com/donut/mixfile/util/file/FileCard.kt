@@ -33,8 +33,9 @@ import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.formatTime
 import com.donut.mixfile.util.parseFileMimeType
+import com.donut.mixfile.util.reveiver.NetworkChangeReceiver
 
-var enablePreview by cachedMutableOf(false, "enable_file_preview")
+var filePreview by cachedMutableOf("关闭", "mix_file_preview")
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -120,7 +121,9 @@ fun PreviewCard(
 @Composable
 fun FileCardList(cardList: List<FileDataLog>) {
 
-    if (enablePreview) {
+    if (filePreview.contentEquals("开启") ||
+        (filePreview.contentEquals("仅Wifi") && NetworkChangeReceiver.isWifi)
+    ) {
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxWidth()

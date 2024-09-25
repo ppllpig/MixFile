@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,9 @@ import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.updateMark
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.truncate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 var currentCategory: String by mutableStateOf("")
 
@@ -102,6 +106,8 @@ val Favorites = MixNavPage(
         color = colorScheme.primary
     )
 
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(searchVal, currentCategory, favorites, updateMark, favoriteSort) {
         result = if (searchVal.trim().isNotEmpty()) {
             favorites.filter {
@@ -118,11 +124,13 @@ val Favorites = MixNavPage(
             "最旧" -> result = result.sortedBy { it.time }
             "最大" -> result = result.sortedByDescending { it.size }
             "最小" -> result = result.sortedBy { it.size }
-            "名称" -> result = result.sortedBy { log ->
-                val regex = Regex("\\d+")
-                val matches = regex.findAll(log.name)
-                val num = matches.map { it.value }.joinToString("").toLongOrNull() ?: 0
-                num
+            "名称" -> {
+                scope.launch(Dispatchers.IO) {
+                    val sorted = result.sortedBy { it.getNameNum() }
+                    withContext(Dispatchers.Main) {
+                        result = sorted
+                    }
+                }
             }
         }
     }

@@ -35,7 +35,7 @@ class MainActivity : MixActivity(MAIN_ID) {
         mixFileSelector = MixFileSelector(this)
         super.onCreate(savedInstanceState)
         val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        networkChangeReceiver = NetworkChangeReceiver()
+        networkChangeReceiver = NetworkChangeReceiver
 
         //请求通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
