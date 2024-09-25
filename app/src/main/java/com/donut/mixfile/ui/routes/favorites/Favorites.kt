@@ -40,6 +40,7 @@ import com.donut.mixfile.util.file.updateMark
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.truncate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -125,10 +126,13 @@ val Favorites = MixNavPage(
             "最大" -> result = result.sortedByDescending { it.size }
             "最小" -> result = result.sortedBy { it.size }
             "名称" -> {
+                val resultCache = result
                 scope.launch(Dispatchers.IO) {
                     val sorted = result.sortedBy { it.getNameNum() }
                     withContext(Dispatchers.Main) {
-                        result = sorted
+                        if (resultCache == result){
+                            result = sorted
+                        }
                     }
                 }
             }
