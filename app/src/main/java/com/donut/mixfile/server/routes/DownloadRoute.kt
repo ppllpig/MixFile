@@ -1,6 +1,7 @@
 package com.donut.mixfile.server.routes
 
 import com.donut.mixfile.server.utils.bean.MixShareInfo
+import com.donut.mixfile.ui.routes.increaseDownloadData
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.encodeURL
 import com.donut.mixfile.util.file.resolveMixShareInfo
@@ -107,6 +108,7 @@ private suspend fun responseFileStream(
                         }
                         try {
                             writeFully(dataToWrite)
+                            increaseDownloadData(dataToWrite.size.toLong())
                         } catch (e: Exception) {
                             close(e)
                         }
