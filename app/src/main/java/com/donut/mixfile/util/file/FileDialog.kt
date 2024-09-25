@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.importFileList
@@ -94,10 +95,9 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                     if (shareInfo.contentType().startsWith("video/")) {
                         AssistChip(onClick = {
                             val intent = Intent(app, VideoActivity::class.java).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 putExtra("url", shareInfo.downloadUrl)
                             }
-                            app.startActivity(intent)
+                            currentActivity.startActivity(intent)
                         }, label = {
                             Text(text = "播放视频", color = colorScheme.primary)
                         })

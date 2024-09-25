@@ -121,7 +121,7 @@ val Favorites = MixNavPage(
             "名称" -> result = result.sortedBy { log ->
                 val regex = Regex("\\d+")
                 val matches = regex.findAll(log.name)
-                val num = matches.map { it.value }.joinToString("").toIntOrNull() ?: 0
+                val num = matches.map { it.value }.joinToString("").toLongOrNull() ?: 0
                 num
             }
         }

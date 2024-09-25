@@ -66,8 +66,8 @@ fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> U
                 key = MixShareInfo.ENCODER.encode(key),
                 referer = uploader.referer
             )
-        call.respondText(mixShareInfo.toString())
         uploadTask.complete(mixShareInfo)
+        call.respondText(mixShareInfo.toString())
     }
 }
 
