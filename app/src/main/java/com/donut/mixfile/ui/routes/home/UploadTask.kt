@@ -34,6 +34,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respondText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
@@ -128,15 +129,14 @@ class UploadTask(
     }
 
 
-    fun complete(shareInfo: MixShareInfo) {
-        result = shareInfo.toString()
-        appScope.launch {
+    suspend fun complete(shareInfo: MixShareInfo) {
+        withContext(Dispatchers.Main) {
+            result = shareInfo.toString()
             uploadTasks -= this@UploadTask
+            if (add) {
+                addUploadLog(shareInfo)
+            }
         }
-        if (add) {
-            addUploadLog(shareInfo)
-        }
-
     }
 
     fun delete() {
@@ -152,9 +152,7 @@ class UploadTask(
             }
             setPositiveButton("确定") {
                 stop()
-                appScope.launch {
-                    uploadTasks -= this@UploadTask
-                }
+                uploadTasks -= this@UploadTask
                 closeDialog()
             }
             show()
