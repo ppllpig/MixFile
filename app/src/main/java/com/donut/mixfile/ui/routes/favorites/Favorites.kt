@@ -33,6 +33,7 @@ import com.donut.mixfile.ui.routes.UploadDialogCard
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.FileCardList
+import com.donut.mixfile.util.file.deleteFavoriteLog
 import com.donut.mixfile.util.file.exportFileList
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile
@@ -203,6 +204,8 @@ val Favorites = MixNavPage(
             fontWeight = FontWeight.Bold,
             color = colorScheme.primary,
         )
-        FileCardList(cardList = result)
+        FileCardList(cardList = result){
+            deleteFavoriteLog(it)
+        }
     }
 }

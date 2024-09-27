@@ -119,7 +119,7 @@ fun PreviewCard(
 }
 
 @Composable
-fun FileCardList(cardList: List<FileDataLog>) {
+fun FileCardList(cardList: List<FileDataLog>, longClick: (FileDataLog) -> Unit = {}) {
 
     if (filePreview.contentEquals("开启") ||
         (filePreview.contentEquals("仅Wifi") && NetworkChangeReceiver.isWifi)
@@ -149,9 +149,7 @@ fun FileCardList(cardList: List<FileDataLog>) {
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             items(cardList.size) { index ->
-                FileCard(cardList[index]) {
-                    deleteFavoriteLog(cardList[index])
-                }
+                FileCard(cardList[index], longClick = longClick)
             }
         }
     }
@@ -162,7 +160,7 @@ fun FileCardList(cardList: List<FileDataLog>) {
 fun FileCard(
     fileDataLog: FileDataLog,
     showDate: Boolean = true,
-    longClick: () -> Unit = {},
+    longClick: (FileDataLog) -> Unit = {},
 ) {
     LaunchedEffect(updateMark) {
 
@@ -176,7 +174,7 @@ fun FileCard(
             .fillMaxWidth()
             .combinedClickable(
                 onLongClick = {
-                    longClick()
+                    longClick(fileDataLog)
                 }
             ) {
                 tryResolveFile(fileDataLog.shareInfoData)
