@@ -46,7 +46,7 @@ fun getRoutes(): Routing.() -> Unit {
             get("/download", concurrencyLimit(DOWNLOAD_TASK_COUNT.toInt(), getDownloadRoute()))
             put("/upload", getUploadRoute())
             get("/upload_history") {
-                call.respond(favorites.take(1000).toJsonString())
+                call.respond(favorites.takeLast(1000).toJsonString())
             }
             get("/file_info") {
                 val shareInfoStr = call.request.queryParameters["s"]
