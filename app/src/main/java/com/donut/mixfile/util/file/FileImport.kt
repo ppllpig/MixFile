@@ -25,12 +25,12 @@ import io.ktor.utils.io.core.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-fun exportFileList(fileList: List<FileDataLog>) {
+fun exportFileList(fileList: List<FileDataLog>,name: String) {
     val strData = fileList.toJsonString()
     val compressedData = compressGzip(strData)
     doUploadFile(
         compressedData,
-        "__mixfile_list_${compressedData.hashSHA256().decodeHex().encodeToBase64().take(8)}",
+        "${name}.mix_list",
         false
     )
 }

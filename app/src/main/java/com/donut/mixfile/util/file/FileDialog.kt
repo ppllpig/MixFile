@@ -51,7 +51,8 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                     }, label = {
                         Text(text = "复制分享码", color = colorScheme.primary)
                     })
-                    if (shareInfo.fileName.startsWith("__mixfile_list")) {
+                    val fileName = shareInfo.fileName
+                    if (fileName.startsWith("__mixfile_list") || fileName.endsWith(".mix_list")) {
                         AssistChip(onClick = {
                             importFileList(shareInfo.downloadUrl)
                         }, label = {

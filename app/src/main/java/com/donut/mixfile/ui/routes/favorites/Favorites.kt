@@ -2,6 +2,8 @@ package com.donut.mixfile.ui.routes.favorites
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +41,7 @@ import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.updateMark
 import com.donut.mixfile.util.formatFileSize
+import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.truncate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -157,12 +160,23 @@ val Favorites = MixNavPage(
         Button(
             onClick = {
                 MixDialogBuilder("确定导出?").apply {
+                    var listName by mutableStateOf("文件列表-${getCurrentTime()}")
                     setContent {
-                        Text(text = "将会导出当前筛选的文件列表上传为一键分享链接")
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            OutlinedTextField(value = listName, onValueChange = {
+                                listName = it
+                            }, modifier = Modifier.fillMaxWidth(), label = {
+                                Text(text = "列表名称")
+                            })
+                            Text(text = "将会导出当前筛选的文件列表上传为一键分享链接")
+                        }
                     }
                     setDefaultNegative()
                     setPositiveButton("确定") {
-                        exportFileList(result)
+                        exportFileList(result, listName)
                         closeDialog()
                     }
                     show()
@@ -204,7 +218,7 @@ val Favorites = MixNavPage(
             fontWeight = FontWeight.Bold,
             color = colorScheme.primary,
         )
-        FileCardList(cardList = result){
+        FileCardList(cardList = result) {
             deleteFavoriteLog(it)
         }
     }
