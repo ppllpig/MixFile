@@ -1,7 +1,6 @@
 package com.donut.mixfile.server.routes
 
 import com.donut.mixfile.app
-import com.donut.mixfile.server.utils.concurrencyLimit
 import com.donut.mixfile.util.debug
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.resolveMixShareInfo
@@ -43,7 +42,7 @@ fun getRoutes(): Routing.() -> Unit {
             }
         }
         route("/api") {
-            get("/download", concurrencyLimit(DOWNLOAD_TASK_COUNT.toInt(), getDownloadRoute()))
+            get("/download", getDownloadRoute())
             put("/upload", getUploadRoute())
             get("/upload_history") {
                 call.respond(favorites.takeLast(1000).toJsonString())
