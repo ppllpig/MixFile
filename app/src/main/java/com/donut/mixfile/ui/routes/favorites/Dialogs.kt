@@ -17,13 +17,14 @@ import com.donut.mixfile.util.file.showFileList
 import com.donut.mixfile.util.file.updateFavorites
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
+import com.donut.mixfile.util.sortByName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
     MixDialogBuilder("收藏分类").apply {
         setContent {
-            SingleSelectItemList(favCategories.toList(), default) {
+            SingleSelectItemList(favCategories.toList().sortByName(), default) {
                 onSelect(it)
                 updateFavorites()
                 closeDialog()

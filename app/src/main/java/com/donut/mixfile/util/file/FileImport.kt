@@ -3,11 +3,8 @@ package com.donut.mixfile.util.file
 import com.donut.mixfile.server.localClient
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.util.compressGzip
-import com.donut.mixfile.util.decodeHex
 import com.donut.mixfile.util.decompressGzip
-import com.donut.mixfile.util.encodeToBase64
 import com.donut.mixfile.util.formatFileSize
-import com.donut.mixfile.util.hashSHA256
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
@@ -25,7 +22,7 @@ import io.ktor.utils.io.core.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-fun exportFileList(fileList: List<FileDataLog>,name: String) {
+fun exportFileList(fileList: List<FileDataLog>, name: String) {
     val strData = fileList.toJsonString()
     val compressedData = compressGzip(strData)
     doUploadFile(

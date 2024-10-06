@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.EOFException
+import java.math.BigInteger
 import java.net.NetworkInterface
 import java.net.URL
 import java.net.URLEncoder
@@ -196,6 +197,21 @@ fun <T> List<T>.at(index: Long): T {
         fixedIndex += this.size
     }
     return this[fixedIndex.toInt()]
+}
+
+fun String.parseSortNum(): BigInteger {
+    val regex = Regex("\\d+")
+    val matches = regex.findAll(this)
+    val numStr = matches.map { it.value }.joinToString("").trim()
+    if (numStr.isEmpty()) {
+        return BigInteger.valueOf(0)
+    }
+    val num = numStr.toBigIntegerOrNull() ?: BigInteger.valueOf(0)
+    return num
+}
+
+fun Iterable<String>.sortByName(): List<String> {
+    return sortedBy { it.parseSortNum() }
 }
 
 fun <T> List<T>.at(index: Int): T {

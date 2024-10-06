@@ -16,7 +16,6 @@ import com.donut.mixfile.util.TimestampAdapter
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.showToast
 import com.google.gson.annotations.JsonAdapter
-import java.math.BigInteger
 import java.util.Date
 
 
@@ -35,17 +34,6 @@ data class FileDataLog(
             category = category.substring(0, 20)
         }
         category = category.trim()
-    }
-
-    fun getNameNum(): BigInteger {
-        val regex = Regex("\\d+")
-        val matches = regex.findAll(name)
-        val numStr = matches.map { it.value }.joinToString("").trim()
-        if (numStr.isEmpty()) {
-            return BigInteger.valueOf(0)
-        }
-        val num = numStr.toBigIntegerOrNull() ?: BigInteger.valueOf(0)
-        return num
     }
 
     fun rename() {

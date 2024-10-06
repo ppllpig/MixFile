@@ -15,11 +15,12 @@ object A3Uploader : Uploader("线路A3") {
         get() = ""
 
     override suspend fun doUpload(fileData: ByteArray): String {
-        val result = uploadClient.submitFormWithBinaryData("https://chatbot.weixin.qq.com/weixinh5/webapp/pfnYYEumBeFN7Yb3TAxwrabYVOa4R9/cos/upload",
-            formData {
-                add("media", fileData, fileFormHeaders())
-            }) {
-        }.body<JsonObject>()
+        val result =
+            uploadClient.submitFormWithBinaryData("https://chatbot.weixin.qq.com/weixinh5/webapp/pfnYYEumBeFN7Yb3TAxwrabYVOa4R9/cos/upload",
+                formData {
+                    add("media", fileData, fileFormHeaders())
+                }) {
+            }.body<JsonObject>()
 
         return result.get("url").asString
     }

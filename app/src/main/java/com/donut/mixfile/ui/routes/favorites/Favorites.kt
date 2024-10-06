@@ -42,6 +42,7 @@ import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.updateMark
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
+import com.donut.mixfile.util.parseSortNum
 import com.donut.mixfile.util.truncate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -131,7 +132,7 @@ val Favorites = MixNavPage(
             "名称" -> {
                 val resultCache = result
                 scope.launch(Dispatchers.IO) {
-                    val sorted = result.sortedBy { it.getNameNum() }
+                    val sorted = result.sortedBy { it.name.parseSortNum() }
                     withContext(Dispatchers.Main) {
                         if (resultCache == result) {
                             result = sorted

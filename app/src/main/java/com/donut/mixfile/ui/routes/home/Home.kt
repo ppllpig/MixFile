@@ -145,7 +145,7 @@ val Home = MixNavPage(
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary
             )
-            FileCardList(cardList = uploadLogs.reversed()){
+            FileCardList(cardList = uploadLogs.reversed()) {
                 deleteUploadLog(it)
             }
         }
