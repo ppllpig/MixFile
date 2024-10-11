@@ -39,7 +39,6 @@ import com.donut.mixfile.util.file.deleteFavoriteLog
 import com.donut.mixfile.util.file.exportFileList
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile
-import com.donut.mixfile.util.file.updateMark
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.parseSortNum
@@ -113,7 +112,7 @@ val Favorites = MixNavPage(
 
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(searchVal, currentCategory, favorites, updateMark, favoriteSort) {
+    LaunchedEffect(searchVal, currentCategory, favorites, favoriteSort) {
         result = if (searchVal.trim().isNotEmpty()) {
             favorites.filter {
                 it.name.contains(searchVal)

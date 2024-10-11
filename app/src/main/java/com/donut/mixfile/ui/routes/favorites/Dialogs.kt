@@ -14,7 +14,6 @@ import com.donut.mixfile.util.file.favCategories
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.loadFileList
 import com.donut.mixfile.util.file.showFileList
-import com.donut.mixfile.util.file.updateFavorites
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import com.donut.mixfile.util.sortByName
@@ -26,7 +25,6 @@ fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
         setContent {
             SingleSelectItemList(favCategories.toList().sortByName(), default) {
                 onSelect(it)
-                updateFavorites()
                 closeDialog()
             }
         }
@@ -50,7 +48,6 @@ fun openSortSelect(default: String = "", onSelect: (String) -> Unit) {
         setContent {
             SingleSelectItemList(listOf("最新", "最旧", "最大", "最小", "名称"), default) {
                 onSelect(it)
-                updateFavorites()
                 closeDialog()
             }
         }
@@ -87,7 +84,14 @@ fun editCategory(name: String, callback: (String) -> Unit = {}) {
                     it.category = newName
                 }
             }
-            updateFavorites()
+
+            favorites = favorites.map {
+                if (it.category.contentEquals(name)) {
+                    it.copy(category = newName)
+                } else {
+                    it
+                }
+            }
             closeDialog()
             callback(newName)
         }

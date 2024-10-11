@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -20,8 +19,8 @@ import java.util.Date
 
 
 data class FileDataLog(
-    var shareInfoData: String,
-    var name: String,
+    val shareInfoData: String,
+    val name: String,
     val size: Long,
     @JsonAdapter(TimestampAdapter::class)
     val time: Date = Date(),
@@ -36,7 +35,15 @@ data class FileDataLog(
         category = category.trim()
     }
 
-    fun rename() {
+    fun updateDataList(list: List<FileDataLog>, action: (FileDataLog) -> FileDataLog) = list.map {
+        if (it.shareInfoData == this.shareInfoData) {
+            action(it)
+        } else {
+            it
+        }
+    }
+
+    fun rename(callback: (MixShareInfo) -> Unit = {}) {
         val shareInfo = resolveMixShareInfo(shareInfoData) ?: return
         MixDialogBuilder("重命名文件").apply {
             var name by mutableStateOf(shareInfo.fileName)
@@ -50,9 +57,19 @@ data class FileDataLog(
             setDefaultNegative()
             setPositiveButton("确定") {
                 shareInfo.fileName = name
-                this@FileDataLog.shareInfoData = shareInfo.toString()
-                this@FileDataLog.name = name
-                updateFavorites()
+                favorites = updateDataList(favorites) {
+                    it.copy(
+                        name = name,
+                        shareInfoData = shareInfo.toString()
+                    )
+                }
+                uploadLogs = updateDataList(uploadLogs) {
+                    it.copy(
+                        name = name,
+                        shareInfoData = shareInfo.toString()
+                    )
+                }
+                callback(shareInfo)
                 showToast("重命名文件成功!")
                 closeDialog()
             }
@@ -61,32 +78,27 @@ data class FileDataLog(
     }
 
     override fun hashCode(): Int {
-        return shareInfoData.hashCode()
+        var result = shareInfoData.hashCode()
+        result = 31 * result + category.hashCode()
+        return result
     }
 
     override fun equals(other: Any?): Boolean {
         if (other !is FileDataLog) return false
-        return shareInfoData.contentEquals(other.shareInfoData)
+        return shareInfoData.contentEquals(other.shareInfoData) && category == other.category
     }
 }
 
 
 var favorites by cachedMutableOf(listOf<FileDataLog>(), "favorite_file_logs")
 
-var updateMark by mutableIntStateOf(0)
-    private set
-
-fun updateFavorites() {
-    favorites = favorites
-    updateMark++
-}
-
 var uploadLogs by cachedMutableOf(listOf<FileDataLog>(), "upload_file_logs")
 
 var favCategories by cachedMutableOf(setOf("默认"), "fav_categories")
 
 fun isFavorite(shareInfo: MixShareInfo): Boolean {
-    return favorites.contains(shareInfo.toDataLog())
+    val shareInfoData = shareInfo.toString()
+    return favorites.any { it.shareInfoData.contentEquals(shareInfoData) }
 }
 
 fun addUploadLog(shareInfo: MixShareInfo) {
@@ -127,14 +139,9 @@ fun addFavoriteLog(
         return false
     }
     val favoriteLog = shareInfo.toDataLog()
-    favoriteLog.category = category
     favCategories += category
-    if (favorites.any { it == favoriteLog }) {
-        favorites -= favoriteLog
-        favorites += favorites
-        return true
-    }
-    favorites = favorites + favoriteLog
+    favorites = favorites.filter { it.shareInfoData != favoriteLog.shareInfoData }
+    favorites = favorites + favoriteLog.copy(category = category)
     return true
 }
 

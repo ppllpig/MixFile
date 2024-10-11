@@ -51,7 +51,7 @@ fun PreviewCard(
         this.startsWith("video/")
     }
 
-    LaunchedEffect(updateMark) {
+    LaunchedEffect(favorites) {
 
     }
     ElevatedCard(
@@ -162,7 +162,7 @@ fun FileCard(
     showDate: Boolean = true,
     longClick: (FileDataLog) -> Unit = {},
 ) {
-    LaunchedEffect(updateMark) {
+    LaunchedEffect(favorites) {
 
     }
     HorizontalDivider()

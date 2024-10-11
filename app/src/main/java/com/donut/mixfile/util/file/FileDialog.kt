@@ -37,12 +37,17 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
     MixDialogBuilder("文件信息").apply {
         onDismiss(onDismiss)
         setContent {
+            val dataLog = remember(shareInfo, favorites, uploadLogs) {
+                val log = shareInfo.toDataLog()
+                favorites.firstOrNull { it.shareInfoData == log.shareInfoData } ?: log
+            }
+            val fileName = dataLog.name
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                InfoText(key = "名称: ", value = shareInfo.fileName)
+                InfoText(key = "名称: ", value = fileName)
                 InfoText(key = "大小: ", value = formatFileSize(shareInfo.fileSize))
                 InfoText(key = "密钥: ", value = shareInfo.key)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -51,7 +56,6 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                     }, label = {
                         Text(text = "复制分享码", color = colorScheme.primary)
                     })
-                    val fileName = shareInfo.fileName
                     if (fileName.startsWith("__mixfile_list") || fileName.endsWith(".mix_list")) {
                         AssistChip(onClick = {
                             importFileList(shareInfo.downloadUrl)
@@ -66,23 +70,24 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                             Text(text = "收藏", color = colorScheme.primary)
                         })
                     } else {
-                        val dataLog = remember(shareInfo, updateMark) {
-                            val log = shareInfo.toDataLog()
-                            favorites.firstOrNull { it == log } ?: log
-                        }
                         AssistChip(onClick = {
                             deleteFavoriteLog(shareInfo.toDataLog())
                         }, label = {
                             Text(text = "取消收藏", color = colorScheme.primary)
                         })
                         AssistChip(onClick = {
-                            dataLog.rename()
+                            dataLog.rename {
+                                closeDialog()
+                                showFileInfoDialog(it)
+                            }
                         }, label = {
                             Text(text = "重命名", color = colorScheme.primary)
                         })
                         AssistChip(onClick = {
-                            openCategorySelect(dataLog.category) {
-                                dataLog.category = it
+                            openCategorySelect(dataLog.category) { category ->
+                                favorites = dataLog.updateDataList(favorites) {
+                                    dataLog.copy(category = category)
+                                }
                             }
                         }, label = {
                             Text(
