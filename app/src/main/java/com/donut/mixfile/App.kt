@@ -13,6 +13,7 @@ import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
+import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.util.objects.MixActivity
 import com.donut.mixfile.util.showError
 import com.donut.mixfile.util.showErrorDialog
@@ -48,6 +49,7 @@ class App : Application(), ImageLoaderFactory {
             showErrorDialog(e)
         }
         innerApp = this
+        UPLOADERS
         MMKV.initialize(this)
         kv = MMKV.defaultMMKV()
         startService(Intent(this, FileService::class.java).apply {
