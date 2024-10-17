@@ -18,9 +18,7 @@ class ExampleUnitTest {
     @Test
     fun main() {
         runBlocking {
-            println(
 
-            )
         }
     }
 
