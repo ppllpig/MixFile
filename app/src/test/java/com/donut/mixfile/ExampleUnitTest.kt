@@ -1,7 +1,5 @@
 package com.donut.mixfile
 
-import com.donut.mixfile.util.file.encodeHex
-import com.donut.mixfile.util.genRandomString
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
