@@ -26,7 +26,6 @@ fun getRoutes(): Routing.() -> Unit {
     return {
 
         get("{param...}") {
-            debug("牛逼")
             val file = call.request.path().substring(1).ifEmpty {
                 "index.html"
             }

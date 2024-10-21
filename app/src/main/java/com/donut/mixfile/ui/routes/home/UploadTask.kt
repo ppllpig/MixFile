@@ -32,6 +32,7 @@ import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respondText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,7 +121,7 @@ class UploadTask(
     @Composable
     fun State() {
         if (stopped) {
-            if (error == null) {
+            if (error == null || error is CancellationException) {
                 return Text(text = "上传取消", color = colorScheme.error)
             }
             return Text(text = "上传失败", color = colorScheme.error)
