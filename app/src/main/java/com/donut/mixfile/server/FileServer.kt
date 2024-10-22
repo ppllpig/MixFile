@@ -59,7 +59,6 @@ fun startServer() {
                 allowHeader(HttpHeaders.AccessControlAllowOrigin)
                 allowHeader(HttpHeaders.AccessControlAllowMethods)
                 allowHeader(HttpHeaders.ContentType)
-                anyHost()
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
