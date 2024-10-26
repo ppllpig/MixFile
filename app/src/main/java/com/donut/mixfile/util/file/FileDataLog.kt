@@ -134,10 +134,6 @@ fun addFavoriteLog(
     shareInfo: MixShareInfo,
     category: String = currentCategory.ifEmpty { "默认" },
 ): Boolean {
-    if (favorites.size > 10000) {
-        showToast("收藏已达到限制!")
-        return false
-    }
     val favoriteLog = shareInfo.toDataLog()
     favCategories += category
     favorites = favorites.filter { it.shareInfoData != favoriteLog.shareInfoData }
