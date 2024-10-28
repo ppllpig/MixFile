@@ -72,8 +72,6 @@ fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> U
     }
 }
 
-val semaphore = Semaphore(UPLOAD_TASK_COUNT.toInt())
-
 suspend fun uploadFile(
     channel: ByteReadChannel,
     head: ByteArray,
@@ -82,6 +80,7 @@ suspend fun uploadFile(
     fileSize: Long,
     uploadTask: UploadTask,
 ): String? {
+    val semaphore = Semaphore(UPLOAD_TASK_COUNT.toInt())
     return coroutineScope {
         val context = currentCoroutineContext()
         uploadTask.onStop = {
