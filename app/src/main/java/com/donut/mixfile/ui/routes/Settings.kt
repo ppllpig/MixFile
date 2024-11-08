@@ -242,7 +242,7 @@ val MixSettings = MixNavPage(
 }
 
 fun selectFilePreview() {
-    MixDialogBuilder("上传线路").apply {
+    MixDialogBuilder("文件预览").apply {
         setContent {
             SingleSelectItemList(
                 items = listOf("开启", "关闭", "仅Wifi"),
