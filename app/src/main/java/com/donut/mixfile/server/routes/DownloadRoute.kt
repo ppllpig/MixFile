@@ -10,13 +10,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.ranges
 import io.ktor.server.response.contentRange
 import io.ktor.server.response.header
 import io.ktor.server.response.respondBytesWriter
 import io.ktor.server.response.respondText
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.server.routing.RoutingHandler
+import io.ktor.utils.io.close
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -27,7 +27,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 
 @OptIn(ExperimentalEncodingApi::class)
-fun getDownloadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
+fun getDownloadRoute(): RoutingHandler {
     return route@{
         val shareInfoData = call.request.queryParameters["s"]
         val referer = call.request.queryParameters["referer"]

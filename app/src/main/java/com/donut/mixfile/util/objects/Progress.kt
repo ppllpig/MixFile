@@ -99,8 +99,8 @@ class ProgressContent(
     var contentLength: Long by mutableLongStateOf(0)
 
 
-    val ktorListener: suspend (bytesWritten: Long, bytesTotal: Long) -> Unit = { bytes, length ->
-        updateProgress(bytes, length)
+    val ktorListener: suspend (bytesWritten: Long, bytesTotal: Long?) -> Unit = { bytes, length ->
+        updateProgress(bytes, length ?: 1)
     }
 
     val interceptor = ProgressInterceptor { bytes, length, done ->

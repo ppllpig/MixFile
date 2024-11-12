@@ -1,7 +1,6 @@
 package com.donut.mixfile.server.routes
 
 import com.donut.mixfile.app
-import com.donut.mixfile.util.debug
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.isNotNull
@@ -10,7 +9,6 @@ import com.donut.mixfile.util.toJsonString
 import com.google.gson.JsonObject
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.header
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -45,7 +43,7 @@ fun getRoutes(): Routing.() -> Unit {
             get("/download", getDownloadRoute())
             put("/upload", getUploadRoute())
             get("/upload_history") {
-                if (call.request.header("origin").isNotNull()){
+                if (call.request.header("origin").isNotNull()) {
                     return@get call.respondText("此接口禁止跨域", status = HttpStatusCode.Forbidden)
                 }
                 call.respond(favorites.takeLast(1000).toJsonString())

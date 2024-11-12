@@ -3,7 +3,7 @@ package com.donut.mixfile.server
 import com.donut.mixfile.util.cachedMutableOf
 import com.google.gson.GsonBuilder
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
@@ -19,7 +19,7 @@ import java.io.InputStream
 
 var UPLOAD_RETRY_TIMES by cachedMutableOf(3, "UPLOAD_RETRY_TIMES")
 
-val uploadClient = HttpClient(CIO).config {
+val uploadClient = HttpClient(OkHttp).config {
     install(ContentNegotiation) {
         gson()
         register(ContentType.Any, GsonConverter(GsonBuilder().create()))
@@ -40,7 +40,7 @@ val uploadClient = HttpClient(CIO).config {
     }
 }
 
-val localClient = HttpClient(CIO).config {
+val localClient = HttpClient(OkHttp).config {
     install(HttpTimeout)
 }
 

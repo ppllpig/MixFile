@@ -17,8 +17,8 @@ import io.ktor.serialization.gson.gson
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.application.install
-import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -38,7 +38,7 @@ var serverStarted by mutableStateOf(false)
 fun startServer() {
     appScope.launch(Dispatchers.IO) {
         serverPort = findAvailablePort(serverPort) ?: serverPort
-        embeddedServer(CIO, port = serverPort, watchPaths = emptyList()) {
+        embeddedServer(Netty, port = serverPort, watchPaths = emptyList()) {
             intercept(ApplicationCallPipeline.Call) {
                 val key = call.request.queryParameters["accessKey"]
                 if (enableAccessKey && !key.contentEquals(accessKey)) {

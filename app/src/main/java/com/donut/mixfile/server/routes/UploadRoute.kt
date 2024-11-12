@@ -8,14 +8,12 @@ import com.donut.mixfile.ui.routes.home.UploadTask
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.generateRandomByteArray
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
 import io.ktor.server.request.contentLength
 import io.ktor.server.request.receiveChannel
 import io.ktor.server.response.respondText
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.server.routing.RoutingHandler
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -26,12 +24,13 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import kotlin.math.ceil
 
 var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
 
 
-fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
+fun getUploadRoute(): RoutingHandler {
     return route@{
         val key = generateRandomByteArray(16)
         val name = call.request.queryParameters["name"]
@@ -95,7 +94,7 @@ suspend fun uploadFile(
 
         while (!channel.isClosedForRead) {
             semaphore.acquire()
-            val fileData = channel.readRemaining(chunkSize).readBytes()
+            val fileData = channel.readRemaining(chunkSize).readByteArray()
             val currentIndex = fileIndex
             fileIndex++
             tasks.add(async {
@@ -103,7 +102,7 @@ suspend fun uploadFile(
                     val url = uploader.upload(head, fileData, secret)
                     fileList[currentIndex] = url
                     withContext(Dispatchers.Main) {
-                        uploadTask.progress.updateProgress(channel.totalBytesRead, fileSize)
+                        uploadTask.progress.increaseBytesWritten(fileData.size.toLong(), fileSize)
                     }
                 } finally {
                     semaphore.release()

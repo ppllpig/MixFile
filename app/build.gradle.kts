@@ -14,8 +14,8 @@ android {
         applicationId = "com.donut.mixfile"
         minSdk = 24
         targetSdk = 34
-        versionCode = 58
-        versionName = "1.6.3"
+        versionCode = 59
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.default.headers)
     implementation(libs.ktor.server.cors)
+    implementation(libs.ktor.server.netty)
     implementation(libs.ktor.serialization.gson)
     implementation(libs.coil)
     implementation(libs.coil.compose)
@@ -89,6 +90,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.okhttp)
     implementation(libs.firebase.analytics)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.network)

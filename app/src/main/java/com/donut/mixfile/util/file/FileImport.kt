@@ -18,9 +18,10 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
-import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 
 fun exportFileList(fileList: List<FileDataLog>, name: String) {
     val strData = fileList.toJsonString()
@@ -73,7 +74,7 @@ suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<F
             if ((it.contentLength() ?: 0) > 1024 * 1024 * 50) {
                 throw Exception("文件过大")
             }
-            val data = it.bodyAsChannel().readRemaining(1024 * 1024 * 50).readBytes()
+            val data = it.bodyAsChannel().readRemaining(1024 * 1024 * 50).readByteArray()
             val extractedData = decompressGzip(data)
             return@execute Gson().fromJson(extractedData, Array<FileDataLog>::class.java)
         }

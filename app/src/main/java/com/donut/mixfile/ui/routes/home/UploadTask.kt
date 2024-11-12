@@ -30,6 +30,7 @@ import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respondText
 import kotlinx.coroutines.CancellationException
@@ -166,7 +167,7 @@ class UploadTask(
         }
         stopped = true
         appScope.launch(Dispatchers.IO) {
-            call?.respondText("上传已取消")
+            call?.respondText("上传已取消", status = HttpStatusCode.InternalServerError)
             onStop()
         }
     }
