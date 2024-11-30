@@ -19,13 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.routes.home.TaskCard
+import com.donut.mixfile.ui.routes.home.UploadTaskCard
 import com.donut.mixfile.ui.routes.home.uploadTasks
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.cancelAllMultiUpload
-import com.donut.mixfile.util.file.successFileCount
-import com.donut.mixfile.util.file.totalFileCount
+import com.donut.mixfile.util.file.totalUploadFileCount
 import com.donut.mixfile.util.file.uploadQueue
+import com.donut.mixfile.util.file.uploadSuccessFileCount
 import com.donut.mixfile.util.objects.AnimatedLoadingBar
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
@@ -41,11 +41,11 @@ fun showUploadTaskWindow() {
             Column(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                if (totalFileCount > 1) {
-                    val progress = successFileCount.toFloat() / totalFileCount
+                if (totalUploadFileCount > 1) {
+                    val progress = uploadSuccessFileCount.toFloat() / totalUploadFileCount
                     AnimatedLoadingBar(
                         progress = progress,
-                        label = "总进度: ${successFileCount}/${totalFileCount} " +
+                        label = "总进度: ${uploadSuccessFileCount}/${totalUploadFileCount} " +
                                 "正在上传: ${uploadTasks.filter { it.uploading }.size} " +
                                 "排队中: $uploadQueue"
                     )
@@ -54,8 +54,8 @@ fun showUploadTaskWindow() {
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                     modifier = Modifier.padding(0.dp)
                 ) {
-                    uploadTasks.forEach {
-                        TaskCard(uploadTask = it) {
+                    uploadTasks.take(10).forEach {
+                        UploadTaskCard(uploadTask = it) {
                             it.delete()
                         }
                     }

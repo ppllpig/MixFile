@@ -37,11 +37,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
-fun TaskCard(
+fun UploadTaskCard(
     uploadTask: UploadTask,
     longClick: () -> Unit = {},
 ) {
@@ -95,7 +94,6 @@ class UploadTask(
     val fileName: String,
     val fileSize: Long,
     val add: Boolean = true,
-    val time: Date = Date(),
 ) {
     var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
 

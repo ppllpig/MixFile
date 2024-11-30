@@ -1,11 +1,14 @@
 package com.donut.mixfile.util.file
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,13 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -119,7 +125,14 @@ fun PreviewCard(
 }
 
 @Composable
-fun FileCardList(cardList: List<FileDataLog>, longClick: (FileDataLog) -> Unit = {}) {
+fun FileCardList(
+    cardList: List<FileDataLog>,
+    selected: Set<FileDataLog> = setOf(),
+    onClick: (FileDataLog) -> Unit = {
+        tryResolveFile(it.shareInfoData)
+    },
+    longClick: (FileDataLog) -> Unit = {},
+) {
 
     if (filePreview.contentEquals("开启") ||
         (filePreview.contentEquals("仅Wifi") && NetworkChangeReceiver.isWifi)
@@ -149,7 +162,16 @@ fun FileCardList(cardList: List<FileDataLog>, longClick: (FileDataLog) -> Unit =
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             items(cardList.size) { index ->
-                FileCard(cardList[index], longClick = longClick)
+                val log = cardList[index]
+                if (index > 0) {
+                    HorizontalDivider()
+                }
+                FileCard(
+                    log,
+                    longClick = longClick,
+                    selected = selected.contains(log),
+                    onClick = onClick
+                )
             }
         }
     }
@@ -160,35 +182,52 @@ fun FileCardList(cardList: List<FileDataLog>, longClick: (FileDataLog) -> Unit =
 fun FileCard(
     fileDataLog: FileDataLog,
     showDate: Boolean = true,
+    onClick: (FileDataLog) -> Unit,
+    selected: Boolean = false,
     longClick: (FileDataLog) -> Unit = {},
 ) {
     LaunchedEffect(favorites) {
 
     }
-    HorizontalDivider()
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color(107, 218, 246, 0),
-        ),
+    val color = remember(selected) {
+        if (selected)
+            Color(107, 184, 242, 84)
+        else
+            Color(107, 218, 246, 0)
+    }
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(color)
             .combinedClickable(
                 onLongClick = {
                     longClick(fileDataLog)
                 }
             ) {
-                tryResolveFile(fileDataLog.shareInfoData)
+                onClick(fileDataLog)
             }
     ) {
         Column(
             modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Text(
-                text = fileDataLog.name.trim(),
-                color = colorScheme.primary,
-                fontSize = 16.sp,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                if (selected) {
+                    Icon(
+                        Icons.Filled.CheckCircle,
+                        contentDescription = "selected",
+                        tint = colorScheme.primary
+                    )
+                }
+                Text(
+                    text = fileDataLog.name.trim(),
+                    color = colorScheme.primary,
+                    fontSize = 16.sp,
+                )
+            }
             FlowRow(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()

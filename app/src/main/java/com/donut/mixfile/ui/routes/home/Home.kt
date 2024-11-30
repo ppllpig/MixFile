@@ -14,6 +14,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -132,6 +133,7 @@ val Home = MixNavPage(
         }
     }
     UploadDialogCard()
+    DownloadDialogCard()
     if (uploadLogs.isNotEmpty()) {
         ElevatedCard(
             modifier = Modifier.fillMaxSize(),
@@ -145,7 +147,8 @@ val Home = MixNavPage(
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary
             )
-            FileCardList(cardList = uploadLogs.reversed()) {
+            HorizontalDivider()
+            FileCardList(cardList = uploadLogs.asReversed()) {
                 deleteUploadLog(it)
             }
         }

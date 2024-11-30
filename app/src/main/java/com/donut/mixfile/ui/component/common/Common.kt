@@ -168,7 +168,7 @@ fun SingleSelectItemList(
 @Composable
 fun <T> SingleSelectItemList(
     items: List<T>,
-    currentOption: T?,
+    currentOption: T? = null,
     getLabel: (option: T) -> String,
     onSelect: (option: T) -> Unit,
 ) {

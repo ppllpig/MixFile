@@ -351,7 +351,7 @@ inline fun errorDialog(title: String, block: () -> Unit) {
         when (e) {
             is CancellationException,
             is EOFException,
-            -> return
+                -> return
         }
         appScope.launch(Dispatchers.Main) {
             showErrorDialog(e, title)

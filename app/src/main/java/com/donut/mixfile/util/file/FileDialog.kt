@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
@@ -24,13 +23,11 @@ import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.importFileList
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
+import com.donut.mixfile.ui.routes.home.DownloadTask
+import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
 import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.copyToClipboard
-import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.formatFileSize
-import com.donut.mixfile.util.objects.ProgressContent
-import com.donut.mixfile.util.showToast
 
 @OptIn(ExperimentalLayoutApi::class)
 fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
@@ -126,6 +123,8 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
         }
         setPositiveButton("下载文件") {
             downloadFile(shareInfo)
+            closeDialog()
+            showDownloadTaskWindow()
         }
         show()
     }
@@ -146,38 +145,6 @@ fun InfoText(key: String, value: String) {
 }
 
 fun downloadFile(shareInfo: MixShareInfo) {
-    MixDialogBuilder(
-        "文件下载中", properties = DialogProperties(
-            dismissOnClickOutside = false,
-            dismissOnBackPress = false
-        )
-    ).apply {
-        setContent {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                val progressContent = remember {
-                    ProgressContent()
-                }
-                progressContent.LoadingContent()
-
-                UseEffect {
-                    errorDialog("下载失败") {
-                        saveFileToStorage(
-                            shareInfo.downloadUrl,
-                            displayName = shareInfo.fileName,
-                            progress = progressContent
-                        )
-                        showToast("文件已保存到下载目录")
-                    }
-                    closeDialog()
-                }
-            }
-        }
-        setNegativeButton("取消") {
-            showToast("下载已取消")
-            closeDialog()
-        }
-        show()
-    }
+    val task = DownloadTask(shareInfo.fileName, shareInfo.fileSize, shareInfo.downloadUrl)
+    task.start()
 }
