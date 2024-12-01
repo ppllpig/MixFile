@@ -7,8 +7,5 @@ MixFile是一款可以上传加密文件并分享的安卓APP \
 已发布版本: https://github.com/InvertGeek/MixFile/releases \
 使用帮助: https://gitlab.com/ivgeek/mixfile/-/wikis/%E4%BD%BF%E7%94%A8%E5%B8%AE%E5%8A%A9
 
-# 电脑版
-https://gitlab.com/ivgeek/mixfiledesktop
-
 # 命令行版本
-https://gitlab.com/ivgeek/mixfilecli
+https://github.com/InvertGeek/mixfilecli
