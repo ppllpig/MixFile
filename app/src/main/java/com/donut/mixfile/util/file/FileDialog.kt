@@ -30,7 +30,10 @@ import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
 
 @OptIn(ExperimentalLayoutApi::class)
-fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
+fun showFileInfoDialog(
+    shareInfo: MixShareInfo,
+    onDismiss: () -> Unit = {}
+) {
     MixDialogBuilder("文件信息").apply {
         onDismiss(onDismiss)
         setContent {
@@ -68,7 +71,7 @@ fun showFileInfoDialog(shareInfo: MixShareInfo, onDismiss: () -> Unit = {}) {
                         })
                     } else {
                         AssistChip(onClick = {
-                            deleteFavoriteLog(shareInfo.toDataLog())
+                            deleteFavoriteLog(dataLog)
                         }, label = {
                             Text(text = "取消收藏", color = colorScheme.primary)
                         })
