@@ -3,7 +3,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/InvertGeek/MixFile">
-    <img src="https://invertgeek.github.io/mixfile-doc/logo.png" alt="Logo" width="100" height="100">
+    <img src="https://invertgeek.github.io/mixfile-doc/logo.png" alt="Logo" width="200" height="200">
   </a>
   <h1 align="center">MixFile</h1>
   <p align="center">
