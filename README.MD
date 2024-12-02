@@ -9,3 +9,6 @@ MixFile是一款可以上传加密文件并分享的安卓APP \
 
 # 命令行版本
 https://github.com/InvertGeek/mixfilecli
+
+## Github Star
+[![Stargazers over time](https://starchart.cc/InvertGeek/MixFile.svg?variant=adaptive)](https://starchart.cc/InvertGeek/MixFile)
