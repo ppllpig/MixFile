@@ -5,7 +5,7 @@
   <a href="https://github.com/InvertGeek/MixFile">
     <img src="https://invertgeek.github.io/mixfile-doc/logo.png" alt="Logo" width="100" height="100">
   </a>
-  <h2 align="center">MixFile</h2>
+  <h1 align="center">MixFile</h1>
   <p align="center">
     无限空间,不限速,加密储存
   </p>
