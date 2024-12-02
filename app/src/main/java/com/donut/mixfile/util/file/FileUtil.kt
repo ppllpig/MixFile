@@ -38,7 +38,6 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.plugins.onUpload
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.parameter
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.put
@@ -69,9 +68,6 @@ suspend fun putUploadFile(
     progressContent: ProgressContent = ProgressContent(),
 ): String {
     val response = localClient.put {
-        timeout {
-            requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
-        }
         url("${getLocalServerAddress()}/api/upload")
         onUpload(progressContent.ktorListener)
         parameter("name", name)
@@ -239,9 +235,6 @@ suspend fun saveFileToStorage(
         return null
     }
     localClient.prepareGet {
-        timeout {
-            requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
-        }
         url(url)
         onDownload(progress.ktorListener)
     }.execute {

@@ -41,7 +41,11 @@ val uploadClient = HttpClient(OkHttp).config {
 }
 
 val localClient = HttpClient(OkHttp).config {
-    install(HttpTimeout)
+    install(HttpTimeout) {
+        requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
+        socketTimeoutMillis = 1000 * 60 * 60
+        connectTimeoutMillis = 1000 * 60 * 60
+    }
 }
 
 class StreamContent(private val stream: InputStream, val length: Long = 0) :

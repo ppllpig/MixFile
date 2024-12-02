@@ -22,7 +22,6 @@ import com.donut.mixfile.util.showToast
 import com.donut.mixfile.util.toJsonString
 import com.google.gson.Gson
 import io.ktor.client.plugins.onDownload
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.url
 import io.ktor.client.statement.bodyAsChannel
@@ -95,9 +94,6 @@ fun showFileList(fileList: List<FileDataLog>) {
 suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<FileDataLog>? {
     try {
         return localClient.prepareGet {
-            timeout {
-                requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
-            }
             url(url)
             onDownload(progressContent.ktorListener)
         }.execute {
