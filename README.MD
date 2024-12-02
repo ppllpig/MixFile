@@ -7,6 +7,14 @@ MixFile是一款可以上传加密文件并分享的安卓APP \
 已发布版本: https://github.com/InvertGeek/MixFile/releases \
 使用帮助: https://invertgeek.github.io/mixfile-doc/help.html
 
+# 详细原理
+将图片切割为1MB的分片,然后加密隐藏到空白图片中 \
+非伪装,图片都是真实有效可被解析,然后上传所有分片,最后聚合分片索引信息 \
+再将信息压缩隐写到一张索引图片中,最后上传索引图片 \
+下载时优先解析索引,再根据索引信息获取到所有分片链接进行逆操作即可还原文件 \
+视频上传后可直接在线播放,已实现range请求,可切换进度条,智能实时解析进度对应的图片信息 \
+基于kotlin协程优化并发,上传下载均可达到数十Mb每秒,和普通文件直链基本无区别
+
 # 命令行版本
 https://github.com/InvertGeek/mixfilecli
 
