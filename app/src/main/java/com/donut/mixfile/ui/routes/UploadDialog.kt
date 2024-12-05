@@ -32,7 +32,7 @@ import com.donut.mixfile.util.showToast
 
 
 fun showUploadTaskWindow() {
-    MixDialogBuilder("上传中的文件").apply {
+    MixDialogBuilder("上传任务").apply {
         setContent {
             if (uploadTasks.isEmpty()) {
                 Text(text = "没有上传中的文件")

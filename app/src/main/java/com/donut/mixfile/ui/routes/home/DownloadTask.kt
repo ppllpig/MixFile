@@ -1,5 +1,7 @@
 package com.donut.mixfile.ui.routes.home
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -21,7 +23,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.appScope
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.InfoText
@@ -47,7 +49,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -67,7 +68,7 @@ fun DownloadTaskCard(
                     longClick()
                 }
             ) {
-                downloadTask.cancel()
+                downloadTask.click()
             }
     ) {
         Column(
@@ -105,6 +106,7 @@ class DownloadTask(
     var progress = ProgressContent("下载中", 14.sp, colorScheme.secondary, false)
 
     var job: Job? = null
+    var fileUri: Uri? = null
 
 
     var stopped by mutableStateOf(false)
@@ -116,7 +118,6 @@ class DownloadTask(
         appScope.launch {
             downloadTasks += this@DownloadTask
         }
-        totalDownloadFileCount++
         progress.contentLength = fileSize
     }
 
@@ -167,22 +168,17 @@ class DownloadTask(
     }
 
     fun start() {
-        downloadQueue++
         job = appScope.launch(Dispatchers.IO) {
             downloadSemaphore.acquire()
-            withContext(Dispatchers.Main) {
-                downloadQueue--
-            }
             if (stopped) {
                 return@launch
             }
             started = true
-            saveFileToStorage(
+            fileUri = saveFileToStorage(
                 url,
                 displayName = fileName,
                 progress = progress
             )
-            downloadSuccessFileCount++
         }
         job?.invokeOnCompletion {
             error = it
@@ -192,7 +188,17 @@ class DownloadTask(
 
     }
 
-    fun cancel() {
+    fun click() {
+        val finalUri = fileUri
+        if (finalUri != null) {
+            val intent =
+                Intent(
+                    Intent.ACTION_VIEW,
+                    finalUri
+                )
+            currentActivity.startActivity(intent)
+            return
+        }
         if (stopped) {
             delete()
             return
@@ -211,19 +217,13 @@ class DownloadTask(
     }
 }
 
-var downloadQueue by mutableIntStateOf(0)
-var totalDownloadFileCount by mutableIntStateOf(0)
-var downloadSuccessFileCount by mutableIntStateOf(0)
 
 fun cancelAllDownloads() {
-    downloadQueue = 0
     downloadTasks.forEach { it.stop() }
-    totalDownloadFileCount = 0
-    downloadSuccessFileCount = 0
 }
 
 fun showDownloadTaskWindow() {
-    MixDialogBuilder("下载中的文件").apply {
+    MixDialogBuilder("下载任务").apply {
         setContent {
             if (downloadTasks.isEmpty()) {
                 Text(text = "没有下载中的文件")
@@ -232,13 +232,15 @@ fun showDownloadTaskWindow() {
             Column(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                if (totalDownloadFileCount > 1) {
-                    val progress = downloadSuccessFileCount.toFloat() / totalDownloadFileCount
+                val downloadedFileCount = downloadTasks.count { it.fileUri != null }
+                val downloadingFileCount = downloadTasks.filter { !it.stopped }.size
+                if (downloadingFileCount > 1) {
+                    val progress = downloadedFileCount.toFloat() / downloadTasks.size
                     AnimatedLoadingBar(
                         progress = progress,
-                        label = "总进度: $downloadSuccessFileCount/$totalDownloadFileCount " +
+                        label = "总进度: $downloadedFileCount/${downloadTasks.size} " +
                                 "正在下载: ${downloadTasks.filter { it.started && !it.stopped }.size} " +
-                                "排队中: $downloadQueue"
+                                "排队中: ${downloadTasks.count { !it.started }}"
                     )
                 }
                 Column(
