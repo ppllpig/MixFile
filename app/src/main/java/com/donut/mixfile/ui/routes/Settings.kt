@@ -186,9 +186,6 @@ val MixSettings = MixNavPage(
     SettingButton(text = "上传线路: $currentUploader") {
         selectUploader()
     }
-    SettingButton(text = "文件预览: $filePreview") {
-        selectFilePreview()
-    }
     if (getCurrentUploader() == CustomUploader) {
         OutlinedTextField(
             value = CUSTOM_UPLOAD_URL,
@@ -215,6 +212,9 @@ val MixSettings = MixNavPage(
         图片尺寸不宜过大,否则影响上传速度
     """.trimIndent()
         )
+    }
+    SettingButton(text = "文件预览: $filePreview") {
+        selectFilePreview()
     }
     SettingButton(text = "颜色主题: ") {
         MixDialogBuilder("颜色主题").apply {
