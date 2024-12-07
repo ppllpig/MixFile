@@ -1,7 +1,6 @@
 package com.donut.mixfile
 
-import com.donut.mixfile.util.file.parseShareCode
-import com.donut.mixfile.util.file.resolveMixShareInfo
+import com.donut.mixfile.server.utils.bean.MixShareInfo
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 

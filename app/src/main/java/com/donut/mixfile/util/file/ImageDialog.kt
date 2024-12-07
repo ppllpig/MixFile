@@ -62,6 +62,7 @@ fun showImageDialog(url: String) {
                 ImageContent(url)
             }
         }
+        setDefaultNegative("关闭")
         show()
     }
 

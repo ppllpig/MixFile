@@ -44,6 +44,9 @@ import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
+import com.donut.mixfile.ui.theme.Theme
+import com.donut.mixfile.ui.theme.currentTheme
+import com.donut.mixfile.ui.theme.enableAutoDarkMode
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.filePreview
@@ -212,6 +215,30 @@ val MixSettings = MixNavPage(
         图片尺寸不宜过大,否则影响上传速度
     """.trimIndent()
         )
+    }
+    SettingButton(text = "颜色主题: ") {
+        MixDialogBuilder("颜色主题").apply {
+            setContent {
+                SingleSelectItemList(
+                    items = Theme.entries,
+                    getLabel = { it.label },
+                    currentOption = Theme.entries.firstOrNull {
+                        it.name == currentTheme
+                    } ?: Theme.DEFAULT
+                ) { option ->
+                    currentTheme = option.name
+                    closeDialog()
+                }
+            }
+            show()
+        }
+    }
+    CommonSwitch(
+        checked = enableAutoDarkMode,
+        text = "自动深色模式:",
+        "跟随系统自动切换深色模式",
+    ) {
+        enableAutoDarkMode = it
     }
     HorizontalDivider()
     val batteryOptimization by remember {
