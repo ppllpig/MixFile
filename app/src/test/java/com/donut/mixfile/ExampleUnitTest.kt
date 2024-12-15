@@ -1,6 +1,5 @@
 package com.donut.mixfile
 
-import com.donut.mixfile.server.utils.bean.MixShareInfo
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 

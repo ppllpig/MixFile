@@ -6,6 +6,7 @@ import com.donut.mixfile.server.accessKey
 import com.donut.mixfile.server.uploadClient
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import com.donut.mixfile.ui.routes.home.serverAddress
+import com.donut.mixfile.util.GSON
 import com.donut.mixfile.util.basen.BigIntBaseN
 import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decompressGzip
@@ -14,7 +15,6 @@ import com.donut.mixfile.util.encryptAES
 import com.donut.mixfile.util.hashMD5
 import com.donut.mixfile.util.parseFileMimeType
 import com.donut.mixmessage.util.encode.basen.Alphabet
-import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
@@ -47,7 +47,7 @@ data class MixShareInfo(
         }
 
         private fun fromJson(json: String): MixShareInfo =
-            Gson().fromJson(json, MixShareInfo::class.java)
+            GSON.fromJson(json, MixShareInfo::class.java)
 
         private fun enc(input: String): String {
             val bytes = input.encodeToByteArray()
@@ -86,7 +86,7 @@ data class MixShareInfo(
         return enc(toJson())
     }
 
-    private fun toJson(): String = Gson().toJson(this)
+    private fun toJson(): String = GSON.toJson(this)
 
     suspend fun fetchFile(url: String, referer: String = this.referer): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
@@ -132,7 +132,7 @@ data class MixFile(
 ) {
 
     companion object {
-        fun fromBytes(data: ByteArray) = Gson().fromJson(decompressGzip(data), MixFile::class.java)
+        fun fromBytes(data: ByteArray) = GSON.fromJson(decompressGzip(data), MixFile::class.java)
     }
 
     fun getFileListByStartRange(startRange: Long): List<Pair<String, Int>> {
@@ -149,6 +149,6 @@ data class MixFile(
     }
 
 
-    fun toBytes() = compressGzip(Gson().toJson(this))
+    fun toBytes() = compressGzip(GSON.toJson(this))
 
 }

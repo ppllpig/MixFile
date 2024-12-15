@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.server.localClient
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
+import com.donut.mixfile.util.GSON
 import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.formatFileSize
@@ -20,7 +21,6 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
 import com.donut.mixfile.util.toJsonString
-import com.google.gson.Gson
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.url
@@ -108,7 +108,7 @@ suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<F
             }
             val data = it.bodyAsChannel().readRemaining(1024 * 1024 * 50).readByteArray()
             val extractedData = decompressGzip(data)
-            return@execute Gson().fromJson(extractedData, Array<FileDataLog>::class.java)
+            return@execute GSON.fromJson(extractedData, Array<FileDataLog>::class.java)
         }
     } catch (e: Exception) {
         withContext(Dispatchers.Main) {

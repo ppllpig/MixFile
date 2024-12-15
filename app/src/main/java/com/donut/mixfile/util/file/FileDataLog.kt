@@ -11,10 +11,8 @@ import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.favorites.currentCategory
-import com.donut.mixfile.util.TimestampAdapter
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.showToast
-import com.google.gson.annotations.JsonAdapter
 import java.util.Date
 
 
@@ -22,7 +20,6 @@ data class FileDataLog(
     val shareInfoData: String,
     val name: String,
     val size: Long,
-    @JsonAdapter(TimestampAdapter::class)
     val time: Date = Date(),
     var category: String = currentCategory,
 ) {

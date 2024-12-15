@@ -1,6 +1,5 @@
 package com.donut.mixfile.util
 
-import com.google.gson.Gson
 import java.nio.ByteBuffer
 import kotlin.streams.toList
 
@@ -151,7 +150,7 @@ fun Int.toBytes(): ByteArray =
 fun ByteArray.toInt(): Int =
     ByteBuffer.wrap(this).int
 
-fun <T> T.toJsonString(): String = Gson().toJson(this)
+fun <T> T.toJsonString(): String = GSON.toJson(this)
 
 
 infix fun <T> T?.default(value: T) = this ?: value

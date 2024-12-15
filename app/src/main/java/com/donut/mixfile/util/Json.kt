@@ -1,5 +1,6 @@
 package com.donut.mixfile.util
 
+import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
@@ -26,4 +27,6 @@ class TimestampAdapter : TypeAdapter<Date?>() {
         return Date(`in`.nextLong())
     }
 }
+
+val GSON = GsonBuilder().registerTypeAdapter(Date::class.java, TimestampAdapter()).create()
 

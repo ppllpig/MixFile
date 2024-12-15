@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.donut.mixfile.kv
-import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 fun <T> constructCachedMutableValue(
@@ -64,7 +63,7 @@ inline fun <reified T> cachedMutableOf(value: List<T>, key: String) =
             var result = listOf<T>()
             val type = object : TypeToken<List<T>>() {}.type
             catchError {
-                val json: List<T> = Gson().fromJson(kv.decodeString(key), type)
+                val json: List<T> = GSON.fromJson(kv.decodeString(key), type)
                 result = json
             }
             return@getter result
@@ -80,7 +79,7 @@ inline fun <reified T> cachedMutableOfSet(value: Set<T>, key: String) =
             var result = setOf<T>()
             val type = object : TypeToken<Set<T>>() {}.type
             catchError {
-                val json: Set<T> = Gson().fromJson(kv.decodeString(key), type)
+                val json: Set<T> = GSON.fromJson(kv.decodeString(key), type)
                 result = json
             }
             return@getter result
