@@ -15,6 +15,11 @@ import com.donut.mixfile.ui.routes.home.serverAddress
 
 
 class FileService : Service() {
+
+    companion object {
+        var instance : FileService? = null
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
@@ -31,6 +36,7 @@ class FileService : Service() {
         super.onCreate()
         createNotificationChannel()
         startForeground(1, getNotification())
+        instance = this
     }
 
 
@@ -39,10 +45,20 @@ class FileService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("MixFile局域网服务器")
+            .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
+            .setOngoing(true)
             .setContentText("运行中: $serverAddress")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .build()
+    }
+
+    fun updateNotification() {
+        val notification: Notification = getNotification()
+
+        val mNotificationManager =
+            getSystemService(NotificationManager::class.java)
+        mNotificationManager.notify(1, notification)
     }
 
     private fun createNotificationChannel() {

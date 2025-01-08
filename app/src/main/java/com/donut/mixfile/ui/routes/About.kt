@@ -101,30 +101,35 @@ val About = MixNavPage(
             }
         }
     }
-    Text(
-        color = colorScheme.primary,
-        text = "项目地址: https://github.com/InvertGeek/MixFile",
-        modifier = Modifier.clickable {
-            MixDialogBuilder("确定打开?").apply {
-                setPositiveButton("确定") {
-                    val intent =
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://github.com/InvertGeek/MixFile")
-                        ).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
-                    app.startActivity(intent)
-                    closeDialog()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            color = colorScheme.primary,
+            text = "项目地址: https://github.com/InvertGeek/MixFile",
+            modifier = Modifier.clickable {
+                MixDialogBuilder("确定打开?").apply {
+                    setPositiveButton("确定") {
+                        val intent =
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/InvertGeek/MixFile")
+                            ).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                        app.startActivity(intent)
+                        closeDialog()
+                    }
+                    setDefaultNegative()
+                    show()
                 }
-                setDefaultNegative()
-                show()
             }
-        }
-    )
-    Text(
-        color = Color.Gray,
-        text = """
+        )
+        Text(
+            color = Color.Gray,
+            text = """
         MixFile采用混合式文件加密上传系统
         您上传的所有文件都会使用AES-GCM-128算法加密,
         上传时会生成随机的128位密钥在本地进行加密后进行上传,
@@ -135,5 +140,6 @@ val About = MixNavPage(
         请把应用省电改为无限制,否则文件服务器可能无法在后台运行
         开启自启动权限后,关闭主页面时将会自动在后台运行服务器
     """.trimIndent()
-    )
+        )
+    }
 }
