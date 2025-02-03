@@ -34,7 +34,7 @@ fun showFileInfoDialog(
     shareInfo: MixShareInfo,
     onDismiss: () -> Unit = {}
 ) {
-    MixDialogBuilder("文件信息").apply {
+    MixDialogBuilder("文件信息",tag="file-info-${shareInfo.url}").apply {
         onDismiss(onDismiss)
         setContent {
             val dataLog = remember(shareInfo, favorites, uploadLogs) {

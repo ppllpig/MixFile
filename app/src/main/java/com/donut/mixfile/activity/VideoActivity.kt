@@ -102,7 +102,7 @@ class VideoActivity : MixActivity("video") {
                             playHistory.toMutableList().apply {
                                 add(0, VideoHistory(time, videoPlayerUrl))
                                 if (this.size > 10) {
-                                    this.removeLast()
+                                    this.removeAt(this.lastIndex)
                                 }
                                 playHistory = this.distinct()
                             }

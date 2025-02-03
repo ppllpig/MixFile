@@ -17,9 +17,12 @@ import com.donut.mixfile.util.compressGzip
 import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
+import com.donut.mixfile.util.hashSHA256
+import com.donut.mixfile.util.hashToMD5String
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
+import com.donut.mixfile.util.toHex
 import com.donut.mixfile.util.toJsonString
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.prepareGet
@@ -72,7 +75,8 @@ fun showFileList(fileList: List<FileDataLog>) {
     val fileTotalSize = fileList.sumOf { it.size }
     MixDialogBuilder(
         "文件列表",
-        "共 ${fileList.size} 个文件 总大小: ${formatFileSize(fileTotalSize)}"
+        "共 ${fileList.size} 个文件 总大小: ${formatFileSize(fileTotalSize)}",
+        tag = "file-list-${fileList.joinToString { it.shareInfoData }.hashSHA256().toHex()}"
     ).apply {
         setContent {
             FileCardList(fileList)
