@@ -57,6 +57,7 @@ import com.donut.mixfile.util.showToast
 
 var useShortCode by cachedMutableOf(true, "use_short_code")
 var autoAddFavorite by cachedMutableOf(true, "auto_add_favorite")
+var useSystemPlayer by cachedMutableOf(false, "use_system_player")
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -182,6 +183,13 @@ val MixSettings = MixNavPage(
         description = "开启后网页端将禁止访问"
     ) {
         enableAccessKey = it
+    }
+    CommonSwitch(
+        checked = useSystemPlayer,
+        text = "使用系统播放器:",
+        description = "播放视频是否使用系统调用其他播放器"
+    ) {
+        useSystemPlayer = it
     }
     SettingButton(text = "上传线路: $currentUploader") {
         selectUploader()

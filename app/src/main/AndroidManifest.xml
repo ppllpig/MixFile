@@ -29,7 +29,7 @@
             android:configChanges="uiMode|orientation|screenSize|keyboardHidden"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.MixFile"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <meta-data
@@ -46,7 +46,7 @@
             android:configChanges="uiMode|orientation|screenSize|keyboardHidden"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.MixFile"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
@@ -55,7 +55,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>
@@ -76,7 +76,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:hardwareAccelerated="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/MixFileDialog"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" >

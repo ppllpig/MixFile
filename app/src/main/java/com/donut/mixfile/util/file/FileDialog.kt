@@ -1,6 +1,7 @@
 package com.donut.mixfile.util.file
 
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -16,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.net.toUri
 import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
@@ -25,9 +28,11 @@ import com.donut.mixfile.ui.routes.favorites.importFileList
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
 import com.donut.mixfile.ui.routes.home.DownloadTask
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
+import com.donut.mixfile.ui.routes.useSystemPlayer
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
+
 
 @OptIn(ExperimentalLayoutApi::class)
 fun showFileInfoDialog(
@@ -100,6 +105,12 @@ fun showFileInfoDialog(
 
                     if (shareInfo.contentType().startsWith("video/")) {
                         AssistChip(onClick = {
+                            if (useSystemPlayer){
+                                val intent = Intent(Intent.ACTION_VIEW)
+                                intent.setDataAndType(shareInfo.downloadUrl.toUri(), "video/*")
+                                currentActivity.startActivity(intent)
+                                return@AssistChip
+                            }
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 putExtra("url", shareInfo.downloadUrl)
                             }
