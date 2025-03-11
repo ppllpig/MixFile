@@ -81,7 +81,7 @@ fun formatFileSize(bytes: Long, mb: Boolean = false): String {
 fun getAppVersion(context: Context): Pair<String, Long> {
     return try {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        val versionName = packageInfo.versionName
+        val versionName = packageInfo.versionName ?: ""
         val versionCode =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) packageInfo.longVersionCode else packageInfo.versionCode.toLong()
         Pair(versionName, versionCode)

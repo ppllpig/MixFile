@@ -3,19 +3,20 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
     id("kotlin-parcelize")
 }
 
 android {
     namespace = "com.donut.mixfile"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         applicationId = "com.donut.mixfile"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 72
-        versionName = "1.9.0"
+        targetSdk = 35
+        versionCode = 73
+        versionName = "1.9.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
