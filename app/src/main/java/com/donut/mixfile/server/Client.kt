@@ -15,11 +15,19 @@ import io.ktor.serialization.gson.GsonConverter
 import io.ktor.serialization.gson.gson
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.jvm.javaio.toOutputStream
+import okhttp3.Dispatcher
 import java.io.InputStream
 
 var UPLOAD_RETRY_TIMES by cachedMutableOf(3, "UPLOAD_RETRY_TIMES")
 
-val uploadClient = HttpClient(OkHttp).config {
+val uploadClient = HttpClient(OkHttp) {
+    engine {
+        config {
+            val dispatcher = Dispatcher()
+            dispatcher.maxRequestsPerHost = 100
+            dispatcher(dispatcher)
+        }
+    }
     install(ContentNegotiation) {
         gson()
         register(ContentType.Any, GsonConverter(GsonBuilder().create()))
