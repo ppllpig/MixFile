@@ -21,7 +21,7 @@ data class FileDataLog(
     val name: String,
     val size: Long,
     val time: Date = Date(),
-    var category: String = currentCategory,
+    var category: String = currentCategory.ifEmpty { "默认" },
 ) {
 
     init {
