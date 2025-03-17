@@ -16,7 +16,8 @@ object A3Uploader : Uploader("线路A3") {
 
     override suspend fun doUpload(fileData: ByteArray): String {
         val result =
-            uploadClient.submitFormWithBinaryData("https://chatbot.weixin.qq.com/weixinh5/webapp/pfnYYEumBeFN7Yb3TAxwrabYVOa4R9/cos/upload",
+            uploadClient.submitFormWithBinaryData(
+                "https://chatbot.weixin.qq.com/weixinh5/webapp/pfnYYEumBeFN7Yb3TAxwrabYVOa4R9/cos/upload",
                 formData {
                     add("media", fileData, fileFormHeaders())
                 }) {

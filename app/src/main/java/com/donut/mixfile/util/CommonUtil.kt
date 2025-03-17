@@ -135,23 +135,29 @@ fun ByteArray.toHex(): String {
     return sb.toString()
 }
 
-fun String.hashMD5() = calculateHash("MD5")
+fun String.hashMD5() = hashToHexString("MD5")
 
-fun String.hashSHA256() = calculateHash("SHA-256")
+fun String.hashSHA256() = hashToHexString("SHA-256")
 
-fun String.calculateHash(algorithm: String): ByteArray {
+fun String.hashToHexString(algorithm: String): ByteArray {
     val md = MessageDigest.getInstance(algorithm)
     md.update(this.toByteArray())
     return md.digest()
 }
 
-fun ByteArray.calculateHash(algorithm: String): String {
-    val md = MessageDigest.getInstance(algorithm)
-    md.update(this)
-    return md.digest().toHex()
+fun ByteArray.hashToHexString(algorithm: String): String {
+    return calcHash(algorithm).toHex()
 }
 
-fun ByteArray.hashSHA256() = calculateHash("SHA-256")
+fun ByteArray.calcHash(algorithm: String): ByteArray {
+    val md = MessageDigest.getInstance(algorithm)
+    md.update(this)
+    return md.digest()
+}
+
+fun ByteArray.hashSHA256() = calcHash("SHA-256")
+
+fun ByteArray.hashSHA256String() = hashToHexString("SHA-256")
 
 inline fun String.isUrl(block: (URL) -> Unit = {}): Boolean {
     val urlPattern =

@@ -13,6 +13,7 @@ import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.decryptAES
 import com.donut.mixfile.util.encryptAES
 import com.donut.mixfile.util.hashMD5
+import com.donut.mixfile.util.hashSHA256
 import com.donut.mixfile.util.parseFileMimeType
 import com.donut.mixmessage.util.encode.basen.Alphabet
 import com.google.gson.annotations.SerializedName
@@ -23,6 +24,8 @@ import io.ktor.utils.io.discard
 import java.net.URLEncoder
 
 
+fun ByteArray.hashMixSHA256() = MixShareInfo.ENCODER.encode(hashSHA256())
+
 data class MixShareInfo(
     @SerializedName("f") var fileName: String,
     @SerializedName("s") val fileSize: Long,
@@ -31,7 +34,6 @@ data class MixShareInfo(
     @SerializedName("k") val key: String,
     @SerializedName("r") val referer: String,
 ) {
-
 
     companion object {
 
@@ -100,6 +102,15 @@ data class MixShareInfo(
             channel.discard(headSize.toLong())
             decryptAES(channel, ENCODER.decode(key))
         }
+        if (result != null) {
+            val hash = url.split("#").getOrNull(1)
+            if (hash != null) {
+                val currentHash = result.hashMixSHA256()
+                if (!currentHash.contentEquals(hash)) {
+                    throw Exception("文件遭到篡改")
+                }
+            }
+        }
         return result
     }
 
@@ -132,7 +143,8 @@ data class MixFile(
 ) {
 
     companion object {
-        fun fromBytes(data: ByteArray) = GSON.fromJson(decompressGzip(data), MixFile::class.java)
+        fun fromBytes(data: ByteArray): MixFile =
+            GSON.fromJson(decompressGzip(data), MixFile::class.java)
     }
 
     fun getFileListByStartRange(startRange: Long): List<Pair<String, Int>> {

@@ -18,7 +18,6 @@ import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.hashSHA256
-import com.donut.mixfile.util.hashToMD5String
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast

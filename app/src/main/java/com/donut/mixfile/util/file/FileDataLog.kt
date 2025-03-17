@@ -53,6 +53,10 @@ data class FileDataLog(
             }
             setDefaultNegative()
             setPositiveButton("确定") {
+                if (name.isEmpty()) {
+                    showToast("文件名不能为空!")
+                    return@setPositiveButton
+                }
                 shareInfo.fileName = name
                 favorites = updateDataList(favorites) {
                     it.copy(

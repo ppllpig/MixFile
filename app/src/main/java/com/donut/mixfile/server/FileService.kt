@@ -17,7 +17,7 @@ import com.donut.mixfile.ui.routes.home.serverAddress
 class FileService : Service() {
 
     companion object {
-        var instance : FileService? = null
+        var instance: FileService? = null
     }
 
     override fun onBind(intent: Intent?): IBinder? {

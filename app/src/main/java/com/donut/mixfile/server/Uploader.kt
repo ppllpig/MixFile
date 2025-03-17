@@ -4,6 +4,7 @@ import com.donut.mixfile.server.uploaders.A3Uploader
 import com.donut.mixfile.server.uploaders.CustomUploader
 import com.donut.mixfile.server.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.uploaders.hidden.A2Uploader
+import com.donut.mixfile.server.utils.bean.hashMixSHA256
 import com.donut.mixfile.server.utils.createBlankBitmap
 import com.donut.mixfile.server.utils.toGif
 import com.donut.mixfile.ui.routes.increaseUploadData
@@ -55,7 +56,7 @@ abstract class Uploader(val name: String) {
     suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String {
         val encryptedData = encryptBytes(head, fileData, key)
         try {
-            return doUpload(encryptedData)
+            return doUpload(encryptedData) + "#${fileData.hashMixSHA256()}"
         } finally {
             increaseUploadData(encryptedData.size.toLong())
         }

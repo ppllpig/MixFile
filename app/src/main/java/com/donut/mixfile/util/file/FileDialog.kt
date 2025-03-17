@@ -1,7 +1,6 @@
 package com.donut.mixfile.util.file
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.net.toUri
 import com.donut.mixfile.activity.VideoActivity
 import com.donut.mixfile.app
@@ -39,7 +37,7 @@ fun showFileInfoDialog(
     shareInfo: MixShareInfo,
     onDismiss: () -> Unit = {}
 ) {
-    MixDialogBuilder("文件信息",tag="file-info-${shareInfo.url}").apply {
+    MixDialogBuilder("文件信息", tag = "file-info-${shareInfo.url}").apply {
         onDismiss(onDismiss)
         setContent {
             val dataLog = remember(shareInfo, favorites, uploadLogs) {
@@ -105,7 +103,7 @@ fun showFileInfoDialog(
 
                     if (shareInfo.contentType().startsWith("video/")) {
                         AssistChip(onClick = {
-                            if (useSystemPlayer){
+                            if (useSystemPlayer) {
                                 val intent = Intent(Intent.ACTION_VIEW)
                                 intent.setDataAndType(shareInfo.downloadUrl.toUri(), "video/*")
                                 currentActivity.startActivity(intent)
