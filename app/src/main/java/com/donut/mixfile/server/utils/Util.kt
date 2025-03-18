@@ -3,6 +3,7 @@ package com.donut.mixfile.server.utils
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import androidx.core.graphics.createBitmap
 import com.donut.mixfile.util.genRandomString
 import com.donut.mixfile.util.generateRandomByteArray
 import com.donut.mixfile.util.ignoreError
@@ -33,7 +34,7 @@ fun createBlankBitmap(
     width: Int = Random.nextInt(50, 100),
     height: Int = Random.nextInt(50, 100),
 ): Bitmap {
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(width, height)
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.rgb(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255)))
     return bitmap

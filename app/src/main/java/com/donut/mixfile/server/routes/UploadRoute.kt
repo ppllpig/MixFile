@@ -32,7 +32,7 @@ var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
 
 fun getUploadRoute(): RoutingHandler {
     return route@{
-        val key = generateRandomByteArray(16)
+        val key = generateRandomByteArray(32)
         val name = call.request.queryParameters["name"]
         val add = call.request.queryParameters["add"] ?: "true"
         if (name.isNullOrEmpty()) {
