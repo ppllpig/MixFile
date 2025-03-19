@@ -294,13 +294,17 @@ fun getCurrentTime(): String {
     return formatter.format(currentTime)
 }
 
-fun genRandomString(length: Int = 32): String {
-    val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+fun genRandomString(
+    length: Int = 32,
+    charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+): String {
     return (1..length)
         .map { kotlin.random.Random.nextInt(0, charPool.size) }
         .map(charPool::get)
         .joinToString("")
 }
+
+fun genRandomHexString(length: Int = 32) = genRandomString(length, ('0'..'9') + ('a'..'f'))
 
 fun compressGzip(input: String): ByteArray {
     val byteArrayOutputStream = ByteArrayOutputStream()

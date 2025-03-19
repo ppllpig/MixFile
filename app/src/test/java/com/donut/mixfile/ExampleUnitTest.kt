@@ -1,5 +1,6 @@
 package com.donut.mixfile
 
+import com.donut.mixfile.util.file.encodeHex
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -17,7 +18,7 @@ class ExampleUnitTest {
     fun main() {
         runBlocking {
 
-
+          
         }
     }
 

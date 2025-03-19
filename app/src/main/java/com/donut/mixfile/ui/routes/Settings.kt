@@ -53,6 +53,7 @@ import com.donut.mixfile.util.file.filePreview
 import com.donut.mixfile.util.file.multiUploadTaskCount
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
+import androidx.core.net.toUri
 
 
 var useShortCode by cachedMutableOf(true, "use_short_code")
@@ -89,7 +90,7 @@ fun isIgnoringBatteryOptimizations(context: Context = currentActivity): Boolean 
 @SuppressLint("BatteryLife")
 fun openBatteryOptimizationSettings(context: Context = currentActivity) {
     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-        data = Uri.parse("package:${context.packageName}")
+        data = "package:${context.packageName}".toUri()
     }
     context.startActivity(intent)
 }
