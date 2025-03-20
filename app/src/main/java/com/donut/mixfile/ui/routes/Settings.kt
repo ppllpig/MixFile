@@ -3,7 +3,6 @@ package com.donut.mixfile.ui.routes
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
@@ -53,7 +53,6 @@ import com.donut.mixfile.util.file.filePreview
 import com.donut.mixfile.util.file.multiUploadTaskCount
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.showToast
-import androidx.core.net.toUri
 
 
 var useShortCode by cachedMutableOf(true, "use_short_code")
