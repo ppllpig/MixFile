@@ -37,13 +37,19 @@ fun CenterControl(
     onPause: () -> Unit = {}
 ) {
     var isPlaying by remember { mutableStateOf(true) }
-    var isBuffering by remember { mutableStateOf(false) }
+    var isBuffering by remember { mutableStateOf(true) }
+
 
     // 添加播放器状态监听
     DisposableEffect(player) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
-                isBuffering = playbackState == Player.STATE_BUFFERING
+                isBuffering =
+                    listOf(Player.STATE_BUFFERING, Player.STATE_IDLE).contains(playbackState)
+            }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                isPlaying = playWhenReady
             }
         }
         player.addListener(listener)
@@ -82,7 +88,6 @@ fun CenterControl(
                     } else {
                         player.play()
                     }
-                    isPlaying = !isPlaying
                     onPause()
                 },
             ) {
