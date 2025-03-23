@@ -75,7 +75,6 @@ fun BottomControl(
                     progress = if (player.duration > 0) {
                         player.currentPosition.toFloat() / player.duration
                     } else 0f
-
                     onPlayTimeChange()
                     delay(1000)
                 }
@@ -97,8 +96,12 @@ fun BottomControl(
                 value = progress,
                 onValueChange = { newValue ->
                     progress = newValue
+                    player.pause()
                     player.seekTo((player.duration * newValue).toLong())
                     onTrackTimeChange()
+                },
+                onValueChangeFinished = {
+                    player.play()
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -137,7 +140,7 @@ fun BottomControl(
                         IconButton(
                             modifier = Modifier.scale(1f),
                             onClick = {
-                                player.seekToPrevious()
+                                player.seekToPreviousMediaItem()
                             },
                         ) {
                             Icon(
@@ -150,7 +153,7 @@ fun BottomControl(
                         IconButton(
                             modifier = Modifier.scale(1f),
                             onClick = {
-                                player.seekToNext()
+                                player.seekToNextMediaItem()
                             },
                         ) {
                             Icon(

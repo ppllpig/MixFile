@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 
@@ -34,7 +35,8 @@ fun CenterControl(
     visible: Boolean,
     modifier: Modifier,
     player: ExoPlayer,
-    onPause: () -> Unit = {}
+    onPause: () -> Unit = {},
+    onMediaChange: () -> Unit = {}
 ) {
     var isPlaying by remember { mutableStateOf(true) }
     var isBuffering by remember { mutableStateOf(true) }
@@ -47,6 +49,13 @@ fun CenterControl(
                 isBuffering =
                     listOf(Player.STATE_BUFFERING, Player.STATE_IDLE).contains(playbackState)
             }
+
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                onMediaChange()
+                super.onMediaItemTransition(mediaItem, reason)
+            }
+
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
                 isPlaying = playWhenReady

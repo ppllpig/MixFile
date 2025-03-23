@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -90,6 +91,8 @@ fun VideoPlayerScreen(
             playWhenReady = true
         }
     }
+
+    var currentMediaItem by remember { mutableIntStateOf(player.currentMediaItemIndex) }
 
     var controlsVisible by remember { mutableStateOf(true) }
 
@@ -168,14 +171,17 @@ fun VideoPlayerScreen(
                     .padding(10.dp, 15.dp),
             ) {
                 Text(
-                    "${player.currentMediaItemIndex + 1} - ${videoUris[player.currentMediaItemIndex].fragment ?: ""}",
+                    "${currentMediaItem + 1} - ${videoUris[currentMediaItem].fragment ?: ""}",
                     color = Color.White
                 )
             }
         }
 
 
-        CenterControl(controlsVisible, Modifier.align(Alignment.Center), player) {
+        CenterControl(controlsVisible, Modifier.align(Alignment.Center), player, onPause = {
+            controlsVisible = true
+        }) {
+            currentMediaItem = player.currentMediaItemIndex
             controlsVisible = true
         }
 
