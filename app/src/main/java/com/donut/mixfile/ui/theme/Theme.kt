@@ -80,6 +80,7 @@ fun MainTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
+    colors: ColorScheme.() -> ColorScheme = { this },
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -102,7 +103,7 @@ fun MainTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colorScheme.colors(),
         typography = Typography,
         content = content
     )

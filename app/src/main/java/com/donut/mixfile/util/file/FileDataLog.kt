@@ -7,12 +7,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.donut.mixfile.server.accessKey
 import com.donut.mixfile.server.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.favorites.currentCategory
+import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.showToast
+import java.net.URLEncoder
 import java.util.Date
 
 
@@ -31,6 +34,16 @@ data class FileDataLog(
         }
         category = category.trim()
     }
+
+    val downloadUrl: String
+        get() {
+            return "${getLocalServerAddress()}/api/download?s=${
+                URLEncoder.encode(
+                    shareInfoData,
+                    "UTF-8"
+                )
+            }&accessKey=$accessKey#${name}"
+        }
 
     fun updateDataList(list: List<FileDataLog>, action: (FileDataLog) -> FileDataLog) = list.map {
         if (it.shareInfoData == this.shareInfoData) {

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Done
@@ -23,6 +24,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -172,10 +174,16 @@ fun <T> SingleSelectItemList(
     getLabel: (option: T) -> String,
     onSelect: (option: T) -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(items) {
+        listState.animateScrollToItem(items.indexOf(currentOption).coerceAtLeast(0))
+    }
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .heightIn(0.dp, 400.dp),
     ) {
+
         items(items.size) { item ->
             val currentItem = items[item]
             val selected = currentOption == currentItem

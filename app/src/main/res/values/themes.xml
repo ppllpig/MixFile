@@ -12,4 +12,8 @@
         <item name="android:windowMinWidthMajor">95%</item>
         <item name="android:windowMinWidthMinor">95%</item>
     </style>
+    <style name="VideoPlayerDialog" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowMinWidthMajor">40%</item>
+        <item name="android:windowMinWidthMinor">40%</item>
+    </style>
 </resources>

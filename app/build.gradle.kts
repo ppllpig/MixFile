@@ -15,8 +15,8 @@ android {
         applicationId = "com.donut.mixfile"
         minSdk = 24
         targetSdk = 35
-        versionCode = 79
-        versionName = "1.10.2"
+        versionCode = 80
+        versionName = "1.11.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -68,6 +68,7 @@ val brotliVersion = "1.17.0"
 val operatingSystem: OperatingSystem = DefaultNativePlatform.getCurrentOperatingSystem()
 
 dependencies {
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation(libs.mmkv)
     implementation(libs.mimetypes)
     implementation(libs.zoomable)
@@ -84,7 +85,6 @@ dependencies {
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
     implementation(libs.coil.video)
-    implementation(libs.compose.video)
     implementation(libs.androidx.media3.exoplayer) // [Required] androidx.media3 ExoPlayer dependency
     implementation(libs.androidx.media3.session) // [Required] MediaSession Extension dependency
     implementation(libs.androidx.media3.ui) // [Required] Base Player UI

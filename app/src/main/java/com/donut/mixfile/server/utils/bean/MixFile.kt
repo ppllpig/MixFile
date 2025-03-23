@@ -71,7 +71,7 @@ data class MixShareInfo(
                     this.toString(),
                     "UTF-8"
                 )
-            }&accessKey=${accessKey}"
+            }&accessKey=${accessKey}#${fileName}"
         }
 
     val lanUrl: String
@@ -81,7 +81,7 @@ data class MixShareInfo(
                     this.toString(),
                     "UTF-8"
                 )
-            }"
+            }&accessKey=${accessKey}#${fileName}"
         }
 
     override fun toString(): String {

@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import com.donut.mixfile.activity.VideoActivity
+import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.utils.bean.MixShareInfo
@@ -111,6 +111,7 @@ fun showFileInfoDialog(
                             }
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 putExtra("url", shareInfo.downloadUrl)
+                                putExtra("hash", shareInfo.url)
                             }
                             currentActivity.startActivity(intent)
                         }, label = {

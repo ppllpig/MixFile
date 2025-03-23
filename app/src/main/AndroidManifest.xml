@@ -42,12 +42,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.VideoActivity"
+            android:name=".activity.video.VideoActivity"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.MixFile"
+            android:theme="@style/VideoPlayerDialog"
             tools:ignore="DiscouragedApi,LockedOrientationActivity" />
         <activity
             android:name=".activity.FileServerActivity"

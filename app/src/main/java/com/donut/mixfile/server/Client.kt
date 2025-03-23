@@ -23,10 +23,10 @@ var UPLOAD_RETRY_TIMES by cachedMutableOf(3, "UPLOAD_RETRY_TIMES")
 val uploadClient = HttpClient(OkHttp) {
     engine {
         config {
-            val dispatcher = Dispatcher()
-            dispatcher.maxRequestsPerHost = Int.MAX_VALUE
-            dispatcher.maxRequests = Int.MAX_VALUE
-            dispatcher(dispatcher)
+            dispatcher(Dispatcher().apply {
+                maxRequestsPerHost = Int.MAX_VALUE
+                maxRequests = Int.MAX_VALUE
+            })
         }
     }
     install(ContentNegotiation) {

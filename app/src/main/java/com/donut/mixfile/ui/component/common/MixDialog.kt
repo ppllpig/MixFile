@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -25,6 +28,11 @@ class MixDialogBuilder(
     private val properties: DialogProperties = DialogProperties(
 //        usePlatformDefaultWidth = false
     ),
+    private val containerColor: Color? = null,
+    private val iconContentColor: Color? = null,
+    private val titleContentColor: Color? = null,
+    private val textContentColor: Color? = null,
+    private val scheme: ColorScheme? = null,
 ) {
     private var content = @Composable {}
     private var positiveButton = @Composable {}
@@ -99,7 +107,12 @@ class MixDialogBuilder(
                 disMissListeners.forEach {
                     it()
                 }
-            }
+            },
+            containerColor,
+            iconContentColor,
+            titleContentColor,
+            textContentColor,
+            scheme
         )
         dialogCache[tag]?.invoke()
         dialogCache[tag] = close
@@ -116,8 +129,13 @@ fun showAlertDialog(
     neutralButton: @Composable () -> Unit = {},
     properties: DialogProperties = DialogProperties(),
     onDismiss: () -> Unit = {},
+    containerColor: Color? = null,
+    iconContentColor: Color? = null,
+    titleContentColor: Color? = null,
+    textContentColor: Color? = null,
+    scheme: ColorScheme? = null,
 ): () -> Unit {
-    return addComposeView { removeView ->
+    return addComposeView(scheme) { removeView ->
         val mixedDismissButton = @Composable {
             neutralButton()
             (dismissButton ?: {
@@ -133,6 +151,10 @@ fun showAlertDialog(
                 .systemBarsPadding()
                 .heightIn(0.dp, 600.dp),
             properties = properties,
+            containerColor = containerColor ?: AlertDialogDefaults.containerColor,
+            iconContentColor = iconContentColor ?: AlertDialogDefaults.iconContentColor,
+            titleContentColor = titleContentColor ?: AlertDialogDefaults.titleContentColor,
+            textContentColor = textContentColor ?: AlertDialogDefaults.textContentColor,
             title = {
                 Text(text = title, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth())
             },

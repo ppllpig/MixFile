@@ -265,7 +265,7 @@ fun String.getFileExtension(): String {
 fun String.parseFileMimeType() = MimeTypes.getInstance()
     .getByExtension(this.getFileExtension())?.mimeType ?: "application/octet-stream"
 
-inline fun catchError(tag: String = "", block: () -> Unit) {
+inline fun catchError(tag: String = "", onError: () -> Unit = {}, block: () -> Unit) {
     try {
         block()
     } catch (e: Exception) {

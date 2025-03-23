@@ -54,32 +54,19 @@ fun cachedMutableOf(value: Parcelable, key: String) =
             kv.decodeParcelable(key, value.javaClass)
         })
 
-inline fun <reified T> cachedMutableOf(value: List<T>, key: String) =
+inline fun <reified T, reified C : Iterable<T>> cachedMutableOf(value: C, key: String) =
     constructCachedMutableValue(
         value,
         key,
         { kv.encode(key, it.toJsonString()) },
         getter@{
-            var result = listOf<T>()
-            val type = object : TypeToken<List<T>>() {}.type
-            catchError {
-                val json: List<T> = GSON.fromJson(kv.decodeString(key), type)
-                result = json
-            }
-            return@getter result
-        }
-    )
-
-inline fun <reified T> cachedMutableOfSet(value: Set<T>, key: String) =
-    constructCachedMutableValue(
-        value,
-        key,
-        { kv.encode(key, it.toJsonString()) },
-        getter@{
-            var result = setOf<T>()
-            val type = object : TypeToken<Set<T>>() {}.type
-            catchError {
-                val json: Set<T> = GSON.fromJson(kv.decodeString(key), type)
+            var result = value
+            val type = object : TypeToken<C>() {}.type
+            catchError(
+                onError = {
+                    kv.remove(key)
+                }) {
+                val json: C = GSON.fromJson(kv.decodeString(key), type)
                 result = json
             }
             return@getter result

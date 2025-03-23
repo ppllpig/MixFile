@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -37,6 +39,7 @@ import com.donut.mixfile.appScope
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.MainTheme
+import com.donut.mixfile.ui.theme.colorScheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,13 +75,18 @@ fun OnDispose(block: () -> Unit) {
     }
 }
 
-fun addComposeView(content: @Composable (removeView: () -> Unit) -> Unit): () -> Unit {
+fun addComposeView(
+    scheme: ColorScheme? = null,
+    content: @Composable (removeView: () -> Unit) -> Unit
+): () -> Unit {
     return addContentView(
         ComposeView(currentActivity).apply {
             setContent {
                 MainTheme {
-                    content {
-                        this.removeView()
+                    MaterialTheme(colorScheme = scheme ?: colorScheme) {
+                        content {
+                            this.removeView()
+                        }
                     }
                 }
             }
