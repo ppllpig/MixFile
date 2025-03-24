@@ -15,6 +15,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -124,13 +125,28 @@ fun VideoPlayerScreen(
         }
     }
 
+    var lastClick by remember { mutableLongStateOf(0L) }
+
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
             .clickable(
-                onClick = { controlsVisible = !controlsVisible },
+                onClick = {
+                    if (System.currentTimeMillis() - lastClick < 300L) {
+                        if (player.isPlaying) {
+                            player.pause()
+                            controlsVisible = true
+                        } else {
+                            player.play()
+                            controlsVisible = false
+                        }
+                        return@clickable
+                    }
+                    lastClick = System.currentTimeMillis()
+                    controlsVisible = !controlsVisible
+                },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             )
