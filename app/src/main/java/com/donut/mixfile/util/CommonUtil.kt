@@ -374,8 +374,8 @@ fun FormBuilder.add(key: String, value: Any?, headers: Headers = Headers.Empty) 
     append(key.quote(), value ?: "", headers)
 }
 
-fun formatTime(date: Date): String {
-    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+fun formatTime(date: Date, format: String = "yyyy-MM-dd HH:mm:ss"): String {
+    val formatter = SimpleDateFormat(format, Locale.US)
     return formatter.format(date)
 }
 
