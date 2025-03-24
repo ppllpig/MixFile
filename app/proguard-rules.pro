@@ -23,7 +23,6 @@
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -keep class xyz.doikki.videoplayer.** { *; }
 -keep class com.donut.mixfile.** { *; }
--keep class com.tencent.** {*;}
 -keep class com.tencent.mmkv.** {*;}
 -keep class io.netty.** {*;}
 -dontwarn xyz.doikki.videoplayer.**
