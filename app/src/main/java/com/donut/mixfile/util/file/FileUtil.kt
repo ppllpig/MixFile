@@ -161,46 +161,50 @@ inline fun uploadUri(uri: Uri, uploader: (StreamContent, String) -> Unit) {
     uploader(stream, fileName)
 }
 
+fun uploadFileUris(uriList: List<Uri>) {
+    val taskList = mutableListOf<suspend () -> Unit>()
+    uploadQueue += uriList.size
+    totalUploadFileCount += uriList.size
+    uriList.forEach { uri ->
+        taskList.add {
+            uploadUri(uri) { stream, name ->
+                putUploadFile(stream, name)
+            }
+        }
+    }
+    if (taskList.isEmpty()) {
+        return
+    }
+    val job = appScope.launch(Dispatchers.IO) {
+        val deferredList = mutableListOf<Deferred<Unit>>()
+        taskList.forEach { task ->
+            uploadSemaphore.acquire()
+            withContext(Dispatchers.Main) {
+                uploadQueue--
+            }
+            deferredList.add(async {
+                catchError {
+                    task()
+                    uploadSuccessFileCount++
+                }
+                uploadSemaphore.release()
+            })
+        }
+        deferredList.awaitAll()
+        withContext(Dispatchers.Main) {
+            if (uploadQueue == 0) {
+                totalUploadFileCount = 0
+                uploadSuccessFileCount = 0
+            }
+        }
+    }
+    multiUploadJobs.add(job)
+}
+
 @SuppressLint("Recycle")
 fun selectAndUploadFile() {
     MainActivity.mixFileSelector.openSelect { uriList ->
-        val taskList = mutableListOf<suspend () -> Unit>()
-        uploadQueue += uriList.size
-        totalUploadFileCount += uriList.size
-        uriList.forEach { uri ->
-            taskList.add {
-                uploadUri(uri) { stream, name ->
-                    putUploadFile(stream, name)
-                }
-            }
-        }
-        if (taskList.isEmpty()) {
-            return@openSelect
-        }
-        val job = appScope.launch(Dispatchers.IO) {
-            val deferredList = mutableListOf<Deferred<Unit>>()
-            taskList.forEach { task ->
-                uploadSemaphore.acquire()
-                withContext(Dispatchers.Main) {
-                    uploadQueue--
-                }
-                deferredList.add(async {
-                    catchError {
-                        task()
-                        uploadSuccessFileCount++
-                    }
-                    uploadSemaphore.release()
-                })
-            }
-            deferredList.awaitAll()
-            withContext(Dispatchers.Main) {
-                if (uploadQueue == 0) {
-                    totalUploadFileCount = 0
-                    uploadSuccessFileCount = 0
-                }
-            }
-        }
-        multiUploadJobs.add(job)
+        uploadFileUris(uriList)
     }
 }
 
