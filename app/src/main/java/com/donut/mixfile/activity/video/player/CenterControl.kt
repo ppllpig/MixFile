@@ -69,6 +69,12 @@ fun CenterControl(
             player.release()
         }
     }
+    AnimatedVisibility(isBuffering, modifier = modifier) {
+        CircularProgressIndicator(
+            strokeWidth = 2.dp,
+            modifier = Modifier.size(40.dp)
+        )
+    }
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(),
@@ -100,12 +106,6 @@ fun CenterControl(
                     onPause()
                 },
             ) {
-                AnimatedVisibility(isBuffering) {
-                    CircularProgressIndicator(
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
                 AnimatedVisibility(!isBuffering) {
                     Icon(
                         modifier = Modifier.size(100.dp),
