@@ -14,6 +14,7 @@ import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
 import com.donut.mixfile.server.UPLOADERS
+import com.donut.mixfile.server.core.utils.registerJson
 import com.donut.mixfile.util.objects.MixActivity
 import com.donut.mixfile.util.showError
 import com.donut.mixfile.util.showErrorDialog
@@ -41,6 +42,7 @@ class App : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        registerJson()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             showError(e)
             if (Looper.myLooper() == null) {

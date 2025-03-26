@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.FileService
-import com.donut.mixfile.server.serverPort
+import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.routes.home.serverAddress
 import com.donut.mixfile.util.getIpAddressInLocalNetwork
 import kotlinx.coroutines.launch
@@ -35,6 +35,6 @@ object NetworkChangeReceiver : BroadcastReceiver() {
         appScope.launch {
             FileService.instance?.updateNotification()
         }
-        serverAddress = "http://${getIpAddressInLocalNetwork()}:$serverPort"
+        serverAddress = "http://${getIpAddressInLocalNetwork()}:${mixFileServer.serverPort}"
     }
 }

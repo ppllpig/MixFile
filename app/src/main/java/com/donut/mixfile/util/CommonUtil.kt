@@ -10,27 +10,22 @@ import android.provider.OpenableColumns
 import android.util.Log
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
-import com.github.amr.mimetypes.MimeTypes
-import io.ktor.client.request.forms.FormBuilder
-import io.ktor.http.Headers
-import io.ktor.http.quote
-import io.ktor.utils.io.InternalAPI
+import com.donut.mixfile.server.core.utils.genRandomString
+import com.donut.mixfile.server.core.utils.ignoreError
+import com.donut.mixfile.server.core.utils.isFalse
+import com.donut.mixfile.server.mixFileServer
+import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.EOFException
 import java.math.BigInteger
 import java.net.NetworkInterface
 import java.net.URL
 import java.net.URLEncoder
-import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.log10
@@ -91,14 +86,6 @@ fun getAppVersion(context: Context): Pair<String, Long> {
     }
 }
 
-fun String.decodeHex(): ByteArray {
-    check(length % 2 == 0) { "Must have an even length" }
-
-    return chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
-}
-
 
 class CachedDelegate<T>(val getKeys: () -> Array<Any?>, private val initializer: () -> T) {
     private var cache: T? = null
@@ -119,46 +106,6 @@ class CachedDelegate<T>(val getKeys: () -> Array<Any?>, private val initializer:
 }
 
 
-tailrec fun String.hashToMD5String(round: Int = 1): String {
-    val digest = hashMD5()
-    if (round > 1) {
-        return digest.toHex().hashToMD5String(round - 1)
-    }
-    return digest.toHex()
-}
-
-fun ByteArray.toHex(): String {
-    val sb = StringBuilder()
-    for (b in this) {
-        sb.append(String.format("%02x", b))
-    }
-    return sb.toString()
-}
-
-fun String.hashMD5() = hashToHexString("MD5")
-
-fun String.hashSHA256() = hashToHexString("SHA-256")
-
-fun String.hashToHexString(algorithm: String): ByteArray {
-    val md = MessageDigest.getInstance(algorithm)
-    md.update(this.toByteArray())
-    return md.digest()
-}
-
-fun ByteArray.hashToHexString(algorithm: String): String {
-    return calcHash(algorithm).toHex()
-}
-
-fun ByteArray.calcHash(algorithm: String): ByteArray {
-    val md = MessageDigest.getInstance(algorithm)
-    md.update(this)
-    return md.digest()
-}
-
-fun ByteArray.hashSHA256() = calcHash("SHA-256")
-
-fun ByteArray.hashSHA256String() = hashToHexString("SHA-256")
-
 inline fun String.isUrl(block: (URL) -> Unit = {}): Boolean {
     val urlPattern =
         Regex("^https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)\$")
@@ -176,14 +123,6 @@ fun getUrlHost(url: String): String? {
         return it.host
     }
     return null
-}
-
-fun String.truncate(maxLength: Int): String {
-    return if (this.length > maxLength) {
-        this.substring(0, maxLength) + "..."
-    } else {
-        this
-    }
 }
 
 @OptIn(ExperimentalEncodingApi::class)
@@ -246,24 +185,9 @@ infix fun <T> List<T>.elementEquals(other: List<T>): Boolean {
 }
 
 
-typealias UnitBlock = () -> Unit
-
-
 fun debug(text: String?, tag: String = "test") {
     Log.d(tag, text ?: "null")
 }
-
-fun String.encodeURL(): String? {
-    return URLEncoder.encode(this, "UTF-8")
-}
-
-fun String.getFileExtension(): String {
-    val index = this.lastIndexOf('.')
-    return if (index == -1) "" else this.substring(index + 1).lowercase()
-}
-
-fun String.parseFileMimeType() = MimeTypes.getInstance()
-    .getByExtension(this.getFileExtension())?.mimeType ?: "application/octet-stream"
 
 inline fun catchError(tag: String = "", onError: () -> Unit = {}, block: () -> Unit) {
     try {
@@ -272,16 +196,6 @@ inline fun catchError(tag: String = "", onError: () -> Unit = {}, block: () -> U
         showError(e, tag)
     }
 }
-
-inline fun <T> ignoreError(block: () -> T): T? {
-    try {
-        return block()
-    } catch (_: Exception) {
-
-    }
-    return null
-}
-
 
 fun getCurrentDate(reverseDays: Long = 0): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
@@ -294,32 +208,7 @@ fun getCurrentTime(): String {
     return formatter.format(currentTime)
 }
 
-fun genRandomString(
-    length: Int = 32,
-    charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-): String {
-    return (1..length)
-        .map { kotlin.random.Random.nextInt(0, charPool.size) }
-        .map(charPool::get)
-        .joinToString("")
-}
-
 fun genRandomHexString(length: Int = 32) = genRandomString(length, ('0'..'9') + ('a'..'f'))
-
-fun compressGzip(input: String): ByteArray {
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    GZIPOutputStream(byteArrayOutputStream).use { gzip ->
-        gzip.write(input.toByteArray())
-    }
-    return byteArrayOutputStream.toByteArray()
-}
-
-fun decompressGzip(compressed: ByteArray): String {
-    val byteArrayInputStream = ByteArrayInputStream(compressed)
-    GZIPInputStream(byteArrayInputStream).use { gzip ->
-        return gzip.bufferedReader().use { it.readText() }
-    }
-}
 
 fun readRawFile(id: Int) = app.resources.openRawResource(id).readBytes()
 
@@ -338,6 +227,19 @@ fun showError(e: Throwable, tag: String = "") {
         "error",
         "${tag}发生错误: ${e.message} ${e.stackTraceToString()}"
     )
+}
+
+fun getFileAccessUrl(
+    host: String = getLocalServerAddress(),
+    shareInfo: String,
+    fileName: String
+): String {
+    return "${host}/api/download?s=${
+        URLEncoder.encode(
+            shareInfo,
+            "UTF-8"
+        )
+    }&accessKey=${mixFileServer.accessKey}#${fileName}"
 }
 
 fun getIpAddressInLocalNetwork(): String {
@@ -367,11 +269,6 @@ inline fun errorDialog(title: String, block: () -> Unit) {
             showErrorDialog(e, title)
         }
     }
-}
-
-@OptIn(InternalAPI::class)
-fun FormBuilder.add(key: String, value: Any?, headers: Headers = Headers.Empty) {
-    append(key.quote(), value ?: "", headers)
 }
 
 fun formatTime(date: Date, format: String = "yyyy-MM-dd HH:mm:ss"): String {

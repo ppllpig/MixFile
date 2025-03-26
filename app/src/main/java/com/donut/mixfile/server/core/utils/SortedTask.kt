@@ -1,6 +1,5 @@
-package com.donut.mixfile.util.objects
+package com.donut.mixfile.server.core.utils
 
-import com.donut.mixfile.util.showError
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
@@ -31,9 +30,6 @@ class SortedTask(limit: Int) {
                 taskMap.remove(task.key)
                 try {
                     block()
-                } catch (e: Exception) {
-                    showError(e)
-                    break
                 } finally {
                     semaphore.release()
                 }

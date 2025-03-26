@@ -1,19 +1,16 @@
-package com.donut.mixfile.server
+package com.donut.mixfile.server.core
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import com.donut.mixfile.appScope
-import com.donut.mixfile.server.routes.getRoutes
-import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.genRandomString
-import com.donut.mixfile.util.ignoreError
-import com.donut.mixfile.util.showError
+
+import com.donut.mixfile.server.core.routes.getRoutes
+import com.donut.mixfile.server.core.utils.MixUploadTask
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.genRandomString
+import com.donut.mixfile.server.core.utils.ignoreError
+import com.donut.mixfile.server.core.utils.registerJson
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.gson.gson
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -24,30 +21,75 @@ import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.io.IOException
+import java.io.InputStream
 import java.net.ServerSocket
 
-var serverPort by mutableIntStateOf(4719)
-val accessKey = genRandomString(32)
-var enableAccessKey by cachedMutableOf(false, "enable_mix_file_access_key")
-var serverStarted by mutableStateOf(false)
 
-fun startServer() {
-    appScope.launch(Dispatchers.IO) {
+abstract class MixFileServer(
+    var serverPort: Int = 4719,
+    var accessKey: String = genRandomString(32),
+    var enableAccessKey: Boolean = false,
+    var accessKeyTip: String = "Require Access Key",
+) {
+
+    init {
+        registerJson()
+    }
+
+    abstract val downloadTaskCount: Int
+    abstract val uploadTaskCount: Int
+    abstract val requestRetryCount: Int
+
+    abstract fun onError(error: Throwable)
+
+    abstract fun getUploader(): Uploader
+
+    abstract fun getStaticFile(path: String): InputStream?
+
+    abstract fun genDefaultImage(): ByteArray
+
+    abstract fun getFileHistory(): String
+
+    open fun getUploadTask(
+        call: ApplicationCall,
+        name: String,
+        size: Long,
+        add: Boolean
+    ): MixUploadTask = object : MixUploadTask {
+        override var error: Throwable? = null
+
+        override var stopped: Boolean = false
+
+        override suspend fun complete(shareInfo: MixShareInfo) {
+        }
+
+        override var onStop: () -> Unit = {}
+        override suspend fun updateProgress(size: Long, total: Long) {
+        }
+
+    }
+
+    open fun onDownloadData(data: ByteArray) {
+
+    }
+
+    open fun onUploadData(data: ByteArray) {
+
+    }
+
+
+    fun start() {
         serverPort = findAvailablePort(serverPort) ?: serverPort
         embeddedServer(Netty, port = serverPort, watchPaths = emptyList()) {
             intercept(ApplicationCallPipeline.Call) {
                 val key = call.request.queryParameters["accessKey"]
                 if (enableAccessKey && !key.contentEquals(accessKey)) {
-                    call.respondText("网页端已被禁止访问,请到APP设置中开启")
+                    call.respondText(accessKeyTip)
                     finish()
                 }
             }
             install(ContentNegotiation) {
-                gson()
+
             }
             install(CORS) {
                 allowOrigins { true }
@@ -66,19 +108,11 @@ fun startServer() {
                         "发生错误: ${cause.message} ${cause.stackTraceToString()}",
                         status = HttpStatusCode.InternalServerError
                     )
-                    if (cause is IOException) {
-                        return@exception
-                    }
-                    when (cause.message) {
-                        "服务器达到并发限制" -> Unit
-                        else -> showError(cause)
-                    }
+                    onError(cause)
                 }
             }
             routing(getRoutes())
-        }.start(wait = false)
-        delay(1000)
-        serverStarted = true
+        }.start(wait = true)
     }
 }
 

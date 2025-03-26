@@ -31,8 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
@@ -46,14 +48,12 @@ import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.FileDataLog
 import com.donut.mixfile.util.file.downloadFile
 import com.donut.mixfile.util.file.favorites
-import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showExportFileListDialog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.parseSortNum
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
-import com.donut.mixfile.util.truncate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -167,7 +167,11 @@ val Favorites = MixNavPage(
                 .weight(1.0f)
                 .padding(10.dp, 0.dp)
         ) {
-            Text(text = "分类: ${currentCategory.ifEmpty { "全部" }.truncate(3)}")
+            Text(
+                text = "分类: ${currentCategory.ifEmpty { "全部" }}",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
         Button(
             onClick = {

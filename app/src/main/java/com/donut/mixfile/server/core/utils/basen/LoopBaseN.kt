@@ -1,6 +1,4 @@
-package com.donut.mixfile.util.basen
-
-import com.donut.mixmessage.util.encode.basen.Alphabet
+package com.donut.mixfile.server.core.utils.basen
 
 class LoopBaseN(override val alphabet: Alphabet) : BaseN() {
 

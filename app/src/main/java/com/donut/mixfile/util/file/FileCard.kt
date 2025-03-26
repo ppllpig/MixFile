@@ -32,13 +32,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.donut.mixfile.server.core.utils.parseFileMimeType
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import com.donut.mixfile.server.downloadUrl
 import com.donut.mixfile.server.serverStarted
 import com.donut.mixfile.ui.routes.home.tryResolveFile
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.formatTime
-import com.donut.mixfile.util.parseFileMimeType
 import com.donut.mixfile.util.reveiver.NetworkChangeReceiver
 
 var filePreview by cachedMutableOf("关闭", "mix_file_preview")

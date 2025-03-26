@@ -1,29 +1,15 @@
-package com.donut.mixfile.server
+package com.donut.mixfile.server.core
 
-import com.donut.mixfile.server.uploaders.A3Uploader
-import com.donut.mixfile.server.uploaders.CustomUploader
-import com.donut.mixfile.server.uploaders.hidden.A1Uploader
-import com.donut.mixfile.server.uploaders.hidden.A2Uploader
-import com.donut.mixfile.server.utils.bean.hashMixSHA256
-import com.donut.mixfile.server.utils.createBlankBitmap
-import com.donut.mixfile.server.utils.toGif
-import com.donut.mixfile.ui.routes.increaseUploadData
-import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.encryptAES
-
-val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
-
-var currentUploader by cachedMutableOf(A1Uploader.name, "current_uploader")
-
-
-fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name == currentUploader } ?: A1Uploader
+import com.donut.mixfile.server.core.aes.encryptAES
+import com.donut.mixfile.server.core.utils.bean.hashMixSHA256
+import io.ktor.client.HttpClient
 
 abstract class Uploader(val name: String) {
 
     open val referer = ""
     open val chunkSize = 1024L * 1024L
 
-    abstract suspend fun doUpload(fileData: ByteArray): String
+    abstract suspend fun doUpload(fileData: ByteArray, client: HttpClient): String
 
     companion object {
         val urlTransforms = mutableMapOf<String, (String) -> String>()
@@ -53,16 +39,24 @@ abstract class Uploader(val name: String) {
         }
     }
 
-    suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String {
+    suspend fun upload(
+        head: ByteArray,
+        fileData: ByteArray,
+        key: ByteArray,
+        mixFileServer: MixFileServer
+    ): String {
         val encryptedData = encryptBytes(head, fileData, key)
         try {
-            return doUpload(encryptedData) + "#${fileData.hashMixSHA256()}"
+            return doUpload(
+                encryptedData,
+                mixFileServer.httpClient
+            ) + "#${fileData.hashMixSHA256()}"
         } finally {
-            increaseUploadData(encryptedData.size.toLong())
+            mixFileServer.onUploadData(encryptedData)
         }
     }
 
-    open suspend fun genHead() = createBlankBitmap().toGif()
+    open suspend fun genHead(client: HttpClient): ByteArray? = null
     private fun encryptBytes(head: ByteArray, fileData: ByteArray, key: ByteArray): ByteArray {
         return head + (encryptAES(fileData, key))
     }

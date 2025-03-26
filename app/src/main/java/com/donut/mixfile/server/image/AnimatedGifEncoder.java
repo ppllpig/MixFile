@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.utils;
+package com.donut.mixfile.server.image;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;

@@ -160,9 +160,10 @@ fun VideoPlayerScreen(
             },
             modifier = Modifier.fillMaxSize()
         )
+        val currentMediaTitle = videoUris[currentMediaItem].fragment ?: ""
 
         TopControl(
-            title = "${currentMediaItem + 1} - ${videoUris[currentMediaItem].fragment ?: ""}",
+            title = if (videoUris.size > 1) "${currentMediaItem + 1} - ${currentMediaTitle}" else currentMediaTitle,
             visible = controlsVisible,
             modifier = Modifier.align(Alignment.TopCenter)
         )

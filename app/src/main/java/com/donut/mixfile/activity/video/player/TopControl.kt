@@ -8,17 +8,25 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.formatTime
 import java.util.Date
@@ -36,18 +44,45 @@ fun TopControl(title: String, visible: Boolean, modifier: Modifier) {
         visible = visible,
         modifier = modifier
     ) {
-        FlowRow(
-            verticalArrangement = Arrangement.Center,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black.copy(alpha = 0.1f))
                 .padding(10.dp, 15.dp),
         ) {
-            Text(
-                text = title,
-                color = Color.White,
-            )
+            Row(
+                modifier = Modifier.weight(0.8f),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier.width(40.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        modifier = Modifier.size(20.dp),
+                        onClick = {
+                            currentActivity.finish()
+                        },
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(100.dp),
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "Exit",
+                            tint = Color.White
+                        )
+                    }
+                }
+                Text(
+                    text = title,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             val batteryManager =
                 LocalContext.current.getSystemService(BATTERY_SERVICE) as BatteryManager
 

@@ -1,11 +1,11 @@
-package com.donut.mixfile.server.routes
+package com.donut.mixfile.server.core.routes
 
-import com.donut.mixfile.server.utils.bean.MixShareInfo
-import com.donut.mixfile.ui.routes.increaseDownloadData
-import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.encodeURL
-import com.donut.mixfile.util.file.resolveMixShareInfo
-import com.donut.mixfile.util.objects.SortedTask
+import com.donut.mixfile.server.core.MixFileServer
+import com.donut.mixfile.server.core.httpClient
+import com.donut.mixfile.server.core.utils.SortedTask
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.encodeURL
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.withCharset
@@ -24,10 +24,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 
 @OptIn(ExperimentalEncodingApi::class)
-fun getDownloadRoute(): RoutingHandler {
+fun MixFileServer.getDownloadRoute(): RoutingHandler {
     return route@{
         val shareInfoData = call.request.queryParameters["s"]
         val referer = call.request.queryParameters["referer"]
@@ -40,7 +39,7 @@ fun getDownloadRoute(): RoutingHandler {
             call.respondText("解析文件失败", status = HttpStatusCode.InternalServerError)
             return@route
         }
-        val mixFile = shareInfo.fetchMixFile()
+        val mixFile = shareInfo.fetchMixFile(httpClient)
         if (mixFile == null) {
             call.respondText(
                 "解析文件索引失败",
@@ -66,11 +65,11 @@ fun getDownloadRoute(): RoutingHandler {
             }
             contentLength = mixFile.fileSize - range.first
         }
-        responseFileStream(call, fileList, contentLength, shareInfo, referer)
+        responseDownloadFileStream(call, fileList, contentLength, shareInfo, referer)
     }
 }
 
-private suspend fun responseFileStream(
+private suspend fun MixFileServer.responseDownloadFileStream(
     call: ApplicationCall,
     fileDataList: List<Pair<String, Int>>,
     contentLength: Long,
@@ -83,7 +82,7 @@ private suspend fun responseFileStream(
             contentType = ContentType.parse(shareInfo.contentType()).withCharset(Charsets.UTF_8),
             contentLength = contentLength
         ) {
-            val sortedTask = SortedTask(DOWNLOAD_TASK_COUNT.toInt())
+            val sortedTask = SortedTask(downloadTaskCount)
             val tasks = mutableListOf<Deferred<Unit>>()
             while (!isClosedForWrite && fileList.isNotEmpty()) {
                 val currentMeta = fileList.removeAt(0)
@@ -91,7 +90,8 @@ private suspend fun responseFileStream(
                 sortedTask.prepareTask(taskOrder)
                 tasks.add(async {
                     val url = currentMeta.first
-                    val dataBytes = shareInfo.fetchFile(url, referer ?: shareInfo.referer)
+                    val dataBytes =
+                        shareInfo.fetchFile(url, httpClient, referer ?: shareInfo.referer)
                     val range = currentMeta.second
                     if (dataBytes == null) {
                         call.respondText(
@@ -108,7 +108,7 @@ private suspend fun responseFileStream(
                         }
                         try {
                             writeFully(dataToWrite)
-                            increaseDownloadData(dataToWrite.size.toLong())
+                            onDownloadData(dataToWrite)
                         } catch (e: Exception) {
                             close(e)
                         }

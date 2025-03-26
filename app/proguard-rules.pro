@@ -25,6 +25,7 @@
 -keep class com.donut.mixfile.** { *; }
 -keep class com.tencent.mmkv.** {*;}
 -keep class io.netty.** {*;}
+-keep class com.alibaba.** {*;}
 -dontwarn xyz.doikki.videoplayer.**
 -dontwarn java.lang.management.ManagementFactory
 -dontwarn java.lang.management.RuntimeMXBean

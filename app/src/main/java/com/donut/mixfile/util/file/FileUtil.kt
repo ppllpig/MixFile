@@ -21,10 +21,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
-import com.donut.mixfile.server.StreamContent
-import com.donut.mixfile.server.accessKey
-import com.donut.mixfile.server.localClient
-import com.donut.mixfile.server.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.StreamContent
+import com.donut.mixfile.server.core.localClient
+import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import com.donut.mixfile.ui.routes.home.tryResolveFile
@@ -72,7 +71,7 @@ suspend fun putUploadFile(
         onUpload(progressContent.ktorListener)
         parameter("name", name)
         parameter("add", add)
-        parameter("accessKey", accessKey)
+        parameter("accessKey", mixFileServer.accessKey)
         setBody(data)
     }
     val message = response.bodyAsText()
@@ -257,6 +256,3 @@ suspend fun saveFileToStorage(
     return fileUri
 }
 
-fun resolveMixShareInfo(value: String): MixShareInfo? {
-    return parseShareCode(value)
-}

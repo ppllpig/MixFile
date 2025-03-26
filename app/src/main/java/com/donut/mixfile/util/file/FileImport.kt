@@ -11,23 +11,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.alibaba.fastjson2.into
+import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.localClient
+import com.donut.mixfile.server.core.localClient
+import com.donut.mixfile.server.core.utils.compressGzip
+import com.donut.mixfile.server.core.utils.decompressGzip
+import com.donut.mixfile.server.core.utils.hashSHA256
+import com.donut.mixfile.server.core.utils.parseFileMimeType
+import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.util.GSON
-import com.donut.mixfile.util.compressGzip
-import com.donut.mixfile.util.decompressGzip
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
-import com.donut.mixfile.util.hashSHA256
 import com.donut.mixfile.util.objects.ProgressContent
-import com.donut.mixfile.util.parseFileMimeType
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
-import com.donut.mixfile.util.toHex
-import com.donut.mixfile.util.toJsonString
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.url
@@ -41,7 +41,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 
 fun exportFileList(fileList: Collection<FileDataLog>, name: String) {
-    val strData = fileList.toJsonString()
+    val strData = fileList.toJSONString()
     val compressedData = compressGzip(strData)
     doUploadFile(
         compressedData,
@@ -75,7 +75,7 @@ fun showExportFileListDialog(fileList: Collection<FileDataLog>) {
     }
 }
 
-fun List<FileDataLog>.hashSHA256() = joinToString { it.shareInfoData }.hashSHA256().toHex()
+fun List<FileDataLog>.hashSHA256(): String = joinToString { it.shareInfoData }.hashSHA256().toHex()
 
 
 fun showFileList(fileList: List<FileDataLog>) {
@@ -134,7 +134,7 @@ suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<F
             }
             val data = it.bodyAsChannel().readRemaining(1024 * 1024 * 50).readByteArray()
             val extractedData = decompressGzip(data)
-            return@execute GSON.fromJson(extractedData, Array<FileDataLog>::class.java)
+            return@execute extractedData.into()
         }
     } catch (e: Exception) {
         withContext(Dispatchers.Main) {

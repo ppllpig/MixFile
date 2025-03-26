@@ -13,10 +13,10 @@ android {
     compileSdk = 35
     defaultConfig {
         applicationId = "com.donut.mixfile"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 87
-        versionName = "1.12.4"
+        versionName = "1.12.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,7 +69,10 @@ val brotliVersion = "1.17.0"
 val operatingSystem: OperatingSystem = DefaultNativePlatform.getCurrentOperatingSystem()
 
 dependencies {
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.fastjson2.kotlin)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.reflect)
     implementation(libs.mmkv)
     implementation(libs.mimetypes)
     implementation(libs.zoomable)
@@ -80,7 +83,7 @@ dependencies {
     implementation(libs.ktor.server.default.headers)
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.netty)
-    implementation(libs.ktor.serialization.gson)
+//    implementation(libs.ktor.serialization.gson)
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)

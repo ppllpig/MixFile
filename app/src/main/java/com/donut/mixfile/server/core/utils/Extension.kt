@@ -1,7 +1,9 @@
-package com.donut.mixfile.util
+package com.donut.mixfile.server.core.utils
 
 import java.nio.ByteBuffer
 import kotlin.streams.toList
+
+typealias UnitBlock = () -> Unit
 
 inline fun <T> T?.isNull(block: UnitBlock = {}): Boolean {
     if (this == null) {
@@ -149,8 +151,6 @@ fun Int.toBytes(): ByteArray =
 
 fun ByteArray.toInt(): Int =
     ByteBuffer.wrap(this).int
-
-fun <T> T.toJsonString(): String = GSON.toJson(this)
 
 
 infix fun <T> T?.default(value: T) = this ?: value

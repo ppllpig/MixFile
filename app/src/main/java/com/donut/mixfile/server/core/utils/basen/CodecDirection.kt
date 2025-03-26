@@ -1,4 +1,4 @@
-package com.donut.mixfile.util.basen
+package com.donut.mixfile.server.core.utils.basen
 
 class CodecDirection(val fromBase: Int, val toBase: Int) {
     private val fromLog = logInt(fromBase)

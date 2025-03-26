@@ -21,7 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.appScope
-import com.donut.mixfile.server.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.MixUploadTask
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.InfoText
@@ -94,15 +95,21 @@ class UploadTask(
     val fileName: String,
     val fileSize: Long,
     val add: Boolean = true,
-) {
+) : MixUploadTask {
     var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
 
-    var onStop = {}
+    override var onStop = {}
+
+    override suspend fun updateProgress(size: Long, total: Long) {
+        withContext(Dispatchers.Main) {
+            progress.increaseBytesWritten(size, total)
+        }
+    }
 
 
-    var stopped by mutableStateOf(false)
+    override var stopped by mutableStateOf(false)
 
-    var error: Throwable? by mutableStateOf(null)
+    override var error: Throwable? by mutableStateOf(null)
 
     var result by mutableStateOf("")
         private set
@@ -129,7 +136,7 @@ class UploadTask(
     }
 
 
-    suspend fun complete(shareInfo: MixShareInfo) {
+    override suspend fun complete(shareInfo: MixShareInfo) {
         withContext(Dispatchers.Main) {
             result = shareInfo.toString()
             uploadTasks -= this@UploadTask

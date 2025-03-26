@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.currentActivity
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.ui.component.common.CommonColumn
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.showFileInfoDialog
 import com.donut.mixfile.util.objects.MixActivity
 

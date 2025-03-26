@@ -4,8 +4,9 @@ import android.os.Parcelable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.alibaba.fastjson2.into
+import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.kv
-import com.google.gson.reflect.TypeToken
 
 fun <T> constructCachedMutableValue(
     value: T,
@@ -58,15 +59,11 @@ inline fun <reified T, reified C : Iterable<T>> cachedMutableOf(value: C, key: S
     constructCachedMutableValue(
         value,
         key,
-        { kv.encode(key, it.toJsonString()) },
+        { kv.encode(key, it.toJSONString()) },
         getter@{
             var result = value
-            val type = object : TypeToken<C>() {}.type
-            catchError(
-                onError = {
-                    kv.remove(key)
-                }) {
-                val json: C = GSON.fromJson(kv.decodeString(key), type)
+            catchError {
+                val json: C = kv.decodeString(key).into()
                 result = json
             }
             return@getter result

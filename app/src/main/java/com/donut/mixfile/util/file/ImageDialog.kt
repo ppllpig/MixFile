@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.donut.mixfile.genImageLoader
+import com.donut.mixfile.server.core.utils.isTrue
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.util.isTrue
 import com.donut.mixfile.util.objects.ProgressContent
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable

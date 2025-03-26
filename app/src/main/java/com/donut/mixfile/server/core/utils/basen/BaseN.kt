@@ -1,6 +1,5 @@
-package com.donut.mixfile.util.basen
+package com.donut.mixfile.server.core.utils.basen
 
-import com.donut.mixmessage.util.encode.basen.Alphabet
 import java.security.MessageDigest
 import kotlin.math.ln
 

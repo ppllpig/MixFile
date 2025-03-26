@@ -31,8 +31,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.donut.mixfile.util.genRandomString
-import com.donut.mixfile.util.isNotNull
+import com.donut.mixfile.server.core.utils.genRandomString
+import com.donut.mixfile.server.core.utils.isNotNull
 import java.lang.ref.WeakReference
 
 

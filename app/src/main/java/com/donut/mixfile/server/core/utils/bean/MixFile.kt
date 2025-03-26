@@ -1,38 +1,35 @@
-package com.donut.mixfile.server.utils.bean
+package com.donut.mixfile.server.core.utils.bean
 
 
-import com.donut.mixfile.server.Uploader
-import com.donut.mixfile.server.accessKey
-import com.donut.mixfile.server.uploadClient
-import com.donut.mixfile.ui.routes.home.getLocalServerAddress
-import com.donut.mixfile.ui.routes.home.serverAddress
-import com.donut.mixfile.util.GSON
-import com.donut.mixfile.util.basen.BigIntBaseN
-import com.donut.mixfile.util.compressGzip
-import com.donut.mixfile.util.decompressGzip
-import com.donut.mixfile.util.decryptAES
-import com.donut.mixfile.util.encryptAES
-import com.donut.mixfile.util.hashMD5
-import com.donut.mixfile.util.hashSHA256
-import com.donut.mixfile.util.parseFileMimeType
-import com.donut.mixmessage.util.encode.basen.Alphabet
-import com.google.gson.annotations.SerializedName
+import com.alibaba.fastjson2.annotation.JSONField
+import com.alibaba.fastjson2.to
+import com.alibaba.fastjson2.toJSONString
+import com.donut.mixfile.server.core.Uploader
+import com.donut.mixfile.server.core.aes.decryptAES
+import com.donut.mixfile.server.core.aes.encryptAES
+import com.donut.mixfile.server.core.utils.basen.Alphabet
+import com.donut.mixfile.server.core.utils.basen.BigIntBaseN
+import com.donut.mixfile.server.core.utils.compressGzip
+import com.donut.mixfile.server.core.utils.decompressGzip
+import com.donut.mixfile.server.core.utils.hashMD5
+import com.donut.mixfile.server.core.utils.hashSHA256
+import com.donut.mixfile.server.core.utils.parseFileMimeType
+import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.discard
-import java.net.URLEncoder
 
 
 fun ByteArray.hashMixSHA256() = MixShareInfo.ENCODER.encode(hashSHA256())
 
 data class MixShareInfo(
-    @SerializedName("f") var fileName: String,
-    @SerializedName("s") val fileSize: Long,
-    @SerializedName("h") val headSize: Int,
-    @SerializedName("u") val url: String,
-    @SerializedName("k") val key: String,
-    @SerializedName("r") val referer: String,
+    @JSONField(name = "f") var fileName: String,
+    @JSONField(name = "s") val fileSize: Long,
+    @JSONField(name = "h") val headSize: Int,
+    @JSONField(name = "u") val url: String,
+    @JSONField(name = "k") val key: String,
+    @JSONField(name = "r") val referer: String,
 ) {
 
     companion object {
@@ -49,7 +46,7 @@ data class MixShareInfo(
         }
 
         private fun fromJson(json: String): MixShareInfo =
-            GSON.fromJson(json, MixShareInfo::class.java)
+            json.to()
 
         private fun enc(input: String): String {
             val bytes = input.encodeToByteArray()
@@ -62,38 +59,23 @@ data class MixShareInfo(
             val result = decryptAES(bytes, "123".hashMD5())
             return result!!.decodeToString()
         }
+
     }
-
-    val downloadUrl: String
-        get() {
-            return "${getLocalServerAddress()}/api/download?s=${
-                URLEncoder.encode(
-                    this.toString(),
-                    "UTF-8"
-                )
-            }&accessKey=${accessKey}#${fileName}"
-        }
-
-    val lanUrl: String
-        get() {
-            return "$serverAddress/api/download?s=${
-                URLEncoder.encode(
-                    this.toString(),
-                    "UTF-8"
-                )
-            }&accessKey=${accessKey}#${fileName}"
-        }
 
     override fun toString(): String {
         return enc(toJson())
     }
 
-    private fun toJson(): String = GSON.toJson(this)
+    private fun toJson(): String = this.toJSONString()
 
-    suspend fun fetchFile(url: String, referer: String = this.referer): ByteArray? {
+    suspend fun fetchFile(
+        url: String,
+        client: HttpClient,
+        referer: String = this.referer,
+    ): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
         val transformedReferer = Uploader.transformReferer(url, referer)
-        val result: ByteArray? = uploadClient.prepareGet(transformedUrl) {
+        val result: ByteArray? = client.prepareGet(transformedUrl) {
             if (transformedReferer.trim().isNotEmpty()) {
                 header("Referer", transformedReferer)
             }
@@ -127,8 +109,8 @@ data class MixShareInfo(
 
     fun contentType(): String = fileName.parseFileMimeType()
 
-    suspend fun fetchMixFile(): MixFile? {
-        val decryptedBytes = fetchFile(url) ?: return null
+    suspend fun fetchMixFile(client: HttpClient): MixFile? {
+        val decryptedBytes = fetchFile(url, client = client) ?: return null
         return MixFile.fromBytes(decryptedBytes)
     }
 
@@ -136,15 +118,15 @@ data class MixShareInfo(
 
 
 data class MixFile(
-    @SerializedName("chunk_size") val chunkSize: Long,
-    @SerializedName("file_size") val fileSize: Long,
-    @SerializedName("version") val version: Long,
-    @SerializedName("file_list") val fileList: List<String>,
+    @JSONField(name = "chunk_size") val chunkSize: Long,
+    @JSONField(name = "file_size") val fileSize: Long,
+    @JSONField(name = "version") val version: Long,
+    @JSONField(name = "file_list") val fileList: List<String>,
 ) {
 
     companion object {
         fun fromBytes(data: ByteArray): MixFile =
-            GSON.fromJson(decompressGzip(data), MixFile::class.java)
+            decompressGzip(data).to()
     }
 
     fun getFileListByStartRange(startRange: Long): List<Pair<String, Int>> {
@@ -161,6 +143,6 @@ data class MixFile(
     }
 
 
-    fun toBytes() = compressGzip(GSON.toJson(this))
+    fun toBytes() = compressGzip(this.toJSONString())
 
 }

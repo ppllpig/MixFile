@@ -29,25 +29,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.donut.mixfile.server.serverPort
+import com.donut.mixfile.server.core.utils.isFalse
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.routes.UploadDialogCard
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.deleteUploadLog
-import com.donut.mixfile.util.file.resolveMixShareInfo
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showFileInfoDialog
 import com.donut.mixfile.util.file.showFileList
 import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.getIpAddressInLocalNetwork
-import com.donut.mixfile.util.isFalse
 import com.donut.mixfile.util.readClipBoardText
 import com.donut.mixfile.util.showToast
 
-var serverAddress by mutableStateOf("http://${getIpAddressInLocalNetwork()}:${serverPort}")
+var serverAddress by mutableStateOf("http://${getIpAddressInLocalNetwork()}:${mixFileServer.serverPort}")
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 val Home = MixNavPage(
@@ -183,7 +183,7 @@ fun tryResolveFile(text: String): Boolean {
 
 
 fun getLocalServerAddress(): String {
-    return "http://127.0.0.1:${serverPort}"
+    return "http://127.0.0.1:${mixFileServer.serverPort}"
 }
 
 

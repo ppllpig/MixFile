@@ -1,7 +1,4 @@
-package com.donut.mixmessage.util.encode.basen
-
-import com.donut.mixfile.util.basen.ALPHABETS
-import com.donut.mixfile.util.basen.CodecDirection
+package com.donut.mixfile.server.core.utils.basen
 
 class Alphabet private constructor(val key: String) {
 

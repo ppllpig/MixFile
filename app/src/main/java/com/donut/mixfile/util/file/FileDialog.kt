@@ -20,12 +20,16 @@ import androidx.core.net.toUri
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.shareCode
+import com.donut.mixfile.server.downloadUrl
+import com.donut.mixfile.server.lanUrl
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.importFileList
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
 import com.donut.mixfile.ui.routes.home.DownloadTask
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
+import com.donut.mixfile.ui.routes.useShortCode
 import com.donut.mixfile.ui.routes.useSystemPlayer
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
@@ -55,7 +59,7 @@ fun showFileInfoDialog(
                 InfoText(key = "密钥: ", value = shareInfo.key)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     AssistChip(onClick = {
-                        shareInfo.shareCode().copyToClipboard()
+                        shareInfo.shareCode(useShortCode).copyToClipboard()
                     }, label = {
                         Text(text = "复制分享码", color = colorScheme.primary)
                     })

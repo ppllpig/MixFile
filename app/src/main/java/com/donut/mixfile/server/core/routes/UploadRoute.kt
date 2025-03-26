@@ -1,12 +1,12 @@
-package com.donut.mixfile.server.routes
+package com.donut.mixfile.server.core.routes
 
-import com.donut.mixfile.server.Uploader
-import com.donut.mixfile.server.getCurrentUploader
-import com.donut.mixfile.server.utils.bean.MixFile
-import com.donut.mixfile.server.utils.bean.MixShareInfo
-import com.donut.mixfile.ui.routes.home.UploadTask
-import com.donut.mixfile.util.cachedMutableOf
-import com.donut.mixfile.util.generateRandomByteArray
+import com.donut.mixfile.server.core.MixFileServer
+import com.donut.mixfile.server.core.Uploader
+import com.donut.mixfile.server.core.aes.generateRandomByteArray
+import com.donut.mixfile.server.core.httpClient
+import com.donut.mixfile.server.core.utils.MixUploadTask
+import com.donut.mixfile.server.core.utils.bean.MixFile
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.contentLength
 import io.ktor.server.request.receiveChannel
@@ -15,7 +15,6 @@ import io.ktor.server.routing.RoutingHandler
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
@@ -23,14 +22,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 import kotlin.math.ceil
 
-var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
 
-
-fun getUploadRoute(): RoutingHandler {
+fun MixFileServer.getUploadRoute(): RoutingHandler {
     return route@{
         val key = generateRandomByteArray(32)
         val name = call.request.queryParameters["name"]
@@ -44,13 +40,13 @@ fun getUploadRoute(): RoutingHandler {
             call.respondText("文件大小不合法", status = HttpStatusCode.InternalServerError)
             return@route
         }
-        val uploadTask = UploadTask(call, name, size, add = add.toBoolean())
+        val uploadTask = getUploadTask(call, name, size, add.toBoolean())
         currentCoroutineContext().job.invokeOnCompletion {
             uploadTask.error = it
             uploadTask.stopped = true
         }
-        val uploader = getCurrentUploader()
-        val head = uploader.genHead()
+        val uploader = getUploader()
+        val head = uploader.genHead(httpClient) ?: genDefaultImage()
         val mixUrl =
             uploadFile(call.receiveChannel(), head, uploader, key, fileSize = size, uploadTask)
         if (mixUrl == null) {
@@ -71,15 +67,15 @@ fun getUploadRoute(): RoutingHandler {
     }
 }
 
-suspend fun uploadFile(
+suspend fun MixFileServer.uploadFile(
     channel: ByteReadChannel,
     head: ByteArray,
     uploader: Uploader,
     secret: ByteArray,
     fileSize: Long,
-    uploadTask: UploadTask,
+    uploadTask: MixUploadTask,
 ): String? {
-    val semaphore = Semaphore(UPLOAD_TASK_COUNT.toInt())
+    val semaphore = Semaphore(uploadTaskCount)
     return coroutineScope {
         val context = currentCoroutineContext()
         uploadTask.onStop = {
@@ -99,11 +95,9 @@ suspend fun uploadFile(
             fileIndex++
             tasks.add(async {
                 try {
-                    val url = uploader.upload(head, fileData, secret)
+                    val url = uploader.upload(head, fileData, secret, this@uploadFile)
                     fileList[currentIndex] = url
-                    withContext(Dispatchers.Main) {
-                        uploadTask.progress.increaseBytesWritten(fileData.size.toLong(), fileSize)
-                    }
+                    uploadTask.updateProgress(fileData.size.toLong(), fileSize)
                 } finally {
                     semaphore.release()
                 }
@@ -115,8 +109,9 @@ suspend fun uploadFile(
         }
         val mixFile =
             MixFile(chunkSize = chunkSize, version = 0, fileList = fileList, fileSize = fileSize)
+        val mixFileData = mixFile.toBytes()
         val mixFileUrl =
-            uploader.upload(head, mixFile.toBytes(), secret)
+            uploader.upload(head, mixFileData, secret, this@uploadFile)
         return@coroutineScope mixFileUrl
     }
 }

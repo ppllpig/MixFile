@@ -1,7 +1,6 @@
 package com.donut.mixfile.ui.routes
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.donut.mixfile.app
+import androidx.core.net.toUri
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.theme.colorScheme
@@ -115,11 +115,9 @@ val About = MixNavPage(
                         val intent =
                             Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("https://github.com/InvertGeek/MixFile")
-                            ).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                        app.startActivity(intent)
+                                "https://github.com/InvertGeek/MixFile".toUri()
+                            )
+                        currentActivity.startActivity(intent)
                         closeDialog()
                     }
                     setDefaultNegative()

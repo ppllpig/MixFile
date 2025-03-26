@@ -29,17 +29,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.donut.mixfile.currentActivity
+import com.donut.mixfile.server.CUSTOM_REFERER
+import com.donut.mixfile.server.CUSTOM_UPLOAD_URL
+import com.donut.mixfile.server.CustomUploader
+import com.donut.mixfile.server.DOWNLOAD_TASK_COUNT
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
+import com.donut.mixfile.server.UPLOAD_TASK_COUNT
+import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.currentUploader
 import com.donut.mixfile.server.enableAccessKey
 import com.donut.mixfile.server.getCurrentUploader
-import com.donut.mixfile.server.routes.DOWNLOAD_TASK_COUNT
-import com.donut.mixfile.server.routes.UPLOAD_TASK_COUNT
-import com.donut.mixfile.server.uploaders.CUSTOM_REFERER
-import com.donut.mixfile.server.uploaders.CUSTOM_UPLOAD_URL
-import com.donut.mixfile.server.uploaders.CustomUploader
-import com.donut.mixfile.server.uploaders.hidden.A1Uploader
+import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
@@ -102,7 +103,7 @@ val MixSettings = MixNavPage(
     Column {
         Text(
             modifier = Modifier.padding(10.dp, 0.dp),
-            text = "下载并发: ${DOWNLOAD_TASK_COUNT}",
+            text = "下载并发: $DOWNLOAD_TASK_COUNT",
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
@@ -118,7 +119,7 @@ val MixSettings = MixNavPage(
     Column {
         Text(
             modifier = Modifier.padding(10.dp, 0.dp),
-            text = "上传并发: ${UPLOAD_TASK_COUNT}",
+            text = "上传并发: $UPLOAD_TASK_COUNT",
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
@@ -148,7 +149,7 @@ val MixSettings = MixNavPage(
     Column {
         Text(
             modifier = Modifier.padding(10.dp, 0.dp),
-            text = "上传失败重试次数(单个分片): ${UPLOAD_RETRY_TIMES}",
+            text = "上传失败重试次数(单个分片): $UPLOAD_RETRY_TIMES",
             color = MaterialTheme.colorScheme.primary
         )
         Slider(
@@ -183,6 +184,7 @@ val MixSettings = MixNavPage(
         description = "开启后网页端将禁止访问"
     ) {
         enableAccessKey = it
+        mixFileServer.enableAccessKey = it
     }
     CommonSwitch(
         checked = useSystemPlayer,
