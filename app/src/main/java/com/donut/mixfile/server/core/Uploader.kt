@@ -57,6 +57,7 @@ abstract class Uploader(val name: String) {
     }
 
     open suspend fun genHead(client: HttpClient): ByteArray? = null
+
     private fun encryptBytes(head: ByteArray, fileData: ByteArray, key: ByteArray): ByteArray {
         return head + (encryptAES(fileData, key))
     }
