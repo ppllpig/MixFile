@@ -11,3 +11,5 @@ val MixShareInfo.downloadUrl: String
 
 val MixShareInfo.lanUrl: String
     get() = getFileAccessUrl(serverAddress, this.toString(), fileName)
+
+
