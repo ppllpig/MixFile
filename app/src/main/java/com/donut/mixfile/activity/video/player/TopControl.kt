@@ -1,6 +1,10 @@
 package com.donut.mixfile.activity.video.player
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Context.BATTERY_SERVICE
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.BatteryManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -19,6 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,18 +92,40 @@ fun TopControl(title: String, visible: Boolean, modifier: Modifier) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            val context = LocalContext.current
             val batteryManager =
-                LocalContext.current.getSystemService(BATTERY_SERVICE) as BatteryManager
+                context.getSystemService(BATTERY_SERVICE) as BatteryManager
 
-
+            var isCharging by remember { mutableStateOf(batteryManager.isCharging) }
             val batteryLevel: Int =
                 batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+
+            val batteryReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+                    isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING
+                }
+            }
+
+            // 使用 DisposableEffect 管理广播接收器的生命周期
+            DisposableEffect(Unit) {
+                val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                context.registerReceiver(batteryReceiver, intentFilter)
+
+                // 在 Composable 销毁时取消注册
+                onDispose {
+                    context.unregisterReceiver(batteryReceiver)
+                }
+            }
+
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    fontSize = 12.sp,
-                    text = "电量: ${batteryLevel}%",
-                    color = colorScheme.primary,
-                )
+                Row {
+                    Text(
+                        fontSize = 12.sp,
+                        text = "电量: ${batteryLevel}%",
+                        color = if (isCharging) Color.Green.copy(0.6f) else colorScheme.primary,
+                    )
+                }
                 Text(
                     fontSize = 12.sp,
                     text = "时间: ${formatTime(Date(), "HH:mm")}",
