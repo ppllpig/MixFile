@@ -37,13 +37,11 @@ import java.io.InputStream
 
 var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
-var enableAccessKey by cachedMutableOf(false, "enable_mix_file_access_key")
+var enableServerAccessKey by cachedMutableOf(false, "enable_mix_file_access_key")
 var UPLOAD_RETRY_TIMES by cachedMutableOf(10, "UPLOAD_RETRY_TIMES")
 
 
 val mixFileServer = object : MixFileServer(
-    accessKeyTip = "网页端已被禁止访问,请到APP设置中开启",
-    enableAccessKey = enableAccessKey,
 ) {
 
     override fun onDownloadData(data: ByteArray) {
@@ -54,13 +52,21 @@ val mixFileServer = object : MixFileServer(
         increaseUploadData(data.size.toLong())
     }
 
+    override val accessKeyTip: String
+        get() = "网页端已被禁止访问,请到APP设置中开启"
+
 
     override val downloadTaskCount: Int
         get() = DOWNLOAD_TASK_COUNT.toInt()
+
     override val uploadTaskCount: Int
         get() = UPLOAD_TASK_COUNT.toInt()
+
     override val requestRetryCount: Int
         get() = UPLOAD_RETRY_TIMES.toInt()
+
+    override val enableAccessKey: Boolean
+        get() = enableServerAccessKey
 
 
     override fun onError(error: Throwable) {
@@ -116,7 +122,7 @@ class FileService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         appScope.launch(Dispatchers.IO) {
-            mixFileServer.start()
+            mixFileServer.start(false)
             delay(1000)
             serverStarted = true
         }

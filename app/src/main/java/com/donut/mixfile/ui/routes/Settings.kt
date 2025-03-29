@@ -38,9 +38,8 @@ import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
 import com.donut.mixfile.server.UPLOAD_TASK_COUNT
 import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.currentUploader
-import com.donut.mixfile.server.enableAccessKey
+import com.donut.mixfile.server.enableServerAccessKey
 import com.donut.mixfile.server.getCurrentUploader
-import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
@@ -179,12 +178,11 @@ val MixSettings = MixNavPage(
         autoAddFavorite = it
     }
     CommonSwitch(
-        checked = enableAccessKey,
+        checked = enableServerAccessKey,
         text = "禁止网页端访问:",
         description = "开启后网页端将禁止访问"
     ) {
-        enableAccessKey = it
-        mixFileServer.enableAccessKey = it
+        enableServerAccessKey = it
     }
     CommonSwitch(
         checked = useSystemPlayer,

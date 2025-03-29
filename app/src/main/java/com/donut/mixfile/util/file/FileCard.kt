@@ -147,7 +147,7 @@ fun FileCardList(
         ) {
             items(cardList.size) { index ->
                 PreviewCard(cardList[index]) {
-                    deleteFavoriteLog(cardList[index])
+                    longClick(cardList[index])
                 }
             }
         }

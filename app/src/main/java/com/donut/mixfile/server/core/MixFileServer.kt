@@ -27,9 +27,6 @@ import java.net.ServerSocket
 
 abstract class MixFileServer(
     var serverPort: Int = 4719,
-    var accessKey: String = genRandomString(32),
-    var enableAccessKey: Boolean = false,
-    var accessKeyTip: String = "Require Access Key",
 ) {
 
     init {
@@ -39,6 +36,9 @@ abstract class MixFileServer(
     abstract val downloadTaskCount: Int
     abstract val uploadTaskCount: Int
     abstract val requestRetryCount: Int
+    open val enableAccessKey: Boolean = false
+    open val accessKey: String = genRandomString(32)
+    open val accessKeyTip: String = "Require Access Key"
 
     abstract fun onError(error: Throwable)
 
@@ -78,7 +78,7 @@ abstract class MixFileServer(
     }
 
 
-    fun start() {
+    fun start(wait: Boolean) {
         serverPort = findAvailablePort(serverPort) ?: serverPort
         embeddedServer(Netty, port = serverPort, watchPaths = emptyList()) {
             intercept(ApplicationCallPipeline.Call) {
@@ -112,7 +112,7 @@ abstract class MixFileServer(
                 }
             }
             routing(getRoutes())
-        }.start(wait = true)
+        }.start(wait = wait)
     }
 }
 
