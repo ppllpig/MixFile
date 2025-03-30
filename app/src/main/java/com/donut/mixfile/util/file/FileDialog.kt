@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,13 +40,24 @@ import com.donut.mixfile.util.formatFileSize
 
 @OptIn(ExperimentalLayoutApi::class)
 fun showFileInfoDialog(
-    log: FileDataLog,
+    dataLog: FileDataLog,
     onDismiss: () -> Unit = {}
 ) {
-    val shareInfo = resolveMixShareInfo(log.shareInfoData)!!
+    var shareInfo = resolveMixShareInfo(dataLog.shareInfoData)!!
     MixDialogBuilder("文件信息", tag = "file-info-${shareInfo.url}").apply {
         onDismiss(onDismiss)
         setContent {
+            val log = remember(favorites) {
+                if (favorites.contains(dataLog)) {
+                    dataLog
+                } else {
+                    favorites.firstOrNull { it.shareInfoData.contentEquals(dataLog.shareInfoData) }
+                        ?: dataLog
+                }
+            }
+            LaunchedEffect(log) {
+                shareInfo = resolveMixShareInfo(log.shareInfoData)!!
+            }
             val fileName = log.name
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -82,7 +95,7 @@ fun showFileInfoDialog(
                         AssistChip(onClick = {
                             log.rename {
                                 closeDialog()
-                                showFileInfoDialog(it)
+                                showFileInfoDialog(it, onDismiss)
                             }
                         }, label = {
                             Text(text = "重命名", color = colorScheme.primary)

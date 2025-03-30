@@ -113,6 +113,7 @@ val Home = MixNavPage(
         OutlinedButton(
             onClick = {
                 text = readClipBoardText()
+                tryResolveFileList(text.trim())
             }, modifier = Modifier
                 .weight(1.0f)
                 .padding(10.dp, 0.dp)

@@ -44,17 +44,17 @@ data class FileDataLog(
         list: List<FileDataLog>,
         action: (FileDataLog) -> FileDataLog
     ): List<FileDataLog> {
-        val index = list.indexOf(this)
-        if (index == -1) return list
-
-        val updatedList = list.toMutableList()
-        updatedList[index] = action(list[index])
-
-        return updatedList.toList()
+        return list.map {
+            if (it.shareInfoData == this.shareInfoData) {
+                action(it)
+            } else {
+                it
+            }
+        }
     }
 
     fun rename(callback: (FileDataLog) -> Unit = {}) {
-        val shareInfo = resolveMixShareInfo(shareInfoData) ?: return
+        var shareInfo = resolveMixShareInfo(shareInfoData) ?: return
         MixDialogBuilder("重命名文件").apply {
             var name by mutableStateOf(shareInfo.fileName)
             setContent {
@@ -70,7 +70,7 @@ data class FileDataLog(
                     showToast("文件名不能为空!")
                     return@setPositiveButton
                 }
-                shareInfo.fileName = name
+                shareInfo = shareInfo.copy(fileName = name)
                 val renamedLog = copy(
                     name = name,
                     shareInfoData = shareInfo.toString()
