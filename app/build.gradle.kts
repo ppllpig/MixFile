@@ -15,8 +15,8 @@ android {
         applicationId = "com.donut.mixfile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 93
-        versionName = "1.12.10"
+        versionCode = 94
+        versionName = "1.12.11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,6 +69,7 @@ val brotliVersion = "1.17.0"
 val operatingSystem: OperatingSystem = DefaultNativePlatform.getCurrentOperatingSystem()
 
 dependencies {
+    implementation(libs.kotlin.retry)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.fastjson2.kotlin)
     implementation(libs.kotlin.stdlib)

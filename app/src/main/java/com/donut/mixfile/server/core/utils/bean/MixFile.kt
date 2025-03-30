@@ -15,6 +15,7 @@ import com.donut.mixfile.server.core.utils.hashMD5
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
@@ -75,7 +76,16 @@ data class MixShareInfo(
     ): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
         val transformedReferer = Uploader.transformReferer(url, referer)
-        val result: ByteArray? = client.prepareGet(transformedUrl) {
+        val result: ByteArray? = client.config {
+            install(HttpRequestRetry) {
+                maxRetries = 3
+                retryOnException(retryOnTimeout = true)
+                retryOnServerErrors()
+                delayMillis { retry ->
+                    retry * 100L
+                }
+            }
+        }.prepareGet(transformedUrl) {
             if (transformedReferer.trim().isNotEmpty()) {
                 header("Referer", transformedReferer)
             }

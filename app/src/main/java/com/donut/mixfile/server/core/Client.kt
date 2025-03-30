@@ -3,7 +3,6 @@ package com.donut.mixfile.server.core
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.content.OutgoingContent
@@ -26,14 +25,6 @@ val MixFileServer.httpClient
         }
         install(ContentNegotiation) {
 
-        }
-        install(HttpRequestRetry) {
-            maxRetries = uploadTaskCount
-            retryOnException(retryOnTimeout = true)
-            retryOnServerErrors()
-            delayMillis { retry ->
-                retry * 100L
-            }
         }
         install(HttpTimeout) {
             requestTimeoutMillis = 1000 * 120

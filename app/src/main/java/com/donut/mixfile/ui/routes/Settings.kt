@@ -191,10 +191,12 @@ val MixSettings = MixNavPage(
     ) {
         useSystemPlayer = it
     }
-    SettingButton(text = "上传线路: $currentUploader") {
+    val uploader = remember(currentUploader) { getCurrentUploader() }
+
+    SettingButton(text = "上传线路: ${uploader.name}") {
         selectUploader()
     }
-    if (getCurrentUploader() == CustomUploader) {
+    if (uploader == CustomUploader) {
         OutlinedTextField(
             value = CUSTOM_UPLOAD_URL,
             onValueChange = {
