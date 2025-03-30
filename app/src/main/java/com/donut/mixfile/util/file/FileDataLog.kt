@@ -40,15 +40,20 @@ data class FileDataLog(
     val downloadUrl: String
         get() = getFileAccessUrl(getLocalServerAddress(), shareInfoData, name)
 
-    fun updateDataList(list: List<FileDataLog>, action: (FileDataLog) -> FileDataLog) = list.map {
-        if (it.shareInfoData == this.shareInfoData) {
-            action(it)
-        } else {
-            it
-        }
+    fun updateDataList(
+        list: List<FileDataLog>,
+        action: (FileDataLog) -> FileDataLog
+    ): List<FileDataLog> {
+        val index = list.indexOf(this)
+        if (index == -1) return list
+
+        val updatedList = list.toMutableList()
+        updatedList[index] = action(list[index])
+
+        return updatedList.toList()
     }
 
-    fun rename(callback: (MixShareInfo) -> Unit = {}) {
+    fun rename(callback: (FileDataLog) -> Unit = {}) {
         val shareInfo = resolveMixShareInfo(shareInfoData) ?: return
         MixDialogBuilder("重命名文件").apply {
             var name by mutableStateOf(shareInfo.fileName)
@@ -66,19 +71,17 @@ data class FileDataLog(
                     return@setPositiveButton
                 }
                 shareInfo.fileName = name
+                val renamedLog = copy(
+                    name = name,
+                    shareInfoData = shareInfo.toString()
+                )
                 favorites = updateDataList(favorites) {
-                    it.copy(
-                        name = name,
-                        shareInfoData = shareInfo.toString()
-                    )
+                    renamedLog
                 }
                 uploadLogs = updateDataList(uploadLogs) {
-                    it.copy(
-                        name = name,
-                        shareInfoData = shareInfo.toString()
-                    )
+                    renamedLog
                 }
-                callback(shareInfo)
+                callback(renamedLog)
                 showToast("重命名文件成功!")
                 closeDialog()
             }
@@ -94,7 +97,7 @@ data class FileDataLog(
 
     override fun equals(other: Any?): Boolean {
         if (other !is FileDataLog) return false
-        return shareInfoData.contentEquals(other.shareInfoData) && category == other.category
+        return shareInfoData.contentEquals(other.shareInfoData) && category.contentEquals(other.category)
     }
 }
 
@@ -104,11 +107,6 @@ var favorites by cachedMutableOf(listOf<FileDataLog>(), "favorite_file_logs")
 var uploadLogs by cachedMutableOf(listOf<FileDataLog>(), "upload_file_logs")
 
 var favCategories by cachedMutableOf(setOf("默认"), "fav_categories")
-
-fun isFavorite(shareInfo: MixShareInfo): Boolean {
-    val shareInfoData = shareInfo.toString()
-    return favorites.any { it.shareInfoData.contentEquals(shareInfoData) }
-}
 
 fun addUploadLog(shareInfo: MixShareInfo) {
     if (autoAddFavorite) {

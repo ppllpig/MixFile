@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +20,7 @@ import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
 import com.donut.mixfile.server.downloadUrl
 import com.donut.mixfile.server.lanUrl
@@ -38,17 +38,14 @@ import com.donut.mixfile.util.formatFileSize
 
 @OptIn(ExperimentalLayoutApi::class)
 fun showFileInfoDialog(
-    shareInfo: MixShareInfo,
+    log: FileDataLog,
     onDismiss: () -> Unit = {}
 ) {
+    val shareInfo = resolveMixShareInfo(log.shareInfoData)!!
     MixDialogBuilder("文件信息", tag = "file-info-${shareInfo.url}").apply {
         onDismiss(onDismiss)
         setContent {
-            val dataLog = remember(shareInfo, favorites, uploadLogs) {
-                val log = shareInfo.toDataLog()
-                favorites.firstOrNull { it.shareInfoData == log.shareInfoData } ?: log
-            }
-            val fileName = dataLog.name
+            val fileName = log.name
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.Start,
@@ -70,7 +67,7 @@ fun showFileInfoDialog(
                             Text(text = "文件列表", color = colorScheme.primary)
                         })
                     }
-                    if (!isFavorite(shareInfo)) {
+                    if (!favorites.contains(log)) {
                         AssistChip(onClick = {
                             addFavoriteLog(shareInfo)
                         }, label = {
@@ -78,12 +75,12 @@ fun showFileInfoDialog(
                         })
                     } else {
                         AssistChip(onClick = {
-                            deleteFavoriteLog(dataLog)
+                            deleteFavoriteLog(log)
                         }, label = {
                             Text(text = "取消收藏", color = colorScheme.primary)
                         })
                         AssistChip(onClick = {
-                            dataLog.rename {
+                            log.rename {
                                 closeDialog()
                                 showFileInfoDialog(it)
                             }
@@ -91,14 +88,14 @@ fun showFileInfoDialog(
                             Text(text = "重命名", color = colorScheme.primary)
                         })
                         AssistChip(onClick = {
-                            openCategorySelect(dataLog.category) { category ->
-                                favorites = dataLog.updateDataList(favorites) {
-                                    dataLog.copy(category = category)
+                            openCategorySelect(log.category) { category ->
+                                favorites = log.updateDataList(favorites) {
+                                    log.copy(category = category)
                                 }
                             }
                         }, label = {
                             Text(
-                                text = "分类: ${dataLog.category}",
+                                text = "分类: ${log.category}",
                                 color = colorScheme.primary
                             )
                         })

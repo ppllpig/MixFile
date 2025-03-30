@@ -2,8 +2,13 @@ package com.donut.mixfile
 
 import com.alibaba.fastjson2.to
 import com.alibaba.fastjson2.toJSONString
+import com.donut.mixfile.server.core.aes.decryptAES
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo.Companion.ENCODER
 import com.donut.mixfile.server.core.utils.encodeHex
+import com.donut.mixfile.server.core.utils.hashMD5
 import com.donut.mixfile.server.core.utils.registerJson
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.Date
@@ -22,10 +27,10 @@ class ExampleUnitTest {
         val date: Date = Date()
     )
 
+
+
     @Test
     fun main() {
-        println("程序继续执行")
-        registerJson()
 
     }
 

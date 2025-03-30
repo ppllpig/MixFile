@@ -163,7 +163,7 @@ fun tryResolveFileList(text: String): Boolean {
         return false
     }
     if (fileList.size == 1) {
-        showFileInfoDialog(fileList.first())
+        showFileInfoDialog(fileList.first().toDataLog())
         return true
     }
     val fileDataList = fileList.map { it.toDataLog() }
@@ -175,7 +175,7 @@ fun tryResolveFileList(text: String): Boolean {
 fun tryResolveFile(text: String): Boolean {
     val fileInfo = resolveMixShareInfo(text.trim())
     if (fileInfo != null) {
-        showFileInfoDialog(fileInfo)
+        showFileInfoDialog(fileInfo.toDataLog())
         return true
     }
     return false

@@ -41,7 +41,6 @@ import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.routes.UploadDialogCard
 import com.donut.mixfile.ui.routes.home.DownloadDialogCard
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
-import com.donut.mixfile.ui.routes.home.tryResolveFile
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.FileCardList
@@ -50,6 +49,7 @@ import com.donut.mixfile.util.file.downloadFile
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showExportFileListDialog
+import com.donut.mixfile.util.file.showFileInfoDialog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.parseSortNum
 import com.donut.mixfile.util.showConfirmDialog
@@ -314,7 +314,7 @@ val Favorites = MixNavPage(
             selected = selected,
             onClick = {
                 if (!multiSelect) {
-                    tryResolveFile(it.shareInfoData)
+                    showFileInfoDialog(it)
                     return@FileCardList
                 }
                 if (!selected.contains(it)) {
