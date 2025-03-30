@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.aes.decryptAES
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo.Companion.ENCODER
+import com.donut.mixfile.server.core.utils.decodeHex
 import com.donut.mixfile.server.core.utils.encodeHex
 import com.donut.mixfile.server.core.utils.hashMD5
 import com.donut.mixfile.server.core.utils.registerJson
@@ -31,6 +32,7 @@ class ExampleUnitTest {
 
     @Test
     fun main() {
+
 
     }
 

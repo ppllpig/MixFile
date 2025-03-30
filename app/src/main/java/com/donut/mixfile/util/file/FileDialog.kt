@@ -67,9 +67,9 @@ fun showFileInfoDialog(
                             Text(text = "文件列表", color = colorScheme.primary)
                         })
                     }
-                    if (!favorites.contains(log)) {
+                    if (!favorites.any { it.shareInfoData.contentEquals(log.shareInfoData) }) {
                         AssistChip(onClick = {
-                            addFavoriteLog(shareInfo)
+                            addFavoriteLog(log)
                         }, label = {
                             Text(text = "收藏", color = colorScheme.primary)
                         })

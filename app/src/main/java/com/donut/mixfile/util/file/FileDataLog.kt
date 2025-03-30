@@ -110,7 +110,7 @@ var favCategories by cachedMutableOf(setOf("默认"), "fav_categories")
 
 fun addUploadLog(shareInfo: MixShareInfo) {
     if (autoAddFavorite) {
-        addFavoriteLog(shareInfo)
+        addFavoriteLog(shareInfo.toDataLog())
     }
     val uploadLog = shareInfo.toDataLog()
     if (uploadLogs.size > 1000) {
@@ -138,13 +138,12 @@ fun deleteUploadLog(uploadLog: FileDataLog, callback: () -> Unit = {}) {
 
 
 fun addFavoriteLog(
-    shareInfo: MixShareInfo,
+    log: FileDataLog,
     category: String = currentCategory.ifEmpty { "默认" },
 ): Boolean {
-    val favoriteLog = shareInfo.toDataLog()
     favCategories += category
-    favorites = favorites.filter { it.shareInfoData != favoriteLog.shareInfoData }
-    favorites = favorites + favoriteLog.copy(category = category)
+    favorites = favorites.filter { it.shareInfoData != log.shareInfoData }
+    favorites = favorites + log.copy(category = category)
     return true
 }
 
