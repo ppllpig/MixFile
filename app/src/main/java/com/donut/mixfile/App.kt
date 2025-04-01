@@ -15,7 +15,9 @@ import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.core.utils.registerJson
+import com.donut.mixfile.util.getAppVersionName
 import com.donut.mixfile.util.objects.MixActivity
+import com.donut.mixfile.util.objects.UpdateChecker
 import com.donut.mixfile.util.showError
 import com.donut.mixfile.util.showErrorDialog
 import com.tencent.mmkv.MMKV
@@ -38,6 +40,8 @@ val currentActivity: MixActivity
 val app: Application
     get() = innerApp
 
+lateinit var updateChecker: UpdateChecker
+
 class App : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
@@ -53,6 +57,7 @@ class App : Application(), ImageLoaderFactory {
         innerApp = this
         UPLOADERS
         MMKV.initialize(this)
+        updateChecker = UpdateChecker("InvertGeek", "MixFile", getAppVersionName(this) ?: "")
         kv = MMKV.defaultMMKV()
         startService(Intent(this, FileService::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
