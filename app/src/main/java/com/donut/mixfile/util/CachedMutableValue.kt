@@ -92,10 +92,7 @@ abstract class CachedMutableValue<T>(
         this.value = value
         synchronized(key) {
             val handler = Handler(app.mainLooper)
-            val currentTask = saveTask
-            if (currentTask != null) {
-                handler.removeCallbacks(currentTask)
-            }
+            saveTask?.let { handler.removeCallbacks(it) }
             val task = Runnable {
                 appScope.launch(Dispatchers.IO) {
                     catchError {
