@@ -43,6 +43,7 @@ import com.donut.mixfile.ui.routes.home.DownloadDialogCard
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.cachedMutableOf
+import com.donut.mixfile.util.catchError
 import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.FileDataLog
 import com.donut.mixfile.util.file.downloadFile
@@ -55,6 +56,8 @@ import com.donut.mixfile.util.parseSortNum
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -123,6 +126,7 @@ val Favorites = MixNavPage(
     )
 
     val scope = rememberCoroutineScope()
+    var sortJob: Job? = remember { null }
 
     LaunchedEffect(searchVal, currentCategory, favorites, favoriteSort) {
         result = if (searchVal.trim().isNotEmpty()) {
@@ -142,11 +146,19 @@ val Favorites = MixNavPage(
             "最小" -> result = result.sortedBy { it.size }
             "名称" -> {
                 val resultCache = result
-                scope.launch(Dispatchers.IO) {
-                    val sorted = result.sortedBy { it.name.parseSortNum() }
-                    withContext(Dispatchers.Main) {
-                        if (resultCache == result) {
-                            result = sorted
+                sortJob?.cancel()
+                sortJob = scope.launch(Dispatchers.IO) {
+                    catchError {
+                        val sorted = result.sortedBy {
+                            if (!isActive) {
+                                throw Exception("canceled")
+                            }
+                            it.name.parseSortNum()
+                        }
+                        withContext(Dispatchers.Main) {
+                            if (resultCache == result) {
+                                result = sorted
+                            }
                         }
                     }
                 }

@@ -1,14 +1,15 @@
 package com.donut.mixfile.util
 
+import android.os.Handler
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.alibaba.fastjson2.into
 import com.alibaba.fastjson2.toJSONString
+import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.kv
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 fun <T> constructCachedMutableValue(
@@ -73,7 +74,7 @@ abstract class CachedMutableValue<T>(
     private val key: String,
 ) {
     var value by mutableStateOf(value)
-    private var saveJob: Job? = null
+    private var saveTask: Runnable? = null
     private var loaded = false
     abstract fun readCachedValue(): T
 
@@ -90,12 +91,20 @@ abstract class CachedMutableValue<T>(
     operator fun setValue(thisRef: Any?, property: Any?, value: T) {
         this.value = value
         synchronized(key) {
-            saveJob?.cancel()
-            saveJob = appScope.launch(Dispatchers.IO) {
-                catchError {
-                    writeCachedValue(value)
+            val handler = Handler(app.mainLooper)
+            val currentTask = saveTask
+            if (currentTask != null) {
+                handler.removeCallbacks(currentTask)
+            }
+            val task = Runnable {
+                appScope.launch(Dispatchers.IO) {
+                    catchError {
+                        writeCachedValue(value)
+                    }
                 }
             }
+            saveTask = task
+            handler.postDelayed(task, 100)
         }
     }
 }

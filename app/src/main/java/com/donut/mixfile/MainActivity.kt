@@ -10,10 +10,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationManagerCompat
-
 import com.donut.mixfile.ui.component.MainContent
 import com.donut.mixfile.ui.theme.MainTheme
-
 import com.donut.mixfile.util.file.MixFileSelector
 import com.donut.mixfile.util.file.uploadFileUris
 import com.donut.mixfile.util.objects.MixActivity
