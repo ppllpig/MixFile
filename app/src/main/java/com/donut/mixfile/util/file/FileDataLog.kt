@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+
 import com.alibaba.fastjson2.annotation.JSONField
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
@@ -44,13 +45,13 @@ data class FileDataLog(
         list: List<FileDataLog>,
         action: (FileDataLog) -> FileDataLog
     ): List<FileDataLog> {
-        return list.map {
-            if (it.shareInfoData == this.shareInfoData) {
-                action(it)
-            } else {
-                it
-            }
+        val newList = list.toMutableList()
+        val index = newList.indexOfFirst { it.shareInfoData == this.shareInfoData }
+        if (index == -1) {
+            return newList
         }
+        newList[index] = action(newList[index])
+        return newList
     }
 
     fun rename(callback: (FileDataLog) -> Unit = {}) {

@@ -71,11 +71,6 @@ fun showFileInfoDialog(
                 InfoText(key = "大小: ", value = formatFileSize(shareInfo.fileSize))
                 InfoText(key = "密钥: ", value = shareInfo.key)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-//                    AssistChip(onClick = {
-//                        shareInfo.shareCode(useShortCode).copyToClipboard()
-//                    }, label = {
-//                        Text(text = "复制分享码", color = colorScheme.primary)
-//                    })
                     if (fileName.startsWith("__mixfile_list") || fileName.endsWith(".mix_list")) {
                         AssistChip(onClick = {
                             importFileList(shareInfo.downloadUrl)

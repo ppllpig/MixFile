@@ -1,9 +1,20 @@
 package com.donut.mixfile
 
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import org.junit.Test
 import java.util.Date
 
+//appScope.launch(Dispatchers.IO) {
+//    repeat(100) {
+//        favorites += List(1000) {
+//            FileDataLog(
+//                genRandomString(32),
+//                "test-data",
+//                1,
+//                category = "test"
+//            )
+//        }
+//    }
+//}
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -18,10 +29,12 @@ class ExampleUnitTest {
         val date: Date = Date()
     )
 
+    val map = mapOf(1 to "aa", 2 to "bb")
+
 
     @Test
     fun main() {
-
+        println(map.values)
     }
 
 

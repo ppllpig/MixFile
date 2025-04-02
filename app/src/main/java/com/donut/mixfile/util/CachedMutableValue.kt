@@ -1,12 +1,15 @@
 package com.donut.mixfile.util
 
-import android.os.Parcelable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.alibaba.fastjson2.into
 import com.alibaba.fastjson2.toJSONString
+import com.donut.mixfile.appScope
 import com.donut.mixfile.kv
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 fun <T> constructCachedMutableValue(
     value: T,
@@ -46,20 +49,14 @@ fun cachedMutableOf(value: Set<String>, key: String) =
         { kv.decodeStringSet(key, value)!! },
     )
 
-fun cachedMutableOf(value: Parcelable, key: String) =
-    constructCachedMutableValue(
-        value,
-        key,
-        { kv.encode(key, it) },
-        getter@{
-            kv.decodeParcelable(key, value.javaClass)
-        })
 
 inline fun <reified T, reified C : Iterable<T>> cachedMutableOf(value: C, key: String) =
     constructCachedMutableValue(
         value,
         key,
-        { kv.encode(key, it.toJSONString()) },
+        {
+            kv.encode(key, it.toJSONString())
+        },
         getter@{
             var result = value
             catchError {
@@ -76,6 +73,7 @@ abstract class CachedMutableValue<T>(
     private val key: String,
 ) {
     var value by mutableStateOf(value)
+    private var saveJob: Job? = null
     private var loaded = false
     abstract fun readCachedValue(): T
 
@@ -91,6 +89,13 @@ abstract class CachedMutableValue<T>(
 
     operator fun setValue(thisRef: Any?, property: Any?, value: T) {
         this.value = value
-        writeCachedValue(value)
+        synchronized(key) {
+            saveJob?.cancel()
+            saveJob = appScope.launch(Dispatchers.IO) {
+                catchError {
+                    writeCachedValue(value)
+                }
+            }
+        }
     }
 }

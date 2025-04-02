@@ -20,13 +20,13 @@ abstract class Uploader(val name: String) {
         val refererTransforms = mutableMapOf<String, (url: String, referer: String) -> String>()
 
         fun transformUrl(url: String): String {
-            return urlTransforms.entries.fold(url) { acc, (name, transform) ->
+            return urlTransforms.entries.fold(url) { acc, (_, transform) ->
                 transform(acc)
             }
         }
 
         fun transformReferer(url: String, referer: String): String {
-            return refererTransforms.entries.fold(referer) { acc, (name, transform) ->
+            return refererTransforms.entries.fold(referer) { acc, (_, transform) ->
                 transform(url, acc)
             }
         }

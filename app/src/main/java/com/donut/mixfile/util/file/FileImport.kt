@@ -102,15 +102,18 @@ fun showFileList(fileList: List<FileDataLog>) {
             }
         }
         setPositiveButton("导入文件") {
-            val prevSize = favorites.size
             val fileMap = favorites.map { it.shareInfoData }.toSet()
+            val newFiles = mutableSetOf<FileDataLog>()
+            val newCategories = mutableSetOf<String>()
             fileList.forEach {
-                favCategories += it.category
+                newCategories += it.category
                 if (!fileMap.contains(it.shareInfoData)) {
-                    favorites += it
+                    newFiles += it
                 }
             }
-            showToast("导入了 ${favorites.size - prevSize} 个文件")
+            favCategories += newCategories
+            favorites += newFiles
+            showToast("导入了 ${newFiles.size} 个文件")
             closeDialog()
         }
         show()
