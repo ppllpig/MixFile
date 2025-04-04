@@ -2,6 +2,7 @@ package com.donut.mixfile.server.core
 
 import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.utils.bean.hashMixSHA256
+import com.donut.mixfile.server.core.utils.isValidURL
 import com.github.michaelbull.retry.policy.constantDelay
 import com.github.michaelbull.retry.policy.plus
 import com.github.michaelbull.retry.policy.stopAtAttempts
@@ -54,10 +55,14 @@ abstract class Uploader(val name: String) {
         return retry(policy) {
             val encryptedData = encryptBytes(head, fileData, key)
             try {
-                doUpload(
+                val url = doUpload(
                     encryptedData,
                     mixFileServer.httpClient
                 ) + "#${fileData.hashMixSHA256()}"
+                if (!isValidURL(url)) {
+                    throw Exception("url格式错误")
+                }
+                url
             } finally {
                 mixFileServer.onUploadData(encryptedData)
             }

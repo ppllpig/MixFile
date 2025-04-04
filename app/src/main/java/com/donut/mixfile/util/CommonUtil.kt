@@ -145,14 +145,18 @@ fun <T> List<T>.at(index: Long): T {
 }
 
 fun String.parseSortNum(): BigInteger {
-    val regex = Regex("\\d+")
-    val matches = regex.findAll(this)
-    val numStr = matches.map { it.value }.joinToString("").trim()
-    if (numStr.isEmpty()) {
-        return BigInteger.valueOf(0)
+    val digits = StringBuilder()
+
+    for (char in this) {
+        if (char.isDigit()) {
+            digits.append(char)
+        }
     }
-    val num = numStr.toBigIntegerOrNull() ?: BigInteger.valueOf(0)
-    return num
+    return if (digits.isEmpty()) {
+        BigInteger.ZERO
+    } else {
+        BigInteger(digits.toString())
+    }
 }
 
 fun Iterable<String>.sortByName(): List<String> {

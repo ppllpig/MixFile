@@ -109,7 +109,6 @@ fun BottomControl(
                 },
                 track = { sliderState ->
                     SliderDefaults.Track(
-//                        modifier = Modifier.scale(1.0f, 0.5f),
                         sliderState = sliderState
                     )
                 },
@@ -125,10 +124,15 @@ fun BottomControl(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
+                    var lastSeek = remember { System.currentTimeMillis() }
                     if (player.mediaItemCount > 1) {
                         IconButton(
                             modifier = Modifier.scale(1f),
                             onClick = {
+                                if (System.currentTimeMillis() - lastSeek < 500) {
+                                    return@IconButton
+                                }
+                                lastSeek = System.currentTimeMillis()
                                 player.seekToPreviousMediaItem()
                             },
                         ) {
@@ -142,6 +146,10 @@ fun BottomControl(
                         IconButton(
                             modifier = Modifier.scale(1f),
                             onClick = {
+                                if (System.currentTimeMillis() - lastSeek < 500) {
+                                    return@IconButton
+                                }
+                                lastSeek = System.currentTimeMillis()
                                 player.seekToNextMediaItem()
                             },
                         ) {

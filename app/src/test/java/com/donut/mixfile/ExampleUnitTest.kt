@@ -1,6 +1,9 @@
 package com.donut.mixfile
 
+import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import org.junit.Test
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.Date
 
 //appScope.launch(Dispatchers.IO) {
@@ -34,7 +37,7 @@ class ExampleUnitTest {
 
     @Test
     fun main() {
-        println(map.values)
+
     }
 
 

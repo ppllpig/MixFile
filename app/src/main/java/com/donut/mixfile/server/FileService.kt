@@ -21,6 +21,7 @@ import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.image.createBlankBitmap
 import com.donut.mixfile.server.image.toGif
+import com.donut.mixfile.ui.routes.favorites.result
 import com.donut.mixfile.ui.routes.home.UploadTask
 import com.donut.mixfile.ui.routes.home.serverAddress
 import com.donut.mixfile.ui.routes.increaseDownloadData
@@ -91,7 +92,10 @@ val mixFileServer = object : MixFileServer(
     }
 
     override fun getFileHistory(): String {
-        return favorites.takeLast(1000).toJSONString()
+        if (result.isEmpty()) {
+            return favorites.asReversed().take(1000).toJSONString()
+        }
+        return result.take(1000).toJSONString()
     }
 
     override fun getUploadTask(

@@ -42,6 +42,7 @@ import com.donut.mixfile.ui.routes.UploadDialogCard
 import com.donut.mixfile.ui.routes.home.DownloadDialogCard
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
 import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.util.OnDispose
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.catchError
 import com.donut.mixfile.util.file.FileCardList
@@ -64,7 +65,7 @@ import kotlinx.coroutines.withContext
 var currentCategory: String by mutableStateOf("")
 
 private var favoriteSort by cachedMutableOf("最新", "mix_favorite_sort")
-
+var result by mutableStateOf(listOf<FileDataLog>())
 
 @OptIn(ExperimentalFoundationApi::class)
 val Favorites = MixNavPage(
@@ -81,10 +82,6 @@ val Favorites = MixNavPage(
 
     var searchVal by remember {
         mutableStateOf("")
-    }
-
-    var result by remember {
-        mutableStateOf(favorites.reversed())
     }
 
     if (favorites.isEmpty()) {
@@ -127,6 +124,10 @@ val Favorites = MixNavPage(
 
     val scope = rememberCoroutineScope()
     var sortJob: Job? = remember { null }
+
+    OnDispose {
+        result = listOf()
+    }
 
     LaunchedEffect(searchVal, currentCategory, favorites, favoriteSort) {
         result = if (searchVal.trim().isNotEmpty()) {

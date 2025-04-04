@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.core.utils.parseFileMimeType
@@ -55,6 +56,7 @@ fun PreviewCard(
     val isImage = fileDataLog.name.parseFileMimeType().run {
         this.startsWith("image/")
     }
+
     val isVideo = fileDataLog.name.parseFileMimeType().run {
         this.startsWith("video/")
     }
@@ -105,6 +107,8 @@ fun PreviewCard(
                     text = fileDataLog.name.trim(),
                     color = colorScheme.primary,
                     fontSize = 16.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 FlowRow(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -135,7 +139,6 @@ fun FileCardList(
     },
     longClick: (FileDataLog) -> Unit = {},
 ) {
-
     if (filePreview.contentEquals("开启") ||
         (filePreview.contentEquals("仅Wifi") && NetworkChangeReceiver.isWifi)
     ) {
@@ -228,6 +231,8 @@ fun FileCard(
                     text = fileDataLog.name.trim(),
                     color = colorScheme.primary,
                     fontSize = 16.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             FlowRow(
