@@ -1,9 +1,8 @@
 package com.donut.mixfile
 
-import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import com.alibaba.fastjson2.to
+import com.alibaba.fastjson2.toJSONString
 import org.junit.Test
-import java.net.MalformedURLException
-import java.net.URL
 import java.util.Date
 
 //appScope.launch(Dispatchers.IO) {
@@ -30,13 +29,18 @@ class ExampleUnitTest {
     data class User(
         val age: Int,
         val date: Date = Date()
-    )
+    ) {
+        init {
+            println("init")
+        }
+    }
 
     val map = mapOf(1 to "aa", 2 to "bb")
 
 
     @Test
     fun main() {
+
 
     }
 

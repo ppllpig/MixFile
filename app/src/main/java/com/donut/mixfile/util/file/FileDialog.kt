@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,11 +19,8 @@ import androidx.core.net.toUri
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
-import com.donut.mixfile.server.downloadUrl
-import com.donut.mixfile.server.lanUrl
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.importFileList
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
@@ -36,6 +31,7 @@ import com.donut.mixfile.ui.routes.useSystemPlayer
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
+import com.donut.mixfile.util.showToast
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -43,24 +39,23 @@ fun showFileInfoDialog(
     dataLog: FileDataLog,
     onDismiss: () -> Unit = {}
 ) {
-    var shareInfo = resolveMixShareInfo(dataLog.shareInfoData)!!
+    val log = if (favorites.contains(dataLog)) {
+        dataLog
+    } else {
+        favorites.firstOrNull { it.isSimilar(dataLog) }
+            ?: dataLog
+    }
+    val shareInfo = resolveMixShareInfo(log.shareInfoData)
+    if (shareInfo == null) {
+        showToast("解析文件分享码失败")
+        return
+    }
     MixDialogBuilder("文件信息", tag = "file-info-${shareInfo.url}").apply {
         onDismiss(onDismiss)
         setNegativeButton("复制分享码") {
             shareInfo.shareCode(useShortCode).copyToClipboard()
         }
         setContent {
-            val log = remember(favorites) {
-                if (favorites.contains(dataLog)) {
-                    dataLog
-                } else {
-                    favorites.firstOrNull { it.shareInfoData.contentEquals(dataLog.shareInfoData) }
-                        ?: dataLog
-                }
-            }
-            LaunchedEffect(log) {
-                shareInfo = resolveMixShareInfo(log.shareInfoData)!!
-            }
             val fileName = log.name
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -73,12 +68,12 @@ fun showFileInfoDialog(
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (fileName.startsWith("__mixfile_list") || fileName.endsWith(".mix_list")) {
                         AssistChip(onClick = {
-                            importFileList(shareInfo.downloadUrl)
+                            importFileList(log.downloadUrl)
                         }, label = {
                             Text(text = "文件列表", color = colorScheme.primary)
                         })
                     }
-                    if (!favorites.any { it.shareInfoData.contentEquals(log.shareInfoData) }) {
+                    if (!favorites.any { it.isSimilar(log) }) {
                         AssistChip(onClick = {
                             addFavoriteLog(log)
                         }, label = {
@@ -117,12 +112,12 @@ fun showFileInfoDialog(
                         AssistChip(onClick = {
                             if (useSystemPlayer) {
                                 val intent = Intent(Intent.ACTION_VIEW)
-                                intent.setDataAndType(shareInfo.downloadUrl.toUri(), "video/*")
+                                intent.setDataAndType(log.downloadUrl.toUri(), "video/*")
                                 currentActivity.startActivity(intent)
                                 return@AssistChip
                             }
                             val intent = Intent(app, VideoActivity::class.java).apply {
-                                putExtra("url", shareInfo.downloadUrl)
+                                putExtra("url", log.downloadUrl)
                                 putExtra("hash", shareInfo.url)
                             }
                             currentActivity.startActivity(intent)
@@ -132,14 +127,14 @@ fun showFileInfoDialog(
                     }
                     if (shareInfo.contentType().startsWith("image/")) {
                         AssistChip(onClick = {
-                            showImageDialog(shareInfo.downloadUrl)
+                            showImageDialog(log.downloadUrl)
                         }, label = {
                             Text(text = "查看图片", color = colorScheme.primary)
                         })
                     }
 
                     AssistChip(onClick = {
-                        shareInfo.lanUrl.copyToClipboard()
+                        log.lanUrl.copyToClipboard()
                     }, label = {
                         Text(text = "复制局域网地址", color = colorScheme.primary)
                     })
@@ -147,7 +142,7 @@ fun showFileInfoDialog(
             }
         }
         setPositiveButton("下载文件") {
-            downloadFile(shareInfo)
+            downloadFile(log)
             closeDialog()
             showDownloadTaskWindow()
         }
@@ -169,7 +164,7 @@ fun InfoText(key: String, value: String) {
     }
 }
 
-fun downloadFile(shareInfo: MixShareInfo) {
-    val task = DownloadTask(shareInfo.fileName, shareInfo.fileSize, shareInfo.downloadUrl)
+fun downloadFile(file: FileDataLog) {
+    val task = DownloadTask(file.name, file.size, file.downloadUrl)
     task.start()
 }

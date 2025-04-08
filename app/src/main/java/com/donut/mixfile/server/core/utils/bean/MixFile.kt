@@ -56,7 +56,7 @@ data class MixShareInfo(
 
         private fun enc(input: String): String {
             val bytes = input.encodeToByteArray()
-            val result = encryptAES(bytes, "123".hashMD5(), iv = "123".hashMD5().copyOf(12))
+            val result = encryptAES(bytes, "123".hashMD5())
             return ENCODER.encode(result)
         }
 
@@ -81,10 +81,10 @@ data class MixShareInfo(
         url: String,
         client: HttpClient,
         referer: String = this.referer,
-    ): ByteArray? {
+    ): ByteArray {
         val transformedUrl = Uploader.transformUrl(url)
         val transformedReferer = Uploader.transformReferer(url, referer)
-        val result: ByteArray? = client.config {
+        val result: ByteArray = client.config {
             install(HttpRequestRetry) {
                 maxRetries = 3
                 retryOnException(retryOnTimeout = true)
@@ -102,13 +102,11 @@ data class MixShareInfo(
             channel.discard(headSize.toLong())
             decryptAES(channel, ENCODER.decode(key))
         }
-        if (result != null) {
-            val hash = url.split("#").getOrNull(1)
-            if (hash != null) {
-                val currentHash = result.hashMixSHA256()
-                if (!currentHash.contentEquals(hash)) {
-                    throw Exception("文件遭到篡改")
-                }
+        val hash = url.split("#").getOrNull(1)
+        if (hash != null) {
+            val currentHash = result.hashMixSHA256()
+            if (!currentHash.contentEquals(hash)) {
+                throw Exception("文件遭到篡改")
             }
         }
         return result
@@ -128,7 +126,7 @@ data class MixShareInfo(
     fun contentType(): String = fileName.parseFileMimeType()
 
     suspend fun fetchMixFile(client: HttpClient): MixFile? {
-        val decryptedBytes = fetchFile(url, client = client) ?: return null
+        val decryptedBytes = fetchFile(url, client = client)
         return MixFile.fromBytes(decryptedBytes)
     }
 

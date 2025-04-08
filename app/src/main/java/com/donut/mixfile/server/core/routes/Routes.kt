@@ -16,7 +16,8 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import io.ktor.utils.io.jvm.javaio.toOutputStream
+import io.ktor.utils.io.copyTo
+import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 
 fun MixFileServer.getRoutes(): Routing.() -> Unit {
 
@@ -29,12 +30,12 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
             call.respondBytesWriter(
                 contentType = ContentType.parse(file.parseFileMimeType())
             ) {
-                fileStream.copyTo(this.toOutputStream())
+                fileStream.toByteReadChannel().copyTo(this)
             }
         }
         route("/api") {
-            get("/download", getDownloadRoute())
-            put("/upload", getUploadRoute())
+            get("/download/{name?}", getDownloadRoute())
+            put("/upload/{name?}", getUploadRoute())
             get("/upload_history") {
                 if (call.request.header("origin").isNotNull()) {
                     return@get call.respondText("此接口禁止跨域", status = HttpStatusCode.Forbidden)
@@ -42,7 +43,7 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
                 call.respond(getFileHistory())
             }
             get("/file_info") {
-                val shareInfoStr = call.request.queryParameters["s"]
+                val shareInfoStr = call.parameters["s"]
                 if (shareInfoStr == null) {
                     call.respondText("分享信息为空", status = HttpStatusCode.InternalServerError)
                     return@get

@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
@@ -45,6 +44,7 @@ import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.OnDispose
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.catchError
+import com.donut.mixfile.util.compareByName
 import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.FileDataLog
 import com.donut.mixfile.util.file.downloadFile
@@ -53,7 +53,6 @@ import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showExportFileListDialog
 import com.donut.mixfile.util.file.showFileInfoDialog
 import com.donut.mixfile.util.formatFileSize
-import com.donut.mixfile.util.parseSortNum
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
@@ -150,11 +149,11 @@ val Favorites = MixNavPage(
                 sortJob?.cancel()
                 sortJob = scope.launch(Dispatchers.IO) {
                     catchError {
-                        val sorted = result.sortedBy {
+                        val sorted = result.sortedWith { file1, file2 ->
                             if (!isActive) {
-                                throw Exception("canceled")
+                                throw Exception("排序取消")
                             }
-                            it.name.parseSortNum()
+                            file1.name.compareByName(file2.name)
                         }
                         withContext(Dispatchers.Main) {
                             if (resultCache == result) {
@@ -262,10 +261,7 @@ val Favorites = MixNavPage(
                                 },
                                 Pair("全部下载") {
                                     selected.forEach {
-                                        val shareInfo = resolveMixShareInfo(it.shareInfoData)
-                                        if (shareInfo != null) {
-                                            downloadFile(shareInfo)
-                                        }
+                                        downloadFile(it)
                                     }
                                     showDownloadTaskWindow()
                                     selected = emptySet()

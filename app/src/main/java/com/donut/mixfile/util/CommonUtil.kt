@@ -12,17 +12,18 @@ import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.core.utils.genRandomString
 import com.donut.mixfile.server.core.utils.ignoreError
-import com.donut.mixfile.server.core.utils.isFalse
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
+import io.ktor.http.URLBuilder
+import io.ktor.http.path
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.EOFException
 import java.math.BigInteger
+import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.URL
-import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -145,22 +146,44 @@ fun <T> List<T>.at(index: Long): T {
 }
 
 fun String.parseSortNum(): BigInteger {
-    val digits = StringBuilder()
-
-    for (char in this) {
-        if (char.isDigit()) {
-            digits.append(char)
-        }
-    }
-    return if (digits.isEmpty()) {
-        BigInteger.ZERO
-    } else {
-        BigInteger(digits.toString())
-    }
+    val numberStr = this.filter { it.isDigit() }.ifEmpty { "0" }
+    return BigInteger(numberStr)
 }
 
-fun Iterable<String>.sortByName(): List<String> {
-    return sortedBy { it.parseSortNum() }
+fun extractNumber(str: String, start: Int): Long {
+    var result = 0L
+    var i = start
+    while (i < str.length && str[i].isDigit()) {
+        result = result * 10 + (str[i] - '0')
+        i++
+    }
+    return result
+}
+
+fun String.compareByName(str2: String): Int {
+    var i1 = 0
+    var i2 = 0
+    val str1 = this
+    while (i1 < str1.length && i2 < str2.length) {
+        // 处理数字部分
+        val char1 = str1[i1]
+        val char2 = str2[i2]
+        if (char1.isDigit() && char2.isDigit()) {
+            val num1 =
+                extractNumber(str1, i1).also { i1 += it.toString().length }
+            val num2 =
+                extractNumber(str2, i2).also { i2 += it.toString().length }
+            //相等则继续提取下个数字进行比较
+            if (num1 != num2) return num1.compareTo(num2)
+        }
+        // 处理非数字部分
+        else {
+            if (char1 != char2) return char1.compareTo(char2)
+            i1++
+            i2++
+        }
+    }
+    return str1.length.compareTo(str2.length)
 }
 
 fun <T> List<T>.at(index: Int): T {
@@ -227,15 +250,6 @@ fun genRandomHexString(length: Int = 32) = genRandomString(length, ('0'..'9') + 
 fun readRawFile(id: Int) = app.resources.openRawResource(id).readBytes()
 
 
-fun isValidUri(uriString: String): Boolean {
-    try {
-        val uri = Uri.parse(uriString)
-        return uri != null && uri.scheme != null
-    } catch (e: Exception) {
-        return false
-    }
-}
-
 fun showError(e: Throwable, tag: String = "") {
     Log.e(
         "error",
@@ -248,26 +262,28 @@ fun getFileAccessUrl(
     shareInfo: String,
     fileName: String
 ): String {
-    return "${host}/api/download?s=${
-        URLEncoder.encode(
-            shareInfo,
-            "UTF-8"
-        )
-    }&accessKey=${mixFileServer.accessKey}#${fileName}"
+    return URLBuilder(host).apply {
+        path("api", "download", fileName)
+        fragment = fileName
+        parameters.apply {
+            append("s", shareInfo)
+            if (mixFileServer.enableAccessKey) {
+                append("accessKey", mixFileServer.accessKey)
+            }
+        }
+
+    }.buildString()
 }
 
 fun getIpAddressInLocalNetwork(): String {
-    val networkInterfaces = NetworkInterface.getNetworkInterfaces().iterator().asSequence()
-    val localAddresses = networkInterfaces.flatMap {
-        it.inetAddresses.asSequence()
-            .filter { inetAddress ->
-                inetAddress.isSiteLocalAddress && inetAddress?.hostAddress?.contains(":")
-                    .isFalse() &&
-                        inetAddress.hostAddress != "127.0.0.1"
-            }
-            .map { inetAddress -> inetAddress.hostAddress }
-    }
-    return localAddresses.firstOrNull() ?: "127.0.0.1"
+    return NetworkInterface.getNetworkInterfaces()?.asSequence()
+        ?.filter { it.isUp }
+        ?.flatMap { it.inetAddresses.asSequence() }
+        ?.find { addr ->
+            addr is Inet4Address &&
+                    addr.isSiteLocalAddress &&
+                    addr.hostAddress != "127.0.0.1"
+        }?.hostAddress ?: "127.0.0.1"
 }
 
 inline fun errorDialog(title: String, block: () -> Unit) {

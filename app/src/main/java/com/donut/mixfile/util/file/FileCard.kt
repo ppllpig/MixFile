@@ -34,8 +34,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.core.utils.parseFileMimeType
-import com.donut.mixfile.server.core.utils.resolveMixShareInfo
-import com.donut.mixfile.server.downloadUrl
 import com.donut.mixfile.server.serverStarted
 import com.donut.mixfile.ui.routes.home.tryResolveFile
 import com.donut.mixfile.ui.theme.colorScheme
@@ -85,18 +83,15 @@ fun PreviewCard(
             verticalArrangement = Arrangement.Bottom
         ) {
             if (serverStarted) {
-                val shareInfo = resolveMixShareInfo(fileDataLog.shareInfoData)
-                if (shareInfo != null) {
-                    if (isImage && fileDataLog.size < 1024 * 1024 * 20 || isVideo) {
-                        ImageContent(
-                            shareInfo.downloadUrl,
-                            Modifier
-                                .height(200.dp)
-                                .fillMaxSize(),
-                            scale = ContentScale.Crop
+                if (isImage && fileDataLog.size < 1024 * 1024 * 20 || isVideo) {
+                    ImageContent(
+                        fileDataLog.downloadUrl,
+                        Modifier
+                            .height(200.dp)
+                            .fillMaxSize(),
+                        scale = ContentScale.Crop
 
-                        )
-                    }
+                    )
                 }
             }
             Column(
@@ -135,7 +130,7 @@ fun FileCardList(
     cardList: List<FileDataLog>,
     selected: Set<FileDataLog> = setOf(),
     onClick: (FileDataLog) -> Unit = {
-        tryResolveFile(it.shareInfoData)
+        showFileInfoDialog(it)
     },
     longClick: (FileDataLog) -> Unit = {},
 ) {

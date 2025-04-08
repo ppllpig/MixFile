@@ -10,20 +10,23 @@ import androidx.compose.ui.Modifier
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.util.UseEffect
+import com.donut.mixfile.util.compareByName
 import com.donut.mixfile.util.file.favCategories
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.loadFileList
 import com.donut.mixfile.util.file.showFileList
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
-import com.donut.mixfile.util.sortByName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 fun openCategorySelect(default: String = "", onSelect: (String) -> Unit) {
     MixDialogBuilder("收藏分类").apply {
         setContent {
-            SingleSelectItemList(favCategories.toList().sortByName(), default) {
+            SingleSelectItemList(
+                favCategories.toList().sortedWith { str1, str2 -> str1.compareByName(str2) },
+                default
+            ) {
                 onSelect(it)
                 closeDialog()
             }

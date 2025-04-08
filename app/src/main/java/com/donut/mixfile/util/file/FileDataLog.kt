@@ -7,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-
 import com.alibaba.fastjson2.annotation.JSONField
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
@@ -15,6 +14,7 @@ import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.favorites.currentCategory
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
+import com.donut.mixfile.ui.routes.home.serverAddress
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.getFileAccessUrl
 import com.donut.mixfile.util.showToast
@@ -37,9 +37,17 @@ data class FileDataLog(
         category = category.trim()
     }
 
+    fun isSimilar(other: FileDataLog): Boolean {
+        return other.shareInfoData.contentEquals(shareInfoData)
+    }
+
     @get:JSONField(serialize = false)
     val downloadUrl: String
         get() = getFileAccessUrl(getLocalServerAddress(), shareInfoData, name)
+
+    @get:JSONField(serialize = false)
+    val lanUrl: String
+        get() = getFileAccessUrl(serverAddress, shareInfoData, name)
 
     fun updateDataList(
         list: List<FileDataLog>,
@@ -98,7 +106,7 @@ data class FileDataLog(
 
     override fun equals(other: Any?): Boolean {
         if (other !is FileDataLog) return false
-        return shareInfoData.contentEquals(other.shareInfoData) && category.contentEquals(other.category)
+        return isSimilar(other) && category.contentEquals(other.category)
     }
 }
 
