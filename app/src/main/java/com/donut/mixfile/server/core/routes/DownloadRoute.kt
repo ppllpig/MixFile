@@ -5,6 +5,7 @@ import com.donut.mixfile.server.core.httpClient
 import com.donut.mixfile.server.core.utils.SortedTask
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.encodeURL
+import com.donut.mixfile.server.core.utils.ifNullOrBlank
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import io.ktor.http.ContentType
@@ -49,10 +50,9 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
             return@route
         }
 
-        val referer =
-            (param["referer"] ?: "").ifBlank { shareInfo.referer }
-        val name =
-            (param["name"] ?: "").ifBlank { shareInfo.fileName }
+        val referer = param["referer"].ifNullOrBlank { shareInfo.referer }
+
+        val name = param["name"].ifNullOrBlank { shareInfo.fileName }
 
         var contentLength = shareInfo.fileSize
         val range: LongRange? = call.request.ranges()?.mergeToSingle(contentLength)
