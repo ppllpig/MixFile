@@ -21,11 +21,13 @@ import com.donut.mixfile.util.objects.UpdateChecker
 import com.donut.mixfile.util.showError
 import com.donut.mixfile.util.showErrorDialog
 import com.tencent.mmkv.MMKV
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 
 
-val appScope by lazy { MainScope() }
+val appScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
 lateinit var kv: MMKV
 

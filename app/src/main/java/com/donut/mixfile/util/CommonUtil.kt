@@ -226,7 +226,7 @@ fun debug(text: String?, tag: String = "test") {
     Log.d(tag, text ?: "null")
 }
 
-inline fun catchError(tag: String = "", onError: () -> Unit = {}, block: () -> Unit) {
+inline fun catchError(tag: String = "", block: () -> Unit) {
     try {
         block()
     } catch (e: Exception) {

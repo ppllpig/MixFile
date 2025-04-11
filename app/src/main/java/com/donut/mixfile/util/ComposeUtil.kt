@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.donut.mixfile.appScope
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.isNotNull
@@ -125,7 +126,7 @@ fun TipText(content: String, onClick: () -> Unit = {}) {
 
 @Composable
 fun OnResume(block: () -> Unit) {
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleObserver = remember {
         LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
