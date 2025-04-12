@@ -120,7 +120,7 @@ fun decompressGzip(compressed: ByteArray): String {
     }
 }
 
-fun String.encodeURL(): String? {
+fun String.encodeURL(): String {
     return URLEncoder.encode(this, "UTF-8")
 }
 

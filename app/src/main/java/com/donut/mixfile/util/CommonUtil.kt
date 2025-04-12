@@ -10,6 +10,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
+import com.donut.mixfile.server.core.utils.encodeURL
 import com.donut.mixfile.server.core.utils.genRandomString
 import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.server.mixFileServer
@@ -263,7 +264,7 @@ fun getFileAccessUrl(
     fileName: String
 ): String {
     return URLBuilder(host).apply {
-        path("api", "download", fileName)
+        path("api", "download", fileName.encodeURL())
         fragment = fileName
         parameters.apply {
             append("s", shareInfo)
