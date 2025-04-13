@@ -1,2 +1,3 @@
 /build
 /src/main/java/com/donut/mixfile/server/core/uploaders/hidden
+/src/test
