@@ -36,7 +36,6 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.InfoText
-import com.donut.mixfile.util.file.sanitizeFileName
 import com.donut.mixfile.util.file.saveFileToStorage
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.objects.AnimatedLoadingBar

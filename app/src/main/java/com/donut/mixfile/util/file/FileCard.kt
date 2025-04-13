@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.serverStarted
-import com.donut.mixfile.ui.routes.home.tryResolveFile
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
@@ -49,7 +47,9 @@ var filePreview by cachedMutableOf("关闭", "mix_file_preview")
 fun PreviewCard(
     fileDataLog: FileDataLog,
     showDate: Boolean = true,
-    longClick: () -> Unit = {},
+    longClick: (FileDataLog) -> Unit = {},
+    selected: Boolean,
+    onClick: (FileDataLog) -> Unit
 ) {
     val isImage = fileDataLog.name.parseFileMimeType().run {
         this.startsWith("image/")
@@ -62,24 +62,34 @@ fun PreviewCard(
     LaunchedEffect(favorites) {
 
     }
+
+    val color = remember(selected) {
+        if (selected)
+            Color(107, 184, 242, 84)
+        else
+            Color(107, 218, 246, 0)
+    }
+
     ElevatedCard(
-        colors = CardDefaults.cardColors(
-//            containerColor = Color(107, 218, 246, 0),
-        ),
+//        colors = CardDefaults.cardColors(
+//            contentColor = color,
+//        ),
         modifier = Modifier
             .fillMaxSize()
             .padding(5.dp)
             .combinedClickable(
                 onLongClick = {
-                    longClick()
+                    longClick(fileDataLog)
                 }
             ) {
-                tryResolveFile(fileDataLog.shareInfoData)
+                onClick(fileDataLog)
             }
     ) {
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color),
             verticalArrangement = Arrangement.Bottom
         ) {
             if (serverStarted) {
@@ -144,9 +154,13 @@ fun FileCardList(
             columns = GridCells.Fixed(2),
         ) {
             items(cardList.size) { index ->
-                PreviewCard(cardList[index]) {
-                    longClick(cardList[index])
-                }
+                val log = cardList[index]
+                PreviewCard(
+                    log,
+                    onClick = onClick,
+                    longClick = longClick,
+                    selected = selected.contains(log)
+                )
             }
         }
         return

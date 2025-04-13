@@ -16,7 +16,6 @@ import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import io.ktor.http.URLBuilder
-import io.ktor.http.path
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -263,8 +262,7 @@ fun getFileAccessUrl(
     shareInfo: String,
     fileName: String
 ): String {
-    return URLBuilder(host).apply {
-        path("api", "download", fileName.encodeURL())
+    return URLBuilder("${host}/api/download/${fileName.encodeURL()}").apply {
         fragment = fileName
         parameters.apply {
             append("s", shareInfo)

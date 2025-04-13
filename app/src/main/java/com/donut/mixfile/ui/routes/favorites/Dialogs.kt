@@ -82,12 +82,6 @@ fun editCategory(name: String, callback: (String) -> Unit = {}) {
             favCategories += newName
             currentCategory = newName
             showToast("修改分类名称成功")
-            favorites.forEach {
-                if (it.category.contentEquals(name)) {
-                    it.category = newName
-                }
-            }
-
             favorites = favorites.map {
                 if (it.category.contentEquals(name)) {
                     it.copy(category = newName)
