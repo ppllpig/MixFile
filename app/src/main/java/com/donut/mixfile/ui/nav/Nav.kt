@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.CastConnected
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
@@ -33,6 +34,7 @@ import com.donut.mixfile.ui.routes.About
 import com.donut.mixfile.ui.routes.MixSettings
 import com.donut.mixfile.ui.routes.favorites.Favorites
 import com.donut.mixfile.ui.routes.home.Home
+import com.donut.mixfile.ui.routes.webdav.WebDAV
 import com.donut.mixfile.util.OnDispose
 import kotlinx.coroutines.launch
 
@@ -81,6 +83,7 @@ fun NavComponent() {
                     NavButton("主页", Icons.Outlined.Home, Home.name)
                     NavButton("收藏", Icons.Outlined.Star, Favorites.name)
                     NavButton("设置", Icons.Outlined.Settings, MixSettings.name)
+                    NavButton("WebDAV", Icons.Outlined.CastConnected, WebDAV.name)
                     NavButton("关于", Icons.Outlined.Info, About.name)
                 }
             }

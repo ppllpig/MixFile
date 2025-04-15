@@ -23,6 +23,7 @@ import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
+import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.objects.ProgressContent
@@ -118,6 +119,30 @@ fun showFileList(fileList: List<FileDataLog>) {
         }
         show()
     }
+}
+
+fun importFileList(url: String) {
+    val progress = ProgressContent()
+    MixDialogBuilder("解析中").apply {
+        setContent {
+            UseEffect {
+                val fileList = loadFileList(url, progress)
+                if (fileList == null) {
+                    showToast("解析分享列表失败!")
+                    closeDialog()
+                    return@UseEffect
+                }
+                withContext(Dispatchers.Main) {
+                    showFileList(fileList.toList())
+                    closeDialog()
+                }
+            }
+            progress.LoadingContent()
+        }
+        setDefaultNegative()
+        show()
+    }
+
 }
 
 suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<FileDataLog>? {

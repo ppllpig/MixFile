@@ -16,9 +16,12 @@ import com.donut.mixfile.MainActivity
 import com.donut.mixfile.R
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
+import com.donut.mixfile.kv
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
+import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
 import com.donut.mixfile.server.core.utils.MixUploadTask
+import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.server.image.createBlankBitmap
 import com.donut.mixfile.server.image.toGif
 import com.donut.mixfile.ui.routes.favorites.result
@@ -29,10 +32,10 @@ import com.donut.mixfile.ui.routes.increaseUploadData
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.showError
-import io.ktor.server.application.ApplicationCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.InputStream
 
@@ -69,6 +72,12 @@ val mixFileServer = object : MixFileServer(
     override val enableAccessKey: Boolean
         get() = enableServerAccessKey
 
+    override val webDav: WebDavManager = object : WebDavManager() {
+        override suspend fun saveWebDavData(data: ByteArray) {
+            kv.encode(WEB_DAV_KEY, data)
+        }
+    }
+
 
     override fun onError(error: Throwable) {
         showError(error)
@@ -78,7 +87,7 @@ val mixFileServer = object : MixFileServer(
         return getCurrentUploader()
     }
 
-    override fun getStaticFile(path: String): InputStream? {
+    override suspend fun getStaticFile(path: String): InputStream? {
         try {
             val fileStream = app.assets.open(path)
             return fileStream
@@ -87,28 +96,31 @@ val mixFileServer = object : MixFileServer(
         }
     }
 
-    override fun genDefaultImage(): ByteArray {
+    override suspend fun genDefaultImage(): ByteArray {
         return createBlankBitmap().toGif()
     }
 
-    override fun getFileHistory(): String {
-        if (result.isEmpty()) {
-            return favorites.asReversed().take(1000).toJSONString()
+    override suspend fun getFileHistory(): String {
+        return withContext(Dispatchers.Main) {
+            if (result.isEmpty()) {
+                return@withContext favorites.asReversed().take(1000).toJSONString()
+            }
+            result.take(1000).toJSONString()
         }
-        return result.take(1000).toJSONString()
     }
 
     override fun getUploadTask(
-        call: ApplicationCall,
         name: String,
         size: Long,
         add: Boolean
     ): MixUploadTask {
-        return UploadTask(call, name, size, add)
+        return UploadTask(name, size, add)
     }
 
 }
 var serverStarted by mutableStateOf(false)
+
+val WEB_DAV_KEY = "mixfile_web_dav_data"
 
 
 class FileService : Service() {
@@ -126,7 +138,16 @@ class FileService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         appScope.launch(Dispatchers.IO) {
-            mixFileServer.start(false)
+            mixFileServer.apply {
+                webDav.loaded = false
+                launch(Dispatchers.IO) {
+                    ignoreError {
+                        webDav.loadDataFromBytes(kv.decodeBytes(WEB_DAV_KEY) ?: byteArrayOf())
+                    }
+                    webDav.loaded = true
+                }
+                start(false)
+            }
             delay(1000)
             serverStarted = true
         }

@@ -19,8 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
 -dontwarn org.slf4j.impl.StaticLoggerBinder
+-dontwarn com.sun.nio.file.SensitivityWatchEventModifier
+-dontwarn java.beans.BeanInfo
+-dontwarn java.beans.IntrospectionException
+-dontwarn java.beans.Introspector
+-dontwarn java.beans.PropertyDescriptor
 -keep class xyz.doikki.videoplayer.** { *; }
 -keep class com.donut.** { *; }
 -keep class com.tencent.mmkv.** {*;}

@@ -14,7 +14,6 @@ import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
 import com.donut.mixfile.server.UPLOADERS
-import com.donut.mixfile.server.core.utils.registerJson
 import com.donut.mixfile.util.getAppVersionName
 import com.donut.mixfile.util.objects.MixActivity
 import com.donut.mixfile.util.objects.UpdateChecker
@@ -48,7 +47,8 @@ class App : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
-        registerJson()
+        MMKV.initialize(this)
+        kv = MMKV.defaultMMKV()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             showError(e)
             if (Looper.myLooper() == null) {
@@ -58,9 +58,7 @@ class App : Application(), ImageLoaderFactory {
         }
         innerApp = this
         UPLOADERS
-        MMKV.initialize(this)
         updateChecker = UpdateChecker("InvertGeek", "MixFile", getAppVersionName(this) ?: "")
-        kv = MMKV.defaultMMKV()
         startService(Intent(this, FileService::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         })

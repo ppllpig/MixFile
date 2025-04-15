@@ -22,7 +22,6 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.routes.favorites.importFileList
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
 import com.donut.mixfile.ui.routes.home.DownloadTask
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow

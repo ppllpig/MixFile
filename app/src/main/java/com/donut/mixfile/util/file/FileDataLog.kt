@@ -18,24 +18,15 @@ import com.donut.mixfile.ui.routes.home.serverAddress
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.getFileAccessUrl
 import com.donut.mixfile.util.showToast
-import java.util.Date
 
 
 data class FileDataLog(
     val shareInfoData: String,
     val name: String,
     val size: Long,
-    val time: Date = Date(),
-    var category: String = currentCategory.ifEmpty { "默认" },
+    val time: Long = System.currentTimeMillis(),
+    val category: String = currentCategory.ifEmpty { "默认" },
 ) {
-
-    init {
-        //限制category长度
-        if (category.length > 20) {
-            category = category.substring(0, 20)
-        }
-        category = category.trim()
-    }
 
     fun isSimilar(other: FileDataLog): Boolean {
         return other.shareInfoData.contentEquals(shareInfoData)

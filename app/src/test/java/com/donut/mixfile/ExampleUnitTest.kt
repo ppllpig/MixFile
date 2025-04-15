@@ -1,5 +1,8 @@
 package com.donut.mixfile
 
+import com.alibaba.fastjson2.annotation.JSONField
+import com.alibaba.fastjson2.to
+import com.alibaba.fastjson2.toJSONString
 import org.junit.Test
 import java.util.Date
 
@@ -23,11 +26,15 @@ import java.util.Date
  */
 
 class ExampleUnitTest {
-
-    data class User(
-        val age: Int,
+    class User(
+        age: Int,
         val date: Date = Date()
     ) {
+        @JSONField
+        var age2: Int = age
+            private set
+
+
         init {
             println("init")
         }
@@ -36,7 +43,6 @@ class ExampleUnitTest {
 
     @Test
     fun main() {
-
 
     }
 

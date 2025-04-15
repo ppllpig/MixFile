@@ -15,6 +15,7 @@ import com.donut.mixfile.ui.routes.About
 import com.donut.mixfile.ui.routes.MixSettings
 import com.donut.mixfile.ui.routes.favorites.Favorites
 import com.donut.mixfile.ui.routes.home.Home
+import com.donut.mixfile.ui.routes.webdav.WebDAV
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -35,6 +36,7 @@ fun NavContent(innerPaddingValues: PaddingValues) {
             MixSettings(this)
             About(this)
             Favorites(this)
+            WebDAV(this)
         }
     }
 }

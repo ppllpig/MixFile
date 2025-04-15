@@ -1,18 +1,20 @@
 package com.donut.mixfile.server.core
 
 
+import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
 import com.donut.mixfile.server.core.routes.getRoutes
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.genRandomString
 import com.donut.mixfile.server.core.utils.ignoreError
-import com.donut.mixfile.server.core.utils.registerJson
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.OnCallContext
+import io.ktor.server.application.PipelineCall
 import io.ktor.server.application.call
+import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -20,18 +22,28 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
 import java.io.InputStream
 import java.net.ServerSocket
 
 
+fun Route.interceptCall(
+    call: suspend OnCallContext<Unit>.(PipelineCall) -> Unit,
+    build: Route.() -> Unit
+): Route {
+    val route = this
+    route.install(createRouteScopedPlugin("InterceptCallPlugin") {
+        onCall(call)
+    })
+    route.build()
+    return route
+}
+
 abstract class MixFileServer(
     var serverPort: Int = 4719,
 ) {
 
-    init {
-        registerJson()
-    }
 
     abstract val downloadTaskCount: Int
     abstract val uploadTaskCount: Int
@@ -44,14 +56,13 @@ abstract class MixFileServer(
 
     abstract fun getUploader(): Uploader
 
-    abstract fun getStaticFile(path: String): InputStream?
+    abstract suspend fun getStaticFile(path: String): InputStream?
 
-    abstract fun genDefaultImage(): ByteArray
+    abstract suspend fun genDefaultImage(): ByteArray
 
-    abstract fun getFileHistory(): String
+    abstract suspend fun getFileHistory(): String
 
     open fun getUploadTask(
-        call: ApplicationCall,
         name: String,
         size: Long,
         add: Boolean
@@ -63,7 +74,8 @@ abstract class MixFileServer(
         override suspend fun complete(shareInfo: MixShareInfo) {
         }
 
-        override var onStop: () -> Unit = {}
+        override val onStop: MutableList<suspend () -> Unit> = mutableListOf()
+
         override suspend fun updateProgress(size: Long, total: Long) {
         }
 
@@ -77,6 +89,8 @@ abstract class MixFileServer(
 
     }
 
+    open val webDav = WebDavManager()
+
 
     fun start(wait: Boolean) {
         serverPort = findAvailablePort(serverPort) ?: serverPort
@@ -88,6 +102,7 @@ abstract class MixFileServer(
                     finish()
                 }
             }
+
             install(ContentNegotiation) {
 
             }

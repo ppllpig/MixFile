@@ -25,7 +25,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -35,10 +38,12 @@ import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.serverStarted
 import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.formatTime
 import com.donut.mixfile.util.reveiver.NetworkChangeReceiver
+import kotlinx.coroutines.delay
 
 var filePreview by cachedMutableOf("关闭", "mix_file_preview")
 
@@ -92,16 +97,31 @@ fun PreviewCard(
                 .background(color),
             verticalArrangement = Arrangement.Bottom
         ) {
+            var loadImg by remember { mutableStateOf(false) }
+            UseEffect {
+                delay(300)
+                loadImg = true
+            }
             if (serverStarted) {
                 if (isImage && fileDataLog.size < 1024 * 1024 * 20 || isVideo) {
-                    ImageContent(
-                        fileDataLog.downloadUrl,
-                        Modifier
-                            .height(200.dp)
-                            .fillMaxSize(),
-                        scale = ContentScale.Crop
+                    if (loadImg) {
+                        ImageContent(
+                            fileDataLog.downloadUrl,
+                            Modifier
+                                .height(200.dp)
+                                .fillMaxSize(),
+                            scale = ContentScale.Crop
 
-                    )
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .height(200.dp)
+                                .fillMaxSize()
+                        ) {
+
+                        }
+                    }
                 }
             }
             Column(

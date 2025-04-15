@@ -31,9 +31,6 @@ import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.response.respondText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -91,14 +88,14 @@ fun UploadTaskCard(
 var uploadTasks by mutableStateOf(listOf<UploadTask>())
 
 class UploadTask(
-    val call: ApplicationCall? = null,
     val fileName: String,
     val fileSize: Long,
     val add: Boolean = true,
 ) : MixUploadTask {
-    var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
 
-    override var onStop = {}
+    override val onStop: MutableList<suspend () -> Unit> = mutableListOf()
+
+    var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
 
     override suspend fun updateProgress(size: Long, total: Long) {
         withContext(Dispatchers.Main) {
@@ -172,8 +169,7 @@ class UploadTask(
         }
         stopped = true
         appScope.launch(Dispatchers.IO) {
-            call?.respondText("上传已取消", status = HttpStatusCode.InternalServerError)
-            onStop()
+            onStop.forEach { it() }
         }
     }
 

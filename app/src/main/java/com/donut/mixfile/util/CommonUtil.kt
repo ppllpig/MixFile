@@ -305,6 +305,9 @@ fun formatTime(date: Date, format: String = "yyyy-MM-dd HH:mm:ss"): String {
     return formatter.format(date)
 }
 
+fun formatTime(date: Long, format: String = "yyyy-MM-dd HH:mm:ss") = formatTime(Date(date), format)
+
+
 fun Uri.getFileName(): String {
     var fileName = ""
     app.contentResolver.query(this, null, null, null, null)?.use {
