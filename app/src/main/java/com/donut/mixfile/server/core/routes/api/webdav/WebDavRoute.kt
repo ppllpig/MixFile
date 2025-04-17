@@ -14,6 +14,8 @@ import io.ktor.http.decodeURLQueryComponent
 import io.ktor.server.request.contentLength
 import io.ktor.server.request.header
 import io.ktor.server.request.receiveChannel
+import io.ktor.server.request.uri
+import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -38,8 +40,8 @@ suspend fun RoutingContext.handleCopy(keep: Boolean, webDavManager: WebDavManage
     val overwrite = call.request.header("overwrite").contentEquals("T")
     val destination = call.request.header("destination")?.decodeURLQueryComponent().let {
         it?.substringAfter("/api/webdav/")
-    }
-    if (destination.isNullOrBlank()) {
+    }.let { normalizePath(it ?: "") }
+    if (destination.isBlank()) {
         call.respond(HttpStatusCode.BadRequest)
         return
     }
@@ -54,6 +56,14 @@ suspend fun RoutingContext.handleCopy(keep: Boolean, webDavManager: WebDavManage
 
 fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
     return {
+        webdav("OPTIONS") {
+            call.response.apply {
+                header("Allow", "OPTIONS, DELETE, COPY, MOVE, PROPFIND")
+                header("Dav", "1")
+                header("Ms-Author-Via", "DAV")
+            }
+            call.respond(HttpStatusCode.OK)
+        }
         webdav("GET") {
             val fileNode = webDav.getFile(davPath)
             if (fileNode == null) {
@@ -104,6 +114,25 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             webDav.saveData()
         }
         propfind {
+            val depth = call.request.header("depth")?.toInt() ?: 0
+            if (depth == 0) {
+                val file = webDav.getFile(davPath)
+                if (file == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                    return@propfind
+                }
+                val text = """
+                <D:multistatus xmlns:D="DAV:">
+                ${file.toXML(call.request.uri)}
+                </D:multistatus>
+                """
+                call.respondText(
+                    contentType = ContentType.Application.Xml,
+                    status = HttpStatusCode.MultiStatus,
+                    text = """<?xml version="1.0" encoding="utf-8"?>${text}"""
+                )
+                return@propfind
+            }
             val fileList = webDav.listFiles(davPath)
             if (fileList == null) {
                 call.respond(HttpStatusCode.NotFound)
@@ -111,19 +140,18 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             }
             val xmlFileList = fileList.toMutableList().apply {
                 add(0, WebDavFile(davParentPath.substringAfterLast("/"), isFolder = true))
-            }.joinToString(separator = "\n") {
-                it.toXML(davPath)
+            }.joinToString(separator = "") {
+                it.toXML(call.request.uri)
             }
-
+            val text = """
+                <D:multistatus xmlns:D="DAV:">
+                $xmlFileList
+                </D:multistatus>
+                """
             call.respondText(
                 contentType = ContentType.Application.Xml,
                 status = HttpStatusCode.MultiStatus,
-                text = """
-                  <?xml version="1.0" encoding="utf-8"?>
-                  <d:multistatus xmlns:d="DAV:">
-                     $xmlFileList
-                  </d:multistatus>
-                """.trimIndent()
+                text = """<?xml version="1.0" encoding="utf-8"?>${text}"""
             )
         }
     }

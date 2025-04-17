@@ -103,6 +103,20 @@ fun showFileList(fileList: List<FileDataLog>) {
             }
         }
         setPositiveButton("导入文件") {
+            showImportConfirmWindow(fileList)
+        }
+        show()
+    }
+}
+
+
+fun showImportConfirmWindow(fileList: List<FileDataLog>) {
+    MixDialogBuilder(
+        "确定导入?",
+        "是否确定导入文件列表",
+    ).apply {
+        setDefaultNegative()
+        setPositiveButton("确定") {
             val fileMap = favorites.map { it.shareInfoData }.toSet()
             val newFiles = mutableSetOf<FileDataLog>()
             val newCategories = mutableSetOf<String>()
