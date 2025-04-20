@@ -13,7 +13,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
-import com.donut.mixfile.server.core.localClient
 import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavFile
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer
@@ -22,6 +21,7 @@ import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.UseEffect
 import com.donut.mixfile.util.file.doUploadFile
 import com.donut.mixfile.util.file.loadFileList
+import com.donut.mixfile.util.file.localClient
 import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
@@ -80,11 +80,17 @@ fun exportWebDavData() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                OutlinedTextField(value = fileName, onValueChange = {
-                    fileName = it
-                }, modifier = Modifier.fillMaxWidth(), label = {
-                    Text(text = "存档备注")
-                })
+                OutlinedTextField(
+                    value = fileName,
+                    onValueChange = {
+                        fileName = it
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text(text = "存档备注")
+                    },
+                    maxLines = 1,
+                )
                 Text(text = "将会导出当前webdav存档")
             }
         }
@@ -228,8 +234,16 @@ fun importWebDavData(url: String) {
                     closeDialog()
                     return@UseEffect
                 }
-                mixFileServer.webDav.loadDataFromBytes(webDavData)
-                mixFileServer.webDav.saveData()
+                val dav = mixFileServer.webDav
+                val data = dav.parseDataFromBytes(webDavData)
+                data.keys.forEach { key ->
+                    val fileList = dav.WEBDAV_DATA.getOrDefault(key, mutableSetOf())
+                    val dataFileList = data.getOrDefault(key, mutableSetOf())
+                    fileList.removeAll(dataFileList)
+                    fileList.addAll(dataFileList)
+                    dav.WEBDAV_DATA[key] = fileList
+                }
+                dav.saveData()
                 showToast("导入成功!")
                 withContext(Dispatchers.Main) {
                     closeDialog()

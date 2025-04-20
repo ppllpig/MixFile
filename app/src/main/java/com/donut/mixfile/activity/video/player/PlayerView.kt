@@ -183,14 +183,13 @@ fun VideoPlayerScreen(
             player = player,
             videos = videoUris,
             onPlayTimeChange = {
-                playHistory.filter { it.hash != hash }.toMutableList().apply {
+                playHistory = playHistory.filter { it.hash != hash }.toMutableList().apply {
                     val history =
                         VideoHistory(player.currentPosition, hash, player.currentMediaItemIndex)
                     add(0, history)
-                    if (this.size > 100) {
-                        this.removeAt(this.lastIndex)
+                    if (size > 500) {
+                        removeAt(lastIndex)
                     }
-                    playHistory = this
                 }
             },
             onTrackTimeChange = {

@@ -3,7 +3,6 @@ package com.donut.mixfile.server.core.routes
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.routes.api.getAPIRoute
 import com.donut.mixfile.server.core.utils.parseFileMimeType
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -21,9 +20,10 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
             val file = call.request.path().substring(1).ifEmpty {
                 "index.html"
             }
-            val fileStream = getStaticFile(file) ?: return@get call.respond(HttpStatusCode.NotFound)
+            val fileStream =
+                getStaticFile(file) ?: return@get call.respond(HttpStatusCode.NotFound)
             call.respondBytesWriter(
-                contentType = ContentType.parse(file.parseFileMimeType())
+                contentType = file.parseFileMimeType()
             ) {
                 fileStream.toByteReadChannel().copyTo(this)
             }

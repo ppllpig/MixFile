@@ -21,8 +21,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
-import com.donut.mixfile.server.core.StreamContent
-import com.donut.mixfile.server.core.localClient
+import com.donut.mixfile.server.core.utils.StreamContent
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
@@ -35,8 +34,13 @@ import com.donut.mixfile.util.getFileName
 import com.donut.mixfile.util.getFileSize
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.onDownload
 import io.ktor.client.plugins.onUpload
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.put
@@ -46,6 +50,7 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
+import io.ktor.util.encodeBase64
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -60,25 +65,38 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
 
+val localClient = HttpClient(OkHttp).config {
+    install(HttpTimeout) {
+        requestTimeoutMillis = 1000 * 60 * 60 * 24 * 30L
+        socketTimeoutMillis = 1000 * 60 * 60
+        connectTimeoutMillis = 1000 * 60 * 60
+    }
+    defaultRequest {
+        header("Authorization", "Basic ${":${mixFileServer.password}".encodeBase64()}")
+    }
+}
+
 suspend fun putUploadFile(
     data: Any?,
     name: String,
     add: Boolean = true,
     progressContent: ProgressContent = ProgressContent(),
 ): String {
-    val response = localClient.put {
-        url("${getLocalServerAddress()}/api/upload")
-        onUpload(progressContent.ktorListener)
-        parameter("name", name)
-        parameter("add", add)
-        parameter("accessKey", mixFileServer.accessKey)
-        setBody(data)
-    }
-    val message = response.bodyAsText()
-    if (!response.status.isSuccess()) {
-        throw Exception("上传失败: $message")
-    }
-    return message
+    return errorDialog("上传失败") {
+        val response = localClient.put {
+            url("${getLocalServerAddress()}/api/upload")
+            onUpload(progressContent.ktorListener)
+            parameter("name", name)
+            parameter("add", add)
+            setBody(data)
+        }
+        val message = response.bodyAsText()
+        if (!response.status.isSuccess()) {
+            throw Exception("上传失败: $message")
+        }
+
+        return message
+    } ?: ""
 }
 
 
@@ -104,16 +122,17 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
             val scope = rememberCoroutineScope()
             LaunchedEffect(Unit) {
                 job = appScope.launch(Dispatchers.IO) {
-                    errorDialog("上传失败") {
-                        val message = putUploadFile(data, name, add, progressContent)
-                        if (!scope.coroutineContext.isActive) {
-                            return@launch
-                        }
-                        withContext(Dispatchers.Main) {
-                            tryResolveFile(message)
-                        }
-                        showToast("上传成功!")
+                    val message = putUploadFile(data, name, add, progressContent)
+                    if (message.isEmpty()) {
+                        return@launch
                     }
+                    if (!scope.coroutineContext.isActive) {
+                        return@launch
+                    }
+                    withContext(Dispatchers.Main) {
+                        tryResolveFile(message)
+                    }
+                    showToast("上传成功!")
                     closeDialog()
                 }
             }

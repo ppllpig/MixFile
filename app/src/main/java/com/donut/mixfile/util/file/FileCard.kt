@@ -57,11 +57,11 @@ fun PreviewCard(
     onClick: (FileDataLog) -> Unit
 ) {
     val isImage = fileDataLog.name.parseFileMimeType().run {
-        this.startsWith("image/")
+        this.contentType.contentEquals("image")
     }
 
     val isVideo = fileDataLog.name.parseFileMimeType().run {
-        this.startsWith("video/")
+        this.contentType.contentEquals("video")
     }
 
     LaunchedEffect(favorites) {

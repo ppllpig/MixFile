@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Looper
 import android.provider.OpenableColumns
 import android.util.Log
 import com.donut.mixfile.app
@@ -17,7 +18,10 @@ import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import io.ktor.http.URLBuilder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.EOFException
 import java.math.BigInteger
@@ -266,8 +270,8 @@ fun getFileAccessUrl(
         fragment = fileName
         parameters.apply {
             append("s", shareInfo)
-            if (mixFileServer.enableAccessKey) {
-                append("accessKey", mixFileServer.accessKey)
+            if (mixFileServer.password.isNotBlank()) {
+                append("accessKey", mixFileServer.password)
             }
         }
 
@@ -285,18 +289,36 @@ fun getIpAddressInLocalNetwork(): String {
         }?.hostAddress ?: "127.0.0.1"
 }
 
-inline fun errorDialog(title: String, block: () -> Unit) {
+fun isMainThread(): Boolean {
+    return Looper.myLooper() == Looper.getMainLooper()
+}
+
+inline fun <T> errorDialog(title: String, block: () -> T): T? {
     try {
-        block()
+        return block()
     } catch (e: Exception) {
         when (e) {
             is CancellationException,
             is EOFException,
-                -> return
+                -> return null
         }
         appScope.launch(Dispatchers.Main) {
             showErrorDialog(e, title)
         }
+    }
+    return null
+}
+
+fun CoroutineScope.loopTask(
+    delay: Long,
+    initDelay: Long = 0,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    block: suspend () -> Unit
+) = launch(dispatcher) {
+    delay(initDelay)
+    while (true) {
+        block()
+        delay(delay)
     }
 }
 

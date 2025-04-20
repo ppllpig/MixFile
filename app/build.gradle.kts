@@ -15,8 +15,8 @@ android {
         applicationId = "com.donut.mixfile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 110
-        versionName = "1.15.2"
+        versionCode = 111
+        versionName = "1.15.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,22 +69,18 @@ val brotliVersion = "1.17.0"
 val operatingSystem: OperatingSystem = DefaultNativePlatform.getCurrentOperatingSystem()
 
 dependencies {
-    implementation(libs.kotlin.retry)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.fastjson2.kotlin)
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.mmkv)
-    implementation(libs.mimetypes)
     implementation(libs.zoomable)
     implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.cio)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.default.headers)
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.netty)
-//    implementation(libs.ktor.serialization.gson)
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
@@ -95,7 +91,6 @@ dependencies {
     implementation(libs.androidx.media3.ui) // [Required] Base Player UI
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.firebase.analytics)
     implementation(libs.ktor.client.content.negotiation)

@@ -41,8 +41,8 @@ import java.io.InputStream
 
 var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
-var enableServerAccessKey by cachedMutableOf(false, "enable_mix_file_access_key")
 var UPLOAD_RETRY_TIMES by cachedMutableOf(10, "UPLOAD_RETRY_TIMES")
+var SERVER_PASSWORD by cachedMutableOf("", "MIXFILE_SERVER_PASSWORD")
 
 
 val mixFileServer = object : MixFileServer(
@@ -56,9 +56,6 @@ val mixFileServer = object : MixFileServer(
         increaseUploadData(data.size.toLong())
     }
 
-    override val accessKeyTip: String
-        get() = "网页端已被禁止访问,请到APP设置中开启"
-
 
     override val downloadTaskCount: Int
         get() = DOWNLOAD_TASK_COUNT.toInt()
@@ -69,8 +66,8 @@ val mixFileServer = object : MixFileServer(
     override val requestRetryCount: Int
         get() = UPLOAD_RETRY_TIMES.toInt()
 
-    override val enableAccessKey: Boolean
-        get() = enableServerAccessKey
+    override val password: String
+        get() = SERVER_PASSWORD
 
     override val webDav: WebDavManager = object : WebDavManager() {
         override suspend fun saveWebDavData(data: ByteArray) {

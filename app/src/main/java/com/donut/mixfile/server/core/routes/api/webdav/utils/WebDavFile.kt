@@ -74,7 +74,7 @@ class WebDavFile(
 
                     }
                     "D:getcontenttype" {
-                        -name.parseFileMimeType()
+                        -name.parseFileMimeType().toString()
                     }
                     "D:getcontentlength" {
                         -size.toString()

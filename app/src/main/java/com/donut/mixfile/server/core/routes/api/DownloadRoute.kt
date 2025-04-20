@@ -1,16 +1,13 @@
 package com.donut.mixfile.server.core.routes.api
 
 import com.donut.mixfile.server.core.MixFileServer
-import com.donut.mixfile.server.core.httpClient
 import com.donut.mixfile.server.core.utils.SortedTask
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.encodeURL
 import com.donut.mixfile.server.core.utils.ifNullOrBlank
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.ranges
 import io.ktor.server.response.contentRange
@@ -94,7 +91,7 @@ private suspend fun MixFileServer.responseDownloadFileStream(
     coroutineScope {
         val fileList = fileDataList.toMutableList()
         call.respondBytesWriter(
-            contentType = ContentType.parse(name.parseFileMimeType()).withCharset(Charsets.UTF_8),
+            contentType = name.parseFileMimeType(),
             contentLength = contentLength
         ) {
             val sortedTask = SortedTask(downloadTaskCount)

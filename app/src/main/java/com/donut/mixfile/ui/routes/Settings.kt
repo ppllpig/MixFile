@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,12 +34,13 @@ import com.donut.mixfile.server.CUSTOM_REFERER
 import com.donut.mixfile.server.CUSTOM_UPLOAD_URL
 import com.donut.mixfile.server.CustomUploader
 import com.donut.mixfile.server.DOWNLOAD_TASK_COUNT
+import com.donut.mixfile.server.SERVER_PASSWORD
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_TIMES
 import com.donut.mixfile.server.UPLOAD_TASK_COUNT
+import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.currentUploader
-import com.donut.mixfile.server.enableServerAccessKey
 import com.donut.mixfile.server.getCurrentUploader
 import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -178,51 +180,23 @@ val MixSettings = MixNavPage(
         autoAddFavorite = it
     }
     CommonSwitch(
-        checked = enableServerAccessKey,
-        text = "禁止网页端访问:",
-        description = "开启后网页端将禁止访问"
-    ) {
-        enableServerAccessKey = it
-    }
-    CommonSwitch(
         checked = useSystemPlayer,
         text = "使用系统播放器:",
         description = "播放视频是否使用系统调用其他播放器"
     ) {
         useSystemPlayer = it
     }
+
+    SettingButton(text = "网页端/WebDav访问密码") {
+        setWebPassword()
+    }
+
     val uploader = remember(currentUploader) { getCurrentUploader() }
 
     SettingButton(text = "上传线路: ${uploader.name}") {
         selectUploader()
     }
-    if (uploader == CustomUploader) {
-        OutlinedTextField(
-            value = CUSTOM_UPLOAD_URL,
-            onValueChange = {
-                CUSTOM_UPLOAD_URL = it
-            },
-            label = { Text(text = "请求地址") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = CUSTOM_REFERER,
-            onValueChange = {
-                CUSTOM_REFERER = it
-            }, label = { Text(text = "referer") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            color = Color.Gray,
-            text = """
-        自定义线路请自行实现,app会使用put方式发送请求
-        请求体为图片二进制,成功请返回200状态码,内容直接返回url
-        失败返回403或500(会重试)状态码
-        另外需要实现get方法返回填充图片,推荐gif格式
-        图片尺寸不宜过大,否则影响上传速度
-    """.trimIndent()
-        )
-    }
+    uploader.SettingComponent()
     SettingButton(text = "文件预览: $filePreview") {
         selectFilePreview()
     }
@@ -278,6 +252,29 @@ val MixSettings = MixNavPage(
     }
 }
 
+fun setWebPassword() {
+    MixDialogBuilder("设置密码").apply {
+        var pass by mutableStateOf(SERVER_PASSWORD)
+        setContent {
+            OutlinedTextField(
+                value = pass,
+                onValueChange = {
+                    pass = it
+                },
+                maxLines = 1,
+                label = { Text(text = "网页/WEBDAV访问密码(留空禁用密码)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        setDefaultNegative()
+        setPositiveButton("确定") {
+            SERVER_PASSWORD = pass.trim()
+            closeDialog()
+        }
+        show()
+    }
+}
+
 fun selectFilePreview() {
     MixDialogBuilder("文件预览").apply {
         setContent {
@@ -290,6 +287,47 @@ fun selectFilePreview() {
             }
         }
         show()
+    }
+}
+
+@Composable
+fun Uploader.SettingComponent() {
+    when (this) {
+        is CustomUploader -> {
+            OutlinedTextField(
+                value = CUSTOM_UPLOAD_URL,
+                onValueChange = {
+                    CUSTOM_UPLOAD_URL = it.trim()
+                },
+                maxLines = 1,
+                label = {
+                    Text(text = "请求地址")
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = CUSTOM_REFERER,
+                maxLines = 1,
+                onValueChange = {
+                    CUSTOM_REFERER = it.trim()
+                },
+                label = {
+                    Text(text = "referer")
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth(),
+                text = """
+        自定义线路请自行实现,app会使用PUT方式发送请求
+        请求体为图片二进制,成功请返回200状态码,内容直接返回URL
+        失败返回403或500(会重试)状态码
+        另外需要实现GET方法返回填充图片,推荐gif格式
+        图片尺寸不宜过大,否则影响上传速度
+        """.trimIndent(),
+            )
+        }
     }
 }
 

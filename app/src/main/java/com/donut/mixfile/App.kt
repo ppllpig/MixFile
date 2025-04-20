@@ -15,6 +15,7 @@ import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
 import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.util.getAppVersionName
+import com.donut.mixfile.util.loopTask
 import com.donut.mixfile.util.objects.MixActivity
 import com.donut.mixfile.util.objects.UpdateChecker
 import com.donut.mixfile.util.showError
@@ -62,6 +63,10 @@ class App : Application(), ImageLoaderFactory {
         startService(Intent(this, FileService::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         })
+        appScope.loopTask(1000 * 60 * 10) {
+            kv.clearMemoryCache()
+            kv.trim()
+        }
     }
 
     override fun newImageLoader(): ImageLoader {
@@ -74,14 +79,8 @@ class App : Application(), ImageLoaderFactory {
 fun genImageLoader(
     context: Context,
     initializer: () -> OkHttpClient = { OkHttpClient() },
-    sourceListener: (ByteArray) -> Unit = {},
 ): ImageLoader {
     return ImageLoader.Builder(context).components {
-        add { result, _, _ ->
-            val source = result.source.source()
-            sourceListener(source.peek().readByteArray())
-            null
-        }
         if (Build.VERSION.SDK_INT >= 28) {
             add(ImageDecoderDecoder.Factory())
         } else {

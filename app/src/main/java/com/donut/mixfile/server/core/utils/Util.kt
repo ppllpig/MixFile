@@ -2,19 +2,28 @@ package com.donut.mixfile.server.core.utils
 
 
 import com.donut.mixfile.server.core.aes.generateRandomByteArray
-import com.github.amr.mimetypes.MimeTypes
 import io.ktor.client.request.forms.FormBuilder
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import io.ktor.http.encodeURLQueryComponent
+import io.ktor.http.content.OutgoingContent
+import io.ktor.http.defaultForFilePath
+import io.ktor.http.encodeURLParameter
 import io.ktor.http.quote
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.header
+import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
+import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.InternalAPI
+import io.ktor.utils.io.jvm.javaio.toOutputStream
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.MalformedURLException
+import java.net.ServerSocket
 import java.net.URL
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.GZIPInputStream
@@ -121,13 +130,53 @@ fun decompressGzip(compressed: ByteArray): String {
 }
 
 fun String.encodeURL(): String {
-    return encodeURLQueryComponent()
+    return encodeURLParameter()
 }
 
-fun String.parseFileMimeType() = MimeTypes.getInstance()
-    .getByExtension(this.getFileExtension())?.mimeType ?: "application/octet-stream"
+fun String.parseFileMimeType() = ContentType.defaultForFilePath(this)
 
 @OptIn(InternalAPI::class)
 fun FormBuilder.add(key: String, value: Any?, headers: Headers = Headers.Empty) {
     append(key.quote(), value ?: "", headers)
+}
+
+class StreamContent(private val stream: InputStream, val length: Long = 0) :
+    OutgoingContent.WriteChannelContent() {
+    override suspend fun writeTo(channel: ByteWriteChannel) {
+        stream.copyTo(channel.toOutputStream())
+    }
+
+    override val contentLength: Long
+        get() = length
+
+}
+
+suspend fun <T> retry(
+    times: Int = 3,
+    delay: Long = 500,
+    block: suspend () -> T
+): T {
+    repeat(times - 1) {
+        try {
+            return block()
+        } catch (e: Exception) {
+            delay(delay)
+        }
+    }
+    return block() // 最后一次尝试
+}
+
+fun RoutingContext.getHeader(name: String) = call.request.header(name)
+
+fun findAvailablePort(startPort: Int = 9527, endPort: Int = 65535): Int? {
+    for (port in startPort..endPort) {
+        ignoreError {
+            // 尝试绑定到指定端口
+            ServerSocket(port).use { serverSocket ->
+                // 成功绑定，返回该端口
+                return serverSocket.localPort
+            }
+        }
+    }
+    return null
 }

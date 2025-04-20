@@ -58,7 +58,7 @@ fun editCategory(name: String, callback: (String) -> Unit = {}) {
 
         setContent {
             OutlinedTextField(value = newName, onValueChange = {
-                newName = it.substring(0, minOf(it.length, 20)).trim()
+                newName = it.take(20).trim()
             }, modifier = Modifier.fillMaxWidth())
         }
         setNegativeButton("删除分类") {
@@ -114,9 +114,13 @@ fun createCategory() {
     MixDialogBuilder("新建分类").apply {
         var name by mutableStateOf("")
         setContent {
-            OutlinedTextField(value = name, onValueChange = {
-                name = it.substring(0, minOf(it.length, 20)).trim()
-            }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = name,
+                onValueChange = {
+                    name = it.take(20).trim()
+                },
+                modifier = Modifier.fillMaxWidth(), maxLines = 1,
+            )
         }
         setPositiveButton("确认") {
             if (name.trim().isEmpty()) {

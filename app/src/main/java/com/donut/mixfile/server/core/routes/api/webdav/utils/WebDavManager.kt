@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import io.ktor.http.encodeURLPath
+import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -16,8 +18,11 @@ open class WebDavManager {
     fun dataToBytes() = compressGzip(WEBDAV_DATA.toJSONString())
 
     fun loadDataFromBytes(data: ByteArray) {
-        WEBDAV_DATA = decompressGzip(data).into()
+        WEBDAV_DATA = parseDataFromBytes(data)
     }
+
+    fun parseDataFromBytes(data: ByteArray): ConcurrentHashMap<String, MutableSet<WebDavFile>> =
+        decompressGzip(data).into()
 
     suspend fun saveData() {
         saveWebDavData(dataToBytes())
@@ -140,9 +145,21 @@ open class WebDavManager {
     }
 }
 
-// 辅助方法：规范化路径（移除多余斜杠，处理空路径）
+fun String?.toDavPath() = normalizePath(this ?: "")
+
+
 fun normalizePath(path: String): String {
-    return path.trim('/').replace(Regex("/+"), "/").trim()
+    if (path.isBlank()) return ""
+    val encoded = path.encodeURLPath()
+    val uri = try {
+        URI(encoded)
+    } catch (_: Exception) {
+        URI.create("http://dummyhost/$encoded").also { uri ->
+            if (uri.path == null) return ""
+        }
+    }
+    val cleanPath = uri.path ?: return ""
+    return cleanPath.trim('/').replace(Regex("/+"), "/")
 }
 
 

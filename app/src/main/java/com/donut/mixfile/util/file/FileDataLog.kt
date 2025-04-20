@@ -44,13 +44,13 @@ data class FileDataLog(
         list: List<FileDataLog>,
         action: (FileDataLog) -> FileDataLog
     ): List<FileDataLog> {
-        val newList = list.toMutableList()
-        val index = newList.indexOfFirst { it.shareInfoData == this.shareInfoData }
+        val index = list.indexOf(this)
         if (index == -1) {
-            return newList
+            return list
         }
-        newList[index] = action(newList[index])
-        return newList
+        val result = list.toMutableList()
+        result[index] = action(this)
+        return result
     }
 
     fun rename(callback: (FileDataLog) -> Unit = {}) {

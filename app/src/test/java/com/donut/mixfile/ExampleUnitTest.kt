@@ -3,6 +3,7 @@ package com.donut.mixfile
 import com.alibaba.fastjson2.annotation.JSONField
 import com.alibaba.fastjson2.to
 import com.alibaba.fastjson2.toJSONString
+import com.donut.mixfile.server.core.routes.api.webdav.utils.normalizePath
 import org.junit.Test
 import java.util.Date
 
@@ -26,19 +27,6 @@ import java.util.Date
  */
 
 class ExampleUnitTest {
-    class User(
-        age: Int,
-        val date: Date = Date()
-    ) {
-        @JSONField
-        var age2: Int = age
-            private set
-
-
-        init {
-            println("init")
-        }
-    }
 
 
     @Test

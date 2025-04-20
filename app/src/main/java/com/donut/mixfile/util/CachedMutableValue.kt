@@ -1,7 +1,7 @@
 package com.donut.mixfile.util
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
 import com.alibaba.fastjson2.into
 import com.alibaba.fastjson2.toJSONString
@@ -70,12 +70,12 @@ inline fun <reified T, reified C : Iterable<T>> cachedMutableOf(value: C, key: S
 
 
 abstract class CachedMutableValue<T>(
-    value: T,
+    private var value: T,
 ) {
-    private var value by mutableStateOf(value)
     private var loaded = false
     private val mutex = Mutex()
     private var saveTask: Job? = null
+    private var stateValue by mutableLongStateOf(0)
 
     abstract fun readCachedValue(): T
 
@@ -87,6 +87,7 @@ abstract class CachedMutableValue<T>(
                 value = readCachedValue()
                 loaded = true
             }
+            stateValue
             return value
         }
     }
@@ -96,6 +97,7 @@ abstract class CachedMutableValue<T>(
         if (this.value == value) {
             return
         }
+        stateValue++
         this.value = value
         saveTask?.cancel()
         saveTask = appScope.launch(Dispatchers.Main) {

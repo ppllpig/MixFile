@@ -19,8 +19,10 @@ import androidx.core.net.toUri
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
+import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
+import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
 import com.donut.mixfile.ui.routes.home.DownloadTask
@@ -117,7 +119,7 @@ fun showFileInfoDialog(
                             }
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 putExtra("url", log.downloadUrl)
-                                putExtra("hash", shareInfo.url)
+                                putExtra("hash", shareInfo.toString().hashSHA256().toHex())
                             }
                             currentActivity.startActivity(intent)
                         }, label = {

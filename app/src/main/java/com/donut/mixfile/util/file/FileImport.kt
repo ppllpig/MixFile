@@ -16,7 +16,6 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.core.localClient
 import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.hashSHA256
@@ -59,11 +58,17 @@ fun showExportFileListDialog(fileList: Collection<FileDataLog>) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                OutlinedTextField(value = listName, onValueChange = {
-                    listName = it
-                }, modifier = Modifier.fillMaxWidth(), label = {
-                    Text(text = "列表名称")
-                })
+                OutlinedTextField(
+                    value = listName,
+                    onValueChange = {
+                        listName = it
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text(text = "列表名称")
+                    },
+                    maxLines = 1,
+                )
                 Text(text = "将会导出当前筛选的文件列表上传为一键分享链接")
             }
         }
@@ -81,7 +86,8 @@ fun List<FileDataLog>.hashSHA256(): String = joinToString { it.shareInfoData }.h
 
 fun showFileList(fileList: List<FileDataLog>) {
     val fileTotalSize = fileList.sumOf { it.size }
-    val videoList = fileList.filter { it.name.parseFileMimeType().startsWith("video/") }
+    val videoList =
+        fileList.filter { it.name.parseFileMimeType().contentType.contentEquals("video") }
     MixDialogBuilder(
         "文件列表",
         "共 ${fileList.size} 个文件 总大小: ${formatFileSize(fileTotalSize)}",
