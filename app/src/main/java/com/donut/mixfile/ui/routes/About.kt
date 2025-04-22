@@ -32,7 +32,7 @@ import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.updateChecker
-import com.donut.mixfile.util.UseEffect
+import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getAppVersionName
@@ -212,7 +212,7 @@ fun showUpdateDialog() {
         setContent {
             var latestVersion: String? by remember { mutableStateOf(null) }
 
-            UseEffect {
+            AsyncEffect {
                 ignoreError {
                     latestVersion = updateChecker.latestVersion
                 }

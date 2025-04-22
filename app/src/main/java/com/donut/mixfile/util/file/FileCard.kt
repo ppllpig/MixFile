@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.serverStarted
 import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.UseEffect
+import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.formatTime
@@ -98,7 +98,7 @@ fun PreviewCard(
             verticalArrangement = Arrangement.Bottom
         ) {
             var loadImg by remember { mutableStateOf(false) }
-            UseEffect {
+            AsyncEffect {
                 delay(300)
                 loadImg = true
             }

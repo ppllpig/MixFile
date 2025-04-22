@@ -33,6 +33,7 @@ import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.getFileName
 import com.donut.mixfile.util.getFileSize
 import com.donut.mixfile.util.objects.ProgressContent
+import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -52,6 +53,7 @@ import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.util.encodeBase64
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -62,6 +64,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.coroutineContext
 
@@ -237,6 +240,36 @@ fun String.sanitizeFileName(): String {
         .replace("\\s+".toRegex(), "_")
         .takeLast(255)
         .ifEmpty { "unnamed_file" }
+}
+
+suspend fun loadDataWithMaxSize(
+    url: String,
+    progressContent: ProgressContent,
+    limit: Long = 1024 * 1024 * 50
+): ByteArray {
+    try {
+        return localClient.prepareGet {
+            url(url)
+            onDownload(progressContent.ktorListener)
+        }.execute {
+            if (!it.status.isSuccess()) {
+                val text = if ((it.contentLength()
+                        ?: (1024 * 1024)) < 1024 * 500
+                ) it.bodyAsText() else "未知错误"
+                throw Exception("下载失败: ${text}")
+            }
+            if ((it.contentLength() ?: 0) > limit) {
+                throw Exception("文件过大")
+            }
+            val data = it.bodyAsChannel().readRemaining(limit).readByteArray()
+            return@execute data
+        }
+    } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+            showErrorDialog(e, "下载数据失败!")
+        }
+    }
+    throw Exception("下载数据失败")
 }
 
 

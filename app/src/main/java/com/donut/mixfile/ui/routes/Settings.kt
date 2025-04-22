@@ -187,7 +187,7 @@ val MixSettings = MixNavPage(
         useSystemPlayer = it
     }
 
-    SettingButton(text = "网页端/WebDav访问密码") {
+    SettingButton(text = "网页端/WebDAV访问密码") {
         setWebPassword()
     }
 

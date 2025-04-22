@@ -22,23 +22,14 @@ import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.util.UseEffect
+import com.donut.mixfile.util.AsyncEffect
+import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.objects.ProgressContent
-import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
-import io.ktor.client.plugins.onDownload
-import io.ktor.client.request.prepareGet
-import io.ktor.client.request.url
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.contentLength
-import io.ktor.http.isSuccess
-import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.io.readByteArray
 
 fun exportFileList(fileList: Collection<FileDataLog>, name: String) {
     val strData = fileList.toJSONString()
@@ -141,20 +132,22 @@ fun showImportConfirmWindow(fileList: List<FileDataLog>) {
     }
 }
 
+suspend fun loadFileList(url: String, progress: ProgressContent): List<FileDataLog> {
+    val fileListData = loadDataWithMaxSize(url, progress)
+    return decompressGzip(fileListData).into()
+}
+
 fun importFileList(url: String) {
     val progress = ProgressContent()
     MixDialogBuilder("解析中").apply {
         setContent {
-            UseEffect {
-                val fileList = loadFileList(url, progress)
-                if (fileList == null) {
-                    showToast("解析分享列表失败!")
-                    closeDialog()
-                    return@UseEffect
-                }
-                withContext(Dispatchers.Main) {
-                    showFileList(fileList.toList())
-                    closeDialog()
+            AsyncEffect {
+                errorDialog("解析文件失败") {
+                    val fileList: List<FileDataLog> = loadFileList(url, progress)
+                    withContext(Dispatchers.Main) {
+                        showFileList(fileList.toList())
+                        closeDialog()
+                    }
                 }
             }
             progress.LoadingContent()
@@ -163,31 +156,4 @@ fun importFileList(url: String) {
         show()
     }
 
-}
-
-suspend fun loadFileList(url: String, progressContent: ProgressContent): Array<FileDataLog>? {
-    try {
-        return localClient.prepareGet {
-            url(url)
-            onDownload(progressContent.ktorListener)
-        }.execute {
-            if (!it.status.isSuccess()) {
-                val text = if ((it.contentLength()
-                        ?: (1024 * 1024)) < 1024 * 500
-                ) it.bodyAsText() else "未知错误"
-                throw Exception("下载失败: ${text}")
-            }
-            if ((it.contentLength() ?: 0) > 1024 * 1024 * 50) {
-                throw Exception("文件过大")
-            }
-            val data = it.bodyAsChannel().readRemaining(1024 * 1024 * 50).readByteArray()
-            val extractedData = decompressGzip(data)
-            return@execute extractedData.into()
-        }
-    } catch (e: Exception) {
-        withContext(Dispatchers.Main) {
-            showErrorDialog(e, "解析分享列表失败!")
-        }
-    }
-    return null
 }
