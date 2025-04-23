@@ -6,6 +6,7 @@ import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.sanitizeWebDavFileName
 import com.donut.mixfile.server.core.utils.toHex
 import io.ktor.http.decodeURLQueryComponent
+import io.ktor.http.encodeURLParameter
 import io.ktor.http.encodeURLPath
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -53,7 +54,7 @@ class WebDavFile(
                 "D:propstat" {
                     "D:prop" {
                         "D:displayname" {
-                            -name.ifEmpty { "root" }
+                            -name.ifEmpty { "root" }.encodeURLParameter()
                         }
                         "D:resourcetype" {
                             "D:collection" {
@@ -78,7 +79,7 @@ class WebDavFile(
             "D:propstat" {
                 "D:prop" {
                     "D:displayname" {
-                        -name
+                        -name.encodeURLParameter()
                     }
                     "D:resourcetype" {
 
