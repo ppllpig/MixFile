@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.donut.mixfile.server.core.utils.bean.FileDataLog
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage
@@ -46,7 +47,6 @@ import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.catchError
 import com.donut.mixfile.util.compareByName
 import com.donut.mixfile.util.file.FileCardList
-import com.donut.mixfile.util.file.FileDataLog
 import com.donut.mixfile.util.file.downloadFile
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.file.selectAndUploadFile

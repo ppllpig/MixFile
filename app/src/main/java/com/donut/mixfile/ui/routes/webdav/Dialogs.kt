@@ -21,10 +21,9 @@ import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.file.doUploadFile
+import com.donut.mixfile.util.file.downloadUrl
 import com.donut.mixfile.util.file.loadDataWithMaxSize
 import com.donut.mixfile.util.file.loadFileList
-
-import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.objects.ProgressContent

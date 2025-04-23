@@ -12,11 +12,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.alibaba.fastjson2.into
-import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.core.utils.compressGzip
+import com.donut.mixfile.server.core.utils.bean.FileDataLog
+import com.donut.mixfile.server.core.utils.bean.toByteArray
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
@@ -32,10 +32,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 fun exportFileList(fileList: Collection<FileDataLog>, name: String) {
-    val strData = fileList.toJSONString()
-    val compressedData = compressGzip(strData)
     doUploadFile(
-        compressedData,
+        fileList.toByteArray(),
         "${name}.mix_list",
         false
     )

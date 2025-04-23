@@ -41,7 +41,6 @@ import com.donut.mixfile.util.file.deleteUploadLog
 import com.donut.mixfile.util.file.selectAndUploadFile
 import com.donut.mixfile.util.file.showFileInfoDialog
 import com.donut.mixfile.util.file.showFileList
-import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.donut.mixfile.util.getIpAddressInLocalNetwork
 import com.donut.mixfile.util.readClipBoardText

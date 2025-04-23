@@ -29,7 +29,6 @@ import com.donut.mixfile.ui.component.common.CommonColumn
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.showFileInfoDialog
-import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.objects.MixActivity
 
 class FileDialogActivity : MixActivity("file_dialog") {

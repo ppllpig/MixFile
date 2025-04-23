@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.alibaba.fastjson2.annotation.JSONField
+import com.donut.mixfile.server.core.utils.bean.FileDataLog
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -20,84 +20,59 @@ import com.donut.mixfile.util.getFileAccessUrl
 import com.donut.mixfile.util.showToast
 
 
-data class FileDataLog(
-    val shareInfoData: String,
-    val name: String,
-    val size: Long,
-    val time: Long = System.currentTimeMillis(),
-    val category: String = currentCategory.ifEmpty { "默认" },
-) {
+val FileDataLog.downloadUrl: String
+    get() = getFileAccessUrl(getLocalServerAddress(), shareInfoData, name)
 
-    fun isSimilar(other: FileDataLog): Boolean {
-        return other.shareInfoData.contentEquals(shareInfoData)
+
+val FileDataLog.lanUrl: String
+    get() = getFileAccessUrl(serverAddress, shareInfoData, name)
+
+fun FileDataLog.updateDataList(
+    list: List<FileDataLog>,
+    action: (FileDataLog) -> FileDataLog
+): List<FileDataLog> {
+    val index = list.indexOf(this)
+    if (index == -1) {
+        return list
     }
+    val result = list.toMutableList()
+    result[index] = action(this)
+    return result
+}
 
-    @get:JSONField(serialize = false)
-    val downloadUrl: String
-        get() = getFileAccessUrl(getLocalServerAddress(), shareInfoData, name)
-
-    @get:JSONField(serialize = false)
-    val lanUrl: String
-        get() = getFileAccessUrl(serverAddress, shareInfoData, name)
-
-    fun updateDataList(
-        list: List<FileDataLog>,
-        action: (FileDataLog) -> FileDataLog
-    ): List<FileDataLog> {
-        val index = list.indexOf(this)
-        if (index == -1) {
-            return list
+fun FileDataLog.rename(callback: (FileDataLog) -> Unit = {}) {
+    var shareInfo = resolveMixShareInfo(shareInfoData) ?: return
+    MixDialogBuilder("重命名文件").apply {
+        var name by mutableStateOf(shareInfo.fileName)
+        setContent {
+            OutlinedTextField(value = name, onValueChange = {
+                name = it
+            }, modifier = Modifier.fillMaxWidth(), label = {
+                Text(text = "输入文件名")
+            })
         }
-        val result = list.toMutableList()
-        result[index] = action(this)
-        return result
-    }
-
-    fun rename(callback: (FileDataLog) -> Unit = {}) {
-        var shareInfo = resolveMixShareInfo(shareInfoData) ?: return
-        MixDialogBuilder("重命名文件").apply {
-            var name by mutableStateOf(shareInfo.fileName)
-            setContent {
-                OutlinedTextField(value = name, onValueChange = {
-                    name = it
-                }, modifier = Modifier.fillMaxWidth(), label = {
-                    Text(text = "输入文件名")
-                })
+        setDefaultNegative()
+        setPositiveButton("确定") {
+            if (name.isEmpty()) {
+                showToast("文件名不能为空!")
+                return@setPositiveButton
             }
-            setDefaultNegative()
-            setPositiveButton("确定") {
-                if (name.isEmpty()) {
-                    showToast("文件名不能为空!")
-                    return@setPositiveButton
-                }
-                shareInfo = shareInfo.copy(fileName = name)
-                val renamedLog = copy(
-                    name = name,
-                    shareInfoData = shareInfo.toString()
-                )
-                favorites = updateDataList(favorites) {
-                    renamedLog
-                }
-                uploadLogs = updateDataList(uploadLogs) {
-                    renamedLog
-                }
-                callback(renamedLog)
-                showToast("重命名文件成功!")
-                closeDialog()
+            shareInfo = shareInfo.copy(fileName = name)
+            val renamedLog = copy(
+                name = name,
+                shareInfoData = shareInfo.toString()
+            )
+            favorites = updateDataList(favorites) {
+                renamedLog
             }
-            show()
+            uploadLogs = updateDataList(uploadLogs) {
+                renamedLog
+            }
+            callback(renamedLog)
+            showToast("重命名文件成功!")
+            closeDialog()
         }
-    }
-
-    override fun hashCode(): Int {
-        var result = shareInfoData.hashCode()
-        result = 31 * result + category.hashCode()
-        return result
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is FileDataLog) return false
-        return isSimilar(other) && category.contentEquals(other.category)
+        show()
     }
 }
 
@@ -147,13 +122,6 @@ fun addFavoriteLog(
     return true
 }
 
-fun MixShareInfo.toDataLog(): FileDataLog {
-    return FileDataLog(
-        shareInfoData = this.toString(),
-        name = this.fileName,
-        size = this.fileSize
-    )
-}
 
 fun deleteFavoriteLog(uploadLog: FileDataLog, callback: () -> Unit = {}) {
     MixDialogBuilder("确定删除?").apply {
