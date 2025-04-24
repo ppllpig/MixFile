@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 plugins {
@@ -15,8 +16,8 @@ android {
         applicationId = "com.donut.mixfile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 115
-        versionName = "1.15.7"
+        versionCode = 116
+        versionName = "1.15.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -38,7 +39,7 @@ android {
     applicationVariants.all {
         val variant = this
         variant.outputs
-            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .map { it as BaseVariantOutputImpl }
             .forEach { output ->
                 val outputFileName =
                     "MixFile-${variant.baseName}-${variant.versionName}.apk"
