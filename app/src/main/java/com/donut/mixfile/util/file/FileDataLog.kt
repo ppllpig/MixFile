@@ -7,8 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.donut.mixfile.server.core.utils.bean.FileDataLog
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.objects.FileDataLog
+import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.autoAddFavorite

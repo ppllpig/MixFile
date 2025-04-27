@@ -13,7 +13,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
-import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavFile
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -104,7 +104,7 @@ fun importFileListToWebDav(url: String) {
     MixDialogBuilder("解析中").apply {
         setContent {
             AsyncEffect {
-                errorDialog("解析文件失败") {
+                errorDialog("解析文件失败", onError = { closeDialog() }) {
                     val dav = mixFileServer.webDav
                     val fileList = loadFileList(url, progress)
                     fileList.forEach {
@@ -192,13 +192,8 @@ fun importWebDavData(url: String) {
     MixDialogBuilder("导入中").apply {
         setContent {
             AsyncEffect {
-                errorDialog("导入失败") {
+                errorDialog("导入失败", onError = { closeDialog() }) {
                     val webDavData = loadDataWithMaxSize(url, progress)
-                    if (webDavData == null) {
-                        showToast("下载文件失败!")
-                        closeDialog()
-                        return@AsyncEffect
-                    }
                     val dav = mixFileServer.webDav
                     val data = dav.parseDataFromBytes(webDavData)
                     data.keys.forEach { key ->

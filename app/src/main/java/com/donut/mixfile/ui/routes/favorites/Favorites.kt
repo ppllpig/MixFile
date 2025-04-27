@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.donut.mixfile.server.core.utils.bean.FileDataLog
+import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.component.common.SingleSelectItemList
 import com.donut.mixfile.ui.nav.MixNavPage

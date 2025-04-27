@@ -15,8 +15,8 @@ import com.alibaba.fastjson2.into
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.core.utils.bean.FileDataLog
-import com.donut.mixfile.server.core.utils.bean.toByteArray
+import com.donut.mixfile.server.core.objects.FileDataLog
+import com.donut.mixfile.server.core.objects.toByteArray
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
@@ -140,7 +140,7 @@ fun importFileList(url: String) {
     MixDialogBuilder("解析中").apply {
         setContent {
             AsyncEffect {
-                errorDialog("解析文件失败") {
+                errorDialog("解析文件失败", onError = { closeDialog() }) {
                     val fileList: List<FileDataLog> = loadFileList(url, progress)
                     withContext(Dispatchers.Main) {
                         showFileList(fileList.toList())

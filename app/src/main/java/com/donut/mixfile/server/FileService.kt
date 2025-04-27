@@ -19,7 +19,7 @@ import com.donut.mixfile.appScope
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
-import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.server.image.createBlankBitmap

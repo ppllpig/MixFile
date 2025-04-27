@@ -19,7 +19,7 @@ import androidx.core.net.toUri
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.core.utils.bean.FileDataLog
+import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode

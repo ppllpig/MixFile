@@ -293,10 +293,11 @@ fun isMainThread(): Boolean {
     return Looper.myLooper() == Looper.getMainLooper()
 }
 
-inline fun <T> errorDialog(title: String, block: () -> T): T? {
+inline fun <T> errorDialog(title: String, onError: (Exception) -> Unit = {}, block: () -> T): T? {
     try {
         return block()
     } catch (e: Exception) {
+        onError(e)
         when (e) {
             is CancellationException,
             is EOFException,

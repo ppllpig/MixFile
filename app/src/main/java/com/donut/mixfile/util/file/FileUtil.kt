@@ -22,6 +22,8 @@ import com.donut.mixfile.MainActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.core.utils.StreamContent
+import com.donut.mixfile.server.core.utils.mb
+import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
@@ -33,7 +35,6 @@ import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.getFileName
 import com.donut.mixfile.util.getFileSize
 import com.donut.mixfile.util.objects.ProgressContent
-import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -171,7 +172,9 @@ fun cancelAllMultiUpload() {
 
 inline fun uploadUri(uri: Uri, uploader: (StreamContent, String) -> Unit) {
     val resolver = app.contentResolver
-    val fileSize = uri.getFileSize()
+    val fileSize = errorDialog("读取文件失败") {
+        uri.getFileSize()
+    } ?: return
     val fileStream = resolver.openInputStream(uri)
     if (fileStream == null) {
         showToast("打开文件失败")
@@ -229,46 +232,27 @@ fun selectAndUploadFile() {
     }
 }
 
-fun String.sanitizeFileName(): String {
-    // 定义非法字符的正则表达式
-    val illegalChars = "[/\\\\:*?\"<>|]".toRegex()
-
-
-    return this
-        .replace(illegalChars, " ")
-        .trim()
-        .takeLast(255)
-        .ifEmpty { "unnamed_file" }
-}
-
 suspend fun loadDataWithMaxSize(
     url: String,
     progressContent: ProgressContent,
-    limit: Long = 1024 * 1024 * 50
+    limit: Long = 50L.mb
 ): ByteArray {
-    try {
-        return localClient.prepareGet {
-            url(url)
-            onDownload(progressContent.ktorListener)
-        }.execute {
-            if (!it.status.isSuccess()) {
-                val text = if ((it.contentLength()
-                        ?: (1024 * 1024)) < 1024 * 500
-                ) it.bodyAsText() else "未知错误"
-                throw Exception("下载失败: ${text}")
-            }
-            if ((it.contentLength() ?: 0) > limit) {
-                throw Exception("文件过大")
-            }
-            val data = it.bodyAsChannel().readRemaining(limit).readByteArray()
-            return@execute data
+    return localClient.prepareGet {
+        url(url)
+        onDownload(progressContent.ktorListener)
+    }.execute {
+        if (!it.status.isSuccess()) {
+            val text = if ((it.contentLength()
+                    ?: (1024 * 1024)) < 1024 * 500
+            ) it.bodyAsText() else "未知错误"
+            throw Exception("下载失败: ${text}")
         }
-    } catch (e: Exception) {
-        withContext(Dispatchers.Main) {
-            showErrorDialog(e, "下载数据失败!")
+        if ((it.contentLength() ?: 0) > limit) {
+            throw Exception("文件过大")
         }
+        val data = it.bodyAsChannel().readRemaining(limit).readByteArray()
+        return@execute data
     }
-    throw Exception("下载数据失败")
 }
 
 

@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.core.utils.bean
+package com.donut.mixfile.server.core.objects
 
 import com.alibaba.fastjson2.annotation.JSONField
 import com.alibaba.fastjson2.to
@@ -9,12 +9,15 @@ import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.utils.basen.Alphabet
 import com.donut.mixfile.server.core.utils.basen.BigIntBaseN
 import com.donut.mixfile.server.core.utils.hashMD5
+import com.donut.mixfile.server.core.utils.mb
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.Url
+import io.ktor.http.contentLength
 import io.ktor.utils.io.discard
 
 data class MixShareInfo(
@@ -83,6 +86,7 @@ data class MixShareInfo(
         url: String,
         client: HttpClient,
         referer: String = this.referer,
+        limit: Int = 20.mb
     ): ByteArray {
         val transformedUrl = Uploader.transformUrl(url)
         val transformedReferer = Uploader.transformReferer(url, referer)
@@ -96,16 +100,20 @@ data class MixShareInfo(
                 }
             }
         }.prepareGet(transformedUrl) {
-            if (transformedReferer.trim().isNotEmpty()) {
+            if (transformedReferer.isNotEmpty()) {
                 header("Referer", transformedReferer)
             }
         }.execute {
+            val contentLength = it.contentLength() ?: 0
+            if (contentLength > (limit + headSize)) {
+                throw Exception("分片文件过大")
+            }
             val channel = it.bodyAsChannel()
             channel.discard(headSize.toLong())
-            decryptAES(channel, ENCODER.decode(key))
+            decryptAES(channel, ENCODER.decode(key), limit + 96)
         }
-        val hash = url.split("#").getOrNull(1)
-        if (hash != null) {
+        val hash = Url(url).fragment.trim()
+        if (hash.isNotEmpty()) {
             val currentHash = result.hashMixSHA256()
             if (!currentHash.contentEquals(hash)) {
                 throw Exception("文件遭到篡改")

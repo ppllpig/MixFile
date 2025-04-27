@@ -35,7 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.donut.mixfile.server.core.utils.bean.FileDataLog
+import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.serverStarted
 import com.donut.mixfile.ui.theme.colorScheme

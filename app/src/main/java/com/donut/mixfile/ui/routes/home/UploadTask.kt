@@ -21,8 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.appScope
+import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.InfoText
