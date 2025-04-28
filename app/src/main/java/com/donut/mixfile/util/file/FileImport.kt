@@ -16,17 +16,19 @@ import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.objects.FileDataLog
+import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.objects.toByteArray
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.hashSHA256
-import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.util.AsyncEffect
+import com.donut.mixfile.util.compareByName
 import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.objects.ProgressContent
+import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -73,10 +75,24 @@ fun showExportFileListDialog(fileList: Collection<FileDataLog>) {
 fun List<FileDataLog>.hashSHA256(): String = joinToString { it.shareInfoData }.hashSHA256().toHex()
 
 
+fun playVideoList(videoList: List<FileDataLog>) {
+    val playList = videoList.sortedWith { file1, file2 ->
+        file1.name.compareByName(file2.name)
+    }
+    val intent = Intent(app, VideoActivity::class.java).apply {
+        putExtra(
+            "fileList",
+            playList.joinToString("\n") { it.downloadUrl }
+        )
+        putExtra("hash", playList.hashSHA256())
+    }
+    currentActivity.startActivity(intent)
+}
+
 fun showFileList(fileList: List<FileDataLog>) {
     val fileTotalSize = fileList.sumOf { it.size }
     val videoList =
-        fileList.filter { it.name.parseFileMimeType().contentType.contentEquals("video") }
+        fileList.filter { it.isVideo }
     MixDialogBuilder(
         "文件列表",
         "共 ${fileList.size} 个文件 总大小: ${formatFileSize(fileTotalSize)}",
@@ -87,14 +103,7 @@ fun showFileList(fileList: List<FileDataLog>) {
         }
         if (videoList.isNotEmpty()) {
             setNegativeButton("全部播放") {
-                val intent = Intent(app, VideoActivity::class.java).apply {
-                    putExtra(
-                        "fileList",
-                        videoList.joinToString("\n") { it.downloadUrl }
-                    )
-                    putExtra("hash", videoList.hashSHA256())
-                }
-                currentActivity.startActivity(intent)
+                playVideoList(videoList)
             }
         }
         setPositiveButton("导入文件") {
@@ -106,27 +115,19 @@ fun showFileList(fileList: List<FileDataLog>) {
 
 
 fun showImportConfirmWindow(fileList: List<FileDataLog>) {
-    MixDialogBuilder(
-        "确定导入?",
-        "是否确定导入文件列表",
-    ).apply {
-        setDefaultNegative()
-        setPositiveButton("确定") {
-            val fileMap = favorites.map { it.shareInfoData }.toSet()
-            val newFiles = mutableSetOf<FileDataLog>()
-            val newCategories = mutableSetOf<String>()
-            fileList.forEach {
-                newCategories += it.category
-                if (!fileMap.contains(it.shareInfoData)) {
-                    newFiles += it
-                }
+    showConfirmDialog("确定导入?", "是否确定导入文件列表") {
+        val fileMap = favorites.map { it.shareInfoData }.toSet()
+        val newFiles = mutableSetOf<FileDataLog>()
+        val newCategories = mutableSetOf<String>()
+        fileList.forEach {
+            newCategories += it.category
+            if (!fileMap.contains(it.shareInfoData)) {
+                newFiles += it
             }
-            favCategories += newCategories
-            favorites += newFiles
-            showToast("导入了 ${newFiles.size} 个文件")
-            closeDialog()
         }
-        show()
+        favCategories += newCategories
+        favorites += newFiles
+        showToast("导入了 ${newFiles.size} 个文件")
     }
 }
 

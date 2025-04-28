@@ -198,8 +198,8 @@ fun GenWebViewClient(modifier: Modifier = Modifier, block: WebView.() -> Unit) =
     }, modifier = modifier)
 
 
-fun showConfirmDialog(title: String, onConfirm: () -> Unit) {
-    MixDialogBuilder(title).apply {
+fun showConfirmDialog(title: String, subtitle: String = "", onConfirm: () -> Unit) {
+    MixDialogBuilder(title, subtitle).apply {
         setPositiveButton("确定") {
             onConfirm()
             closeDialog()

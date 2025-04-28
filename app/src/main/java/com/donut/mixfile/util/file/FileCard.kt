@@ -36,7 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.server.core.objects.FileDataLog
-import com.donut.mixfile.server.core.utils.parseFileMimeType
+import com.donut.mixfile.server.core.objects.isImage
+import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.serverStarted
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.AsyncEffect
@@ -57,13 +58,9 @@ fun PreviewCard(
     selected: Boolean,
     onClick: (FileDataLog) -> Unit
 ) {
-    val isImage = fileDataLog.name.parseFileMimeType().run {
-        this.contentType.contentEquals("image")
-    }
+    val isImage = fileDataLog.isImage
 
-    val isVideo = fileDataLog.name.parseFileMimeType().run {
-        this.contentType.contentEquals("video")
-    }
+    val isVideo = fileDataLog.isVideo
 
     LaunchedEffect(favorites) {
 
@@ -217,7 +214,9 @@ fun FileCardList(
 fun FileCard(
     fileDataLog: FileDataLog,
     showDate: Boolean = true,
-    onClick: (FileDataLog) -> Unit,
+    onClick: (FileDataLog) -> Unit = {
+        showFileInfoDialog(it)
+    },
     selected: Boolean = false,
     longClick: (FileDataLog) -> Unit = {},
 ) {

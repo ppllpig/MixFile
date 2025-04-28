@@ -2,18 +2,23 @@ package com.donut.mixfile.ui.routes.webdav
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -30,6 +35,7 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 fun clearWebDavData() {
     MixDialogBuilder("确定清空webdav数据?").apply {
@@ -187,6 +193,38 @@ fun tryImportWebDavData(code: String) {
     }
 }
 
+suspend fun importWebDavData(data: ConcurrentHashMap<String, MutableSet<WebDavFile>>) {
+    val dav = mixFileServer.webDav
+    data.keys.forEach { key ->
+        val fileList = dav.WEBDAV_DATA.getOrDefault(key, mutableSetOf())
+        val dataFileList = data.getOrDefault(key, mutableSetOf())
+        fileList.removeAll(dataFileList)
+        fileList.addAll(dataFileList)
+        dav.WEBDAV_DATA[key] = fileList
+    }
+    dav.saveData()
+}
+
+fun importWebDavData(manager: WebDavManager) {
+    MixDialogBuilder("导入中", properties = DialogProperties(dismissOnClickOutside = false)).apply {
+        setContent {
+            AsyncEffect {
+                importWebDavData(manager.WEBDAV_DATA)
+                showToast("导入成功")
+                closeDialog()
+            }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        show()
+    }
+}
+
 fun importWebDavData(url: String) {
     val progress = ProgressContent()
     MixDialogBuilder("导入中").apply {
@@ -196,14 +234,7 @@ fun importWebDavData(url: String) {
                     val webDavData = loadDataWithMaxSize(url, progress)
                     val dav = mixFileServer.webDav
                     val data = dav.parseDataFromBytes(webDavData)
-                    data.keys.forEach { key ->
-                        val fileList = dav.WEBDAV_DATA.getOrDefault(key, mutableSetOf())
-                        val dataFileList = data.getOrDefault(key, mutableSetOf())
-                        fileList.removeAll(dataFileList)
-                        fileList.addAll(dataFileList)
-                        dav.WEBDAV_DATA[key] = fileList
-                    }
-                    dav.saveData()
+                    importWebDavData(data)
                     showToast("导入成功!")
                 }
                 withContext(Dispatchers.Main) {

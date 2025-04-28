@@ -138,9 +138,8 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                         val path = normalizePath(s)
                         val newPath = normalizePath("${davParentPath}/${path}")
                         val fileList = webDav.WEBDAV_DATA.getOrDefault(newPath, HashSet())
-                        fileList.removeAll(webDavFiles)
-                        fileList.addAll(webDavFiles)
-                        webDav.WEBDAV_DATA[newPath] = fileList
+                        webDavFiles.addAll(fileList)
+                        webDav.WEBDAV_DATA[newPath] = webDavFiles
                     }
                     call.respond(HttpStatusCode.Created)
                     webDav.saveData()

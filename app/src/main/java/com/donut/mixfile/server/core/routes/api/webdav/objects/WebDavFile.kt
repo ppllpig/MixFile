@@ -1,6 +1,7 @@
 package com.donut.mixfile.server.core.routes.api.webdav.objects
 
 import com.alibaba.fastjson2.annotation.JSONField
+import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.sanitizeFileName
@@ -11,6 +12,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+
+
+fun WebDavFile.toDataLog() = FileDataLog(shareInfoData, name, size)
 
 // WebDAV 文件类，包含额外属性
 class WebDavFile(
@@ -41,6 +45,7 @@ class WebDavFile(
 
 
     override fun hashCode(): Int = name.hashCode()
+
     fun toXML(path: String): String {
         if (isFolder) {
             return xml("D:response") {

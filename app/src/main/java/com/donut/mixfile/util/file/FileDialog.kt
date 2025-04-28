@@ -75,6 +75,13 @@ fun showFileInfoDialog(
                             Text(text = "文件列表", color = colorScheme.primary)
                         })
                     }
+                    if (fileName.endsWith(".mix_dav")) {
+                        AssistChip(onClick = {
+                            previewWebDavData(log.downloadUrl)
+                        }, label = {
+                            Text(text = "查看文件", color = colorScheme.primary)
+                        })
+                    }
                     if (!favorites.any { it.isSimilar(log) }) {
                         AssistChip(onClick = {
                             addFavoriteLog(log)
