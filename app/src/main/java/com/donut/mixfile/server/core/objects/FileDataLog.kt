@@ -5,6 +5,7 @@ import com.donut.mixfile.server.core.utils.compressGzip
 import io.ktor.http.ContentType
 import io.ktor.http.defaultForFilePath
 
+
 data class FileDataLog(
     val shareInfoData: String,
     val name: String,
