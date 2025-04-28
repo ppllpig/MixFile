@@ -3,6 +3,7 @@ package com.donut.mixfile.util.file
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.favorites.currentCategory
@@ -45,11 +47,22 @@ fun FileDataLog.rename(callback: (FileDataLog) -> Unit = {}) {
     MixDialogBuilder("重命名文件").apply {
         var name by mutableStateOf(shareInfo.fileName)
         setContent {
-            OutlinedTextField(value = name, onValueChange = {
-                name = it
-            }, modifier = Modifier.fillMaxWidth(), label = {
-                Text(text = "输入文件名")
-            })
+            LaunchedEffect(name) {
+                val sanitized = name.sanitizeFileName()
+                if (!sanitized.contentEquals(name)) {
+                    name = sanitized
+                }
+            }
+            OutlinedTextField(
+                value = name,
+                onValueChange = {
+                    name = it
+                },
+                modifier = Modifier.fillMaxWidth(), label = {
+                    Text(text = "输入文件名")
+                },
+                maxLines = 1
+            )
         }
         setDefaultNegative()
         setPositiveButton("确定") {

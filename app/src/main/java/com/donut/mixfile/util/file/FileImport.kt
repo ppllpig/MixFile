@@ -20,6 +20,7 @@ import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.objects.toByteArray
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.hashSHA256
+import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.util.AsyncEffect
@@ -52,7 +53,7 @@ fun showExportFileListDialog(fileList: Collection<FileDataLog>) {
                 OutlinedTextField(
                     value = listName,
                     onValueChange = {
-                        listName = it
+                        listName = it.sanitizeFileName()
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = {

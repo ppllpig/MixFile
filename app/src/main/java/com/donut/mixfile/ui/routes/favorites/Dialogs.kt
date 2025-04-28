@@ -57,9 +57,13 @@ fun editCategory(name: String, callback: (String) -> Unit = {}) {
         var newName by mutableStateOf(name)
 
         setContent {
-            OutlinedTextField(value = newName, onValueChange = {
-                newName = it.take(20).trim()
-            }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = newName,
+                onValueChange = {
+                    newName = it.take(20).trim()
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         setNegativeButton("删除分类") {
             deleteCategory(name) {
@@ -119,7 +123,8 @@ fun createCategory() {
                 onValueChange = {
                     name = it.take(20).trim()
                 },
-                modifier = Modifier.fillMaxWidth(), maxLines = 1,
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 1,
             )
         }
         setPositiveButton("确认") {

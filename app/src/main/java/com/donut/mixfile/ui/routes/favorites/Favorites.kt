@@ -101,6 +101,7 @@ val Favorites = MixNavPage(
         },
         label = { Text(text = "搜索") },
         modifier = Modifier.fillMaxWidth(),
+        maxLines = 2,
         trailingIcon = {
             if (searchVal.isNotEmpty()) {
                 Icon(
