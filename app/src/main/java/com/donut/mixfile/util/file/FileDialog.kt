@@ -20,6 +20,8 @@ import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.objects.FileDataLog
+import com.donut.mixfile.server.core.objects.isImage
+import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
@@ -68,7 +70,7 @@ fun showFileInfoDialog(
                 InfoText(key = "大小: ", value = formatFileSize(shareInfo.fileSize))
                 InfoText(key = "密钥: ", value = shareInfo.key)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (fileName.startsWith("__mixfile_list") || fileName.endsWith(".mix_list")) {
+                    if (fileName.endsWith(".mix_list")) {
                         AssistChip(onClick = {
                             importFileList(log.downloadUrl)
                         }, label = {
@@ -117,7 +119,7 @@ fun showFileInfoDialog(
 
                     }
 
-                    if (shareInfo.contentType().startsWith("video/")) {
+                    if (dataLog.isVideo) {
                         AssistChip(onClick = {
                             if (useSystemPlayer) {
                                 val intent = Intent(Intent.ACTION_VIEW)
@@ -134,7 +136,7 @@ fun showFileInfoDialog(
                             Text(text = "播放视频", color = colorScheme.primary)
                         })
                     }
-                    if (shareInfo.contentType().startsWith("image/")) {
+                    if (dataLog.isImage) {
                         AssistChip(onClick = {
                             showImageDialog(log.downloadUrl)
                         }, label = {
