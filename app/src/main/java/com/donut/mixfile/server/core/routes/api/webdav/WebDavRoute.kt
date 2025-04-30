@@ -21,6 +21,8 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.decodeURLQueryComponent
 import io.ktor.http.encodeURLParameter
+import io.ktor.http.withCharset
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.contentLength
 import io.ktor.server.request.path
 import io.ktor.server.request.receiveChannel
@@ -130,7 +132,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
         }
         webdav("PUT") {
             val fileSize = call.request.contentLength() ?: 0
-            if (fileSize < 50.mb && fileSize > 0) {
+            if (fileSize > 0 && fileSize < 50.mb) {
                 if (davFileName.endsWith(".mix_dav")) {
                     val davFileList =
                         webDav.parseDataFromBytes(receiveBytes(50.mb))
@@ -218,11 +220,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                 ${file.toXML(decodedPath)}
                 </D:multistatus>
                 """
-                call.respondText(
-                    contentType = ContentType.Application.Xml,
-                    status = HttpStatusCode.MultiStatus,
-                    text = """<?xml version="1.0" encoding="utf-8"?>${text}"""
-                )
+                call.respondXml(text)
                 return@propfind
             }
             val fileList = webDav.listFiles(davPath)
@@ -234,22 +232,38 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                 if (isNotEmpty()) {
                     add(WebDavFile("当前目录存档.mix_dav", isFolder = false))
                 }
-                add(0, WebDavFile(davParentPath.substringAfterLast("/"), isFolder = true))
             }.joinToString(separator = "") {
                 it.toXML(decodedPath)
             }
             val text = """
                 <D:multistatus xmlns:D="DAV:">
+                ${WebDavFile("root", isFolder = true).toXML("/api/webdav/")}
                 $xmlFileList
                 </D:multistatus>
                 """
-            call.respondText(
-                contentType = ContentType.Application.Xml,
-                status = HttpStatusCode.MultiStatus,
-                text = """<?xml version="1.0" encoding="utf-8"?>${text}"""
-            )
+            call.respondXml(text)
         }
     }
+}
+
+suspend fun ApplicationCall.respondXml(xml: String) {
+    respondText(
+        contentType = ContentType.Text.Xml.withCharset(Charsets.UTF_8),
+        status = HttpStatusCode.MultiStatus,
+        text = compressXml(
+            """<?xml version="1.0" encoding="UTF-8"?>$xml"""
+        )
+    )
+}
+
+fun compressXml(xmlString: String): String {
+    // 1. 移除换行符和多余的空白字符
+    var compressed = xmlString.replace("\\s+".toRegex(), " ")
+
+    // 2. 去除标签之间的多余空格
+    compressed = compressed.replace("> <", "><").trim()
+
+    return compressed
 }
 
 fun Route.webdav(method: String, handler: RoutingHandler) {

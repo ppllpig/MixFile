@@ -26,7 +26,7 @@ class WebDavFile(
 ) {
 
     init {
-        name = name.trim().ifEmpty { "root" }.sanitizeFileName()
+        name = name.trim().sanitizeFileName()
     }
 
     override fun equals(other: Any?): Boolean {
