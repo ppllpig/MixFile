@@ -53,8 +53,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.util.encodeBase64
-import io.ktor.utils.io.jvm.javaio.toInputStream
+import io.ktor.utils.io.copyAndClose
 import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.streams.asByteWriteChannel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -106,7 +107,8 @@ suspend fun putUploadFile(
 
 fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
     MixDialogBuilder(
-        "上传中", properties = DialogProperties(
+        "上传中",
+        properties = DialogProperties(
             dismissOnClickOutside = false,
             dismissOnBackPress = false
         )
@@ -297,9 +299,7 @@ suspend fun saveFileToStorage(
             throw Exception("下载失败: ${text}")
         }
         resolver.openOutputStream(fileUri)?.use { output ->
-            it.bodyAsChannel().toInputStream().use { input ->
-                input.copyTo(output)
-            }
+            it.bodyAsChannel().copyAndClose(output.asByteWriteChannel())
         }
     }
     return fileUri

@@ -10,7 +10,7 @@ import io.ktor.server.response.respondBytesWriter
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import io.ktor.utils.io.copyTo
+import io.ktor.utils.io.copyAndClose
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
 
 fun MixFileServer.getRoutes(): Routing.() -> Unit {
@@ -25,7 +25,7 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
             call.respondBytesWriter(
                 contentType = file.parseFileMimeType()
             ) {
-                fileStream.toByteReadChannel().copyTo(this)
+                fileStream.toByteReadChannel().copyAndClose(this)
             }
         }
         route("/api", getAPIRoute())
