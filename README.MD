@@ -19,7 +19,8 @@ MixFile是一款可以上传加密文件并分享的安卓APP \
 加密时会自动生成随机密钥进行加密,上传完成后,密钥 文件地址 文件大小等信息会附加在分享码中 \
 将分享码发送给他人即可实现分享文件 \
 已发布版本: https://github.com/InvertGeek/MixFile/releases \
-使用帮助: https://invertgeek.github.io/mixfile-doc/help.html
+使用帮助: https://invertgeek.github.io/mixfile-doc/help.html \
+TG群: https://t.me/mixfilefx
 
 ## 详细原理
 将文件切割为1MB的分片,然后加密隐藏到空白图片中 \
