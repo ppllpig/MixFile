@@ -6,6 +6,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -140,12 +141,15 @@ fun VideoPlayerScreen(
 
     var lastClick by remember { mutableLongStateOf(0L) }
 
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
-            .clickable {
+            .clickable(
+                //移除点击波浪效果
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
                 if (System.currentTimeMillis() - lastClick < 300L) {
                     if (player.isPlaying) {
                         player.pause()
