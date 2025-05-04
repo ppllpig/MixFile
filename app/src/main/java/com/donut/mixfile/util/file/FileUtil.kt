@@ -22,6 +22,7 @@ import com.donut.mixfile.MainActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.core.utils.StreamContent
+import com.donut.mixfile.server.core.utils.kb
 import com.donut.mixfile.server.core.utils.mb
 import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.mixFileServer
@@ -244,9 +245,8 @@ suspend fun loadDataWithMaxSize(
         onDownload(progressContent.ktorListener)
     }.execute {
         if (!it.status.isSuccess()) {
-            val text = if ((it.contentLength()
-                    ?: (1024 * 1024)) < 1024 * 500
-            ) it.bodyAsText() else "未知错误"
+            val text =
+                if ((it.contentLength() ?: 1024L.kb) < 500L.kb) it.bodyAsText() else "未知错误"
             throw Exception("下载失败: ${text}")
         }
         if ((it.contentLength() ?: 0) > limit) {
@@ -293,9 +293,8 @@ suspend fun saveFileToStorage(
         onDownload(progress.ktorListener)
     }.execute {
         if (!it.status.isSuccess()) {
-            val text = if ((it.contentLength()
-                    ?: (1024 * 1024)) < 1024 * 500
-            ) it.bodyAsText() else "未知错误"
+            val text =
+                if ((it.contentLength() ?: 1024L.kb) < 500L.kb) it.bodyAsText() else "未知错误"
             throw Exception("下载失败: ${text}")
         }
         resolver.openOutputStream(fileUri)?.use { output ->

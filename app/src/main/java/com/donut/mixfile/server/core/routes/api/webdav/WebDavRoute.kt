@@ -11,6 +11,7 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.routes.api.webdav.objects.normalizePath
 import com.donut.mixfile.server.core.routes.api.webdav.objects.toDavPath
+import com.donut.mixfile.server.core.utils.decodedPath
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.getHeader
 import com.donut.mixfile.server.core.utils.mb
@@ -24,7 +25,6 @@ import io.ktor.http.encodeURLParameter
 import io.ktor.http.withCharset
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.contentLength
-import io.ktor.server.request.path
 import io.ktor.server.request.receiveChannel
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
@@ -39,8 +39,6 @@ import io.ktor.utils.io.readRemaining
 import kotlinx.io.readByteArray
 
 const val API_PATH = "/api/webdav"
-
-val RoutingContext.decodedPath: String get() = call.request.path().decodeURLQueryComponent()
 
 val RoutingContext.davPath: String
     get() = normalizePath(decodedPath.substringAfter(API_PATH))

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -35,8 +37,8 @@ fun CenterControl(
     visible: Boolean,
     modifier: Modifier,
     player: ExoPlayer,
-    onPause: () -> Unit = {},
-    onMediaChange: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onMediaChange: () -> Unit = {},
 ) {
     var isPlaying by remember { mutableStateOf(true) }
     var isBuffering by remember { mutableStateOf(true) }
@@ -48,8 +50,8 @@ fun CenterControl(
             override fun onPlaybackStateChanged(playbackState: Int) {
                 isBuffering =
                     listOf(Player.STATE_BUFFERING, Player.STATE_IDLE).contains(playbackState)
+                super.onPlaybackStateChanged(playbackState)
             }
-
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 onMediaChange()
@@ -59,22 +61,28 @@ fun CenterControl(
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
                 isPlaying = playWhenReady
+                super.onPlayWhenReadyChanged(playWhenReady, reason)
             }
         }
         player.addListener(listener)
 
-        // 清理资源
         onDispose {
             player.removeListener(listener)
-            player.release()
         }
     }
-    AnimatedVisibility(isBuffering, modifier = modifier) {
+
+    AnimatedVisibility(
+        isBuffering,
+        modifier = modifier,
+        enter = scaleIn(),
+        exit = scaleOut(),
+    ) {
         CircularProgressIndicator(
             strokeWidth = 2.dp,
             modifier = Modifier.size(40.dp)
         )
     }
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(),
@@ -86,6 +94,7 @@ fun CenterControl(
                 modifier = Modifier.scale(1.5f),
                 onClick = {
                     player.seekBack()
+                    onClick()
                 },
             ) {
                 Icon(
@@ -103,10 +112,15 @@ fun CenterControl(
                     } else {
                         player.play()
                     }
-                    onPause()
+                    onClick()
                 },
             ) {
-                AnimatedVisibility(!isBuffering) {
+                AnimatedVisibility(
+                    !isBuffering,
+                    modifier = Modifier,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                ) {
                     Icon(
                         modifier = Modifier.size(100.dp),
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -120,6 +134,7 @@ fun CenterControl(
                 modifier = Modifier.scale(1.5f),
                 onClick = {
                     player.seekForward()
+                    onClick()
                 },
             ) {
                 Icon(

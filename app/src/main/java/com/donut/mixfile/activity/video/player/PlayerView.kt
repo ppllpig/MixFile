@@ -6,7 +6,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +37,6 @@ import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.delay
 import java.util.Locale
 
-
 fun formatTime(milliseconds: Long): String {
     val seconds = (milliseconds / 1000) % 60
     val minutes = (milliseconds / (1000 * 60)) % 60
@@ -57,6 +55,19 @@ val playerColorScheme
         onSurface = Color.White.copy(0.8f),
         onSecondaryContainer = colorScheme.primary.copy(0.8f)
     )
+
+
+class ForceUpdateMutable<T>(value: T) {
+    private var value by mutableStateOf(value)
+    var inc by mutableLongStateOf(0)
+
+    val get get() = value
+
+    fun set(value: T) {
+        this.value = value
+        inc++
+    }
+}
 
 @SuppressLint("PrivateResource")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,15 +98,17 @@ fun VideoPlayerScreen(
 
     var currentMediaItem by remember { mutableIntStateOf(player.currentMediaItemIndex) }
 
-    var controlsVisible by remember { mutableStateOf(true) }
+    var controlsVisible = remember { ForceUpdateMutable(true) }
+
 
     // 控制栏自动隐藏
-    LaunchedEffect(controlsVisible) {
-        if (controlsVisible) {
-            delay(3000) // 3秒后隐藏
-            controlsVisible = false
+    LaunchedEffect(controlsVisible.inc) {
+        if (controlsVisible.get) {
+            delay(3000)
+            controlsVisible.set(false)
         }
     }
+
     val lifecycleOwner =
         LocalLifecycleOwner.current
 
@@ -132,24 +145,20 @@ fun VideoPlayerScreen(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
-            .clickable(
-                onClick = {
-                    if (System.currentTimeMillis() - lastClick < 300L) {
-                        if (player.isPlaying) {
-                            player.pause()
-                            controlsVisible = true
-                        } else {
-                            player.play()
-                            controlsVisible = false
-                        }
-                        return@clickable
+            .clickable {
+                if (System.currentTimeMillis() - lastClick < 300L) {
+                    if (player.isPlaying) {
+                        player.pause()
+                        controlsVisible.set(true)
+                    } else {
+                        player.play()
+                        controlsVisible.set(false)
                     }
-                    lastClick = System.currentTimeMillis()
-                    controlsVisible = !controlsVisible
-                },
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            )
+                    return@clickable
+                }
+                lastClick = System.currentTimeMillis()
+                controlsVisible.set(!controlsVisible.get)
+            }
     ) {
         AndroidView(
             factory = {
@@ -164,21 +173,26 @@ fun VideoPlayerScreen(
 
         TopControl(
             title = if (videoUris.size > 1) "${currentMediaItem + 1} - ${currentMediaTitle}" else currentMediaTitle,
-            visible = controlsVisible,
+            visible = controlsVisible.get,
             modifier = Modifier.align(Alignment.TopCenter)
         )
 
 
-        CenterControl(controlsVisible, Modifier.align(Alignment.Center), player, onPause = {
-            controlsVisible = true
-        }) {
+        CenterControl(
+            controlsVisible.get,
+            Modifier.align(Alignment.Center),
+            player,
+            onClick = {
+                controlsVisible.set(true)
+            }
+        ) {
             currentMediaItem = player.currentMediaItemIndex
-            controlsVisible = true
+            controlsVisible.set(true)
         }
 
 
         BottomControl(
-            visible = controlsVisible,
+            visible = controlsVisible.get,
             modifier = Modifier.align(Alignment.BottomCenter),
             player = player,
             videos = videoUris,
@@ -193,7 +207,7 @@ fun VideoPlayerScreen(
                 }
             },
             onTrackTimeChange = {
-                controlsVisible = true
+                controlsVisible.set(true)
             }
         )
     }

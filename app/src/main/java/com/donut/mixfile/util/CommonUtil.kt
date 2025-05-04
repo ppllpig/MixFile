@@ -93,23 +93,22 @@ fun getAppVersion(context: Context): Pair<String, Long> {
 
 
 class CachedDelegate<T>(val getKeys: () -> Array<Any?>, private val initializer: () -> T) {
-    private var cache: T? = null
-    private var keys: Array<Any?> = arrayOf()
+    private var cache: T = initializer()
+    private var keys: Array<Any?> = getKeys()
 
     operator fun getValue(thisRef: Any?, property: Any?): T {
         val newKeys = getKeys()
-        if (cache == null || !keys.contentEquals(newKeys)) {
+        if (!keys.contentEquals(newKeys)) {
             keys = newKeys
             cache = initializer()
         }
-        return cache!!
+        return cache
     }
 
     operator fun setValue(thisRef: Any?, property: Any?, value: T) {
         cache = value
     }
 }
-
 
 inline fun String.isUrl(block: (URL) -> Unit = {}): Boolean {
     val urlPattern =

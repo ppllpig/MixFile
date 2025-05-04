@@ -23,6 +23,7 @@ import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.isImage
 import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.utils.hashSHA256
+import com.donut.mixfile.server.core.utils.isTrue
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
 import com.donut.mixfile.server.core.utils.toHex
@@ -33,6 +34,7 @@ import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
 import com.donut.mixfile.ui.routes.useShortCode
 import com.donut.mixfile.ui.routes.useSystemPlayer
 import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.util.CachedDelegate
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.showToast
@@ -43,12 +45,12 @@ fun showFileInfoDialog(
     dataLog: FileDataLog,
     onDismiss: () -> Unit = {}
 ) {
-    val log = if (favorites.contains(dataLog)) {
-        dataLog
-    } else {
-        favorites.firstOrNull { it.isSimilar(dataLog) }
-            ?: dataLog
+    var isFav = false
+
+    val log by CachedDelegate({ arrayOf(favorites) }) {
+        favorites.firstOrNull { it.isSimilar(dataLog).isTrue { isFav = true } } ?: dataLog
     }
+
     val shareInfo = resolveMixShareInfo(log.shareInfoData)
     if (shareInfo == null) {
         showToast("解析文件分享码失败")
@@ -84,7 +86,7 @@ fun showFileInfoDialog(
                             Text(text = "查看文件", color = colorScheme.primary)
                         })
                     }
-                    if (!favorites.any { it.isSimilar(log) }) {
+                    if (!isFav) {
                         AssistChip(onClick = {
                             addFavoriteLog(log)
                         }, label = {
