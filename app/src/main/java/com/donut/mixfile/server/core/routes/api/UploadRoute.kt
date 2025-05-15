@@ -6,6 +6,7 @@ import com.donut.mixfile.server.core.aes.generateRandomByteArray
 import com.donut.mixfile.server.core.objects.MixFile
 import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.MixUploadTask
+import com.donut.mixfile.server.core.utils.mb
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.contentLength
 import io.ktor.server.request.receiveChannel
@@ -23,6 +24,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.io.readByteArray
 import kotlin.math.ceil
+import kotlin.math.min
 
 
 fun MixFileServer.getUploadRoute(): RoutingHandler {
@@ -81,22 +83,22 @@ private suspend fun MixFileServer.doUploadFile(
     fileSize: Long,
     uploadTask: MixUploadTask,
 ): String {
-
-    val semaphore = Semaphore(uploadTaskCount)
+    val chunkSizeMB = chunkSize / 1.mb
+    val semaphore = Semaphore((uploadTaskCount / chunkSizeMB.coerceAtLeast(1)).coerceAtLeast(1))
     return coroutineScope {
         uploadTask.onStop.add(0) {
             channel.cancel()
         }
-        val chunkSize = uploader.chunkSize
+        val fixedChunkSize = min(20.mb, chunkSize)
         //固定大小string list
-        val fileListLength = ceil(fileSize.toDouble() / chunkSize).toInt()
+        val fileListLength = ceil(fileSize.toDouble() / fixedChunkSize).toInt()
         val fileList = List(fileListLength) { "" }.toMutableList()
         var fileIndex = 0
         val tasks = mutableListOf<Deferred<Unit?>>()
 
         while (!channel.isClosedForRead) {
             semaphore.acquire()
-            val fileData = channel.readRemaining(chunkSize.toLong()).readByteArray()
+            val fileData = channel.readRemaining(fixedChunkSize.toLong()).readByteArray()
             val currentIndex = fileIndex
             fileIndex++
             tasks.add(async {
@@ -114,7 +116,12 @@ private suspend fun MixFileServer.doUploadFile(
             throw Exception("上传失败")
         }
         val mixFile =
-            MixFile(chunkSize = chunkSize, version = 0, fileList = fileList, fileSize = fileSize)
+            MixFile(
+                chunkSize = fixedChunkSize,
+                version = 0,
+                fileList = fileList,
+                fileSize = fileSize
+            )
         val mixFileData = mixFile.toBytes()
         val mixFileUrl =
             uploader.upload(head, mixFileData, secret, this@doUploadFile)

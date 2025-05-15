@@ -22,6 +22,7 @@ import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.ignoreError
+import com.donut.mixfile.server.core.utils.kb
 import com.donut.mixfile.server.image.createBlankBitmap
 import com.donut.mixfile.server.image.toGif
 import com.donut.mixfile.ui.routes.favorites.result
@@ -41,8 +42,9 @@ import java.io.InputStream
 
 var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
-var UPLOAD_RETRY_TIMES by cachedMutableOf(10, "UPLOAD_RETRY_TIMES")
+var UPLOAD_RETRY_COUNT by cachedMutableOf(10, "UPLOAD_RETRY_TIMES")
 var SERVER_PASSWORD by cachedMutableOf("", "MIXFILE_SERVER_PASSWORD")
+var MIXFILE_CHUNK_SIZE by cachedMutableOf(1024, "mixfile_server_chunk_size")
 
 
 val mixFileServer = object : MixFileServer(
@@ -63,8 +65,11 @@ val mixFileServer = object : MixFileServer(
     override val uploadTaskCount: Int
         get() = UPLOAD_TASK_COUNT.toInt()
 
-    override val requestRetryCount: Int
-        get() = UPLOAD_RETRY_TIMES.toInt()
+    override val uploadRetryCount: Int
+        get() = UPLOAD_RETRY_COUNT.toInt()
+
+    override val chunkSize: Int
+        get() = MIXFILE_CHUNK_SIZE.toInt() * 1.kb
 
     override val password: String
         get() = SERVER_PASSWORD

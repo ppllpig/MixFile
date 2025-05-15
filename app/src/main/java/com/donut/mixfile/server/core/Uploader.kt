@@ -3,7 +3,6 @@ package com.donut.mixfile.server.core
 import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.objects.hashMixSHA256
 import com.donut.mixfile.server.core.utils.isValidURL
-import com.donut.mixfile.server.core.utils.mb
 import com.donut.mixfile.server.core.utils.retry
 import io.ktor.client.HttpClient
 import io.ktor.http.URLBuilder
@@ -11,7 +10,6 @@ import io.ktor.http.URLBuilder
 abstract class Uploader(val name: String) {
 
     open val referer = ""
-    open val chunkSize = 1.mb
 
     abstract suspend fun doUpload(fileData: ByteArray, client: HttpClient): String
 
@@ -50,7 +48,7 @@ abstract class Uploader(val name: String) {
         mixFileServer: MixFileServer
     ): String {
 
-        return retry(times = mixFileServer.requestRetryCount, delay = 100) {
+        return retry(times = mixFileServer.uploadRetryCount, delay = 100) {
             val encryptedData = encryptBytes(head, fileData, key)
             try {
                 val url = doUpload(
