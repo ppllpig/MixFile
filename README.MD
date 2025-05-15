@@ -22,6 +22,9 @@ MixFile是一款可以上传加密文件并分享的安卓APP \
 使用帮助: https://invertgeek.github.io/mixfile-doc/help.html \
 TG群: https://t.me/mixfilefx
 
+## 命令行版本
+https://github.com/InvertGeek/mixfilecli
+
 ## 详细原理
 将文件切割为1MB的分片,然后加密隐藏到空白图片中 \
 非伪装,图片都是真实有效可被解析,然后上传所有分片,最后聚合分片索引信息 \
@@ -50,8 +53,6 @@ SHA256校验在分享码泄露的情况下,也可确保文件不会被篡改,每
 也就是可以保证同一个分享码，不可能下载到不同的文件,只要分享码内容相同,无论以什么手段修改云端的返回的内容都是无法通过校验的 \
 原理: 索引文件结构中会储存所有URL以及其SHA256原内容哈希值,分享码中包含索引文件地址以及其SHA256哈希值,
 
-## 命令行版本
-https://github.com/InvertGeek/mixfilecli
 
 ## 免责声明
 
