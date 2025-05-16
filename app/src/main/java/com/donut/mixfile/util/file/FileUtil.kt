@@ -17,7 +17,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
@@ -109,10 +108,7 @@ suspend fun putUploadFile(
 fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
     MixDialogBuilder(
         "上传中",
-        properties = DialogProperties(
-            dismissOnClickOutside = false,
-            dismissOnBackPress = false
-        )
+        autoClose = false
     ).apply {
         var job: Job? = null
         setContent {

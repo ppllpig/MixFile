@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
@@ -206,7 +205,10 @@ suspend fun importWebDavData(data: ConcurrentHashMap<String, MutableSet<WebDavFi
 }
 
 fun importWebDavData(manager: WebDavManager) {
-    MixDialogBuilder("导入中", properties = DialogProperties(dismissOnClickOutside = false)).apply {
+    MixDialogBuilder(
+        "导入中",
+        autoClose = false
+    ).apply {
         setContent {
             AsyncEffect {
                 importWebDavData(manager.WEBDAV_DATA)
