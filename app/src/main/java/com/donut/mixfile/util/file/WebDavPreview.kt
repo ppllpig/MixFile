@@ -33,17 +33,19 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.routes.api.webdav.objects.normalizePath
 import com.donut.mixfile.server.core.routes.api.webdav.objects.toDataLog
-import com.donut.mixfile.server.core.utils.toInt
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.webdav.importWebDavData
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.AsyncEffect
+import com.donut.mixfile.util.catchError
+import com.donut.mixfile.util.compareByName
 import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.formatTime
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -100,8 +102,29 @@ fun showWebDavFileList(manager: WebDavManager) {
                     modifier = Modifier.padding(5.dp, 10.dp)
                 )
             }
-            val fileList =
-                remember(currentPath) { manager.listFiles(currentPath) } ?: listOf()
+
+            var fileList by remember {
+                mutableStateOf(manager.listFiles(currentPath) ?: listOf())
+            }
+
+            AsyncEffect(currentPath) {
+                catchError {
+                    val files = manager.listFiles(currentPath) ?: listOf()
+                    withContext(Dispatchers.Main) {
+                        fileList = files
+                    }
+                    val sorted = files.sortedWith { file1, file2 ->
+                        if (!isActive) {
+                            throw Exception("排序取消")
+                        }
+                        file1.name.compareByName(file2.name)
+                    }
+                    withContext(Dispatchers.Main) {
+                        fileList = sorted
+                    }
+                }
+            }
+
             LaunchedEffect(fileList) {
                 videoList = fileList.map { it.toDataLog() }.filter {
                     it.isVideo
@@ -110,7 +133,7 @@ fun showWebDavFileList(manager: WebDavManager) {
             BackHandler(enabled = currentPath.isNotEmpty()) {
                 currentPath = currentPath.substringBeforeLast("/", "")
             }
-            val sorted = fileList.sortedBy { -it.isFolder.toInt() }
+
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.padding(0.dp)
@@ -126,6 +149,9 @@ fun showWebDavFileList(manager: WebDavManager) {
                         Text("返回上一级", color = colorScheme.primary)
                     }
                 }
+                if (fileList.isEmpty()) {
+                    Text("没有文件")
+                }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,7 +159,7 @@ fun showWebDavFileList(manager: WebDavManager) {
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     items(fileList.size) { index ->
-                        val log = sorted[index]
+                        val log = fileList[index]
                         if (index > 0) {
                             HorizontalDivider()
                         }

@@ -8,6 +8,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.util.AsyncEffect
+import com.donut.mixfile.util.catchError
 import com.donut.mixfile.util.compareByName
 import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.formatFileSize
@@ -32,6 +34,7 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
 fun exportFileList(fileList: Collection<FileDataLog>, name: String) {
@@ -100,7 +103,21 @@ fun showFileList(fileList: List<FileDataLog>) {
         tag = "file-list-${fileList.hashSHA256()}"
     ).apply {
         setContent {
-            FileCardList(fileList)
+            var listState by remember { mutableStateOf(fileList) }
+            AsyncEffect(fileList) {
+                catchError {
+                    val sorted = fileList.sortedWith { file1, file2 ->
+                        if (!isActive) {
+                            throw Exception("排序取消")
+                        }
+                        file1.name.compareByName(file2.name)
+                    }
+                    withContext(Dispatchers.Main) {
+                        listState = sorted
+                    }
+                }
+            }
+            FileCardList(listState)
         }
         if (videoList.isNotEmpty()) {
             setNegativeButton("全部播放") {
