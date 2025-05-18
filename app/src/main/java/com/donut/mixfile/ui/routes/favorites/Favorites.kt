@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,9 +55,7 @@ import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 var currentCategory: String by mutableStateOf("")
@@ -122,9 +119,6 @@ val Favorites = MixNavPage(
         color = colorScheme.primary
     )
 
-    val scope = rememberCoroutineScope()
-    var sortJob: Job? = remember { null }
-
     OnDispose {
         result = listOf()
     }
@@ -147,8 +141,7 @@ val Favorites = MixNavPage(
             "最小" -> result = result.sortedBy { it.size }
             "名称" -> {
                 val resultCache = result
-                sortJob?.cancel()
-                sortJob = scope.launch(Dispatchers.IO) {
+                withContext(Dispatchers.IO) {
                     catchError {
                         val sorted = result.sortedWith { file1, file2 ->
                             if (!isActive) {
