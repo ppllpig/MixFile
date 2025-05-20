@@ -9,13 +9,15 @@ import com.donut.mixfile.server.core.routes.api.respondMixFile
 import com.donut.mixfile.server.core.routes.api.uploadFile
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
+import com.donut.mixfile.server.core.routes.api.webdav.objects.normalPath
 import com.donut.mixfile.server.core.routes.api.webdav.objects.normalizePath
-import com.donut.mixfile.server.core.routes.api.webdav.objects.toDavPath
 import com.donut.mixfile.server.core.utils.decodedPath
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.getHeader
 import com.donut.mixfile.server.core.utils.mb
+import com.donut.mixfile.server.core.utils.paramPath
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import com.donut.mixfile.server.core.utils.routePrefix
 import com.donut.mixfile.server.core.utils.sanitizeFileName
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
@@ -38,19 +40,19 @@ import io.ktor.server.routing.route
 import io.ktor.utils.io.readRemaining
 import kotlinx.io.readByteArray
 
-const val API_PATH = "/api/webdav"
+
+suspend fun RoutingContext.receiveBytes(limit: Int) =
+    call.receiveChannel().readRemaining(limit.toLong()).readByteArray()
+
 
 val RoutingContext.davPath: String
-    get() = normalizePath(decodedPath.substringAfter(API_PATH))
+    get() = paramPath
 
 val RoutingContext.davParentPath: String
     get() = davPath.substringBeforeLast("/", "")
 
 val RoutingContext.davFileName: String
     get() = davPath.substringAfterLast("/").sanitizeFileName()
-
-suspend fun RoutingContext.receiveBytes(limit: Int) =
-    call.receiveChannel().readRemaining(limit.toLong()).readByteArray()
 
 val RoutingContext.davShareInfo: MixShareInfo?
     get() = resolveMixShareInfo(
@@ -63,8 +65,8 @@ val RoutingContext.davShareInfo: MixShareInfo?
 suspend fun RoutingContext.handleCopy(keep: Boolean, webDavManager: WebDavManager) {
     val overwrite = getHeader("overwrite").contentEquals("T")
     val destination = getHeader("destination")?.decodeURLQueryComponent().let {
-        it?.substringAfter(API_PATH)
-    }.toDavPath()
+        it?.substringAfter(routePrefix).normalPath()
+    }
     if (destination.isBlank()) {
         call.respond(HttpStatusCode.BadRequest)
         return
@@ -207,23 +209,14 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
         }
         propfind {
             val depth = getHeader("depth")?.toInt() ?: 0
+            val file = webDav.getFile(davPath)
             if (depth == 0) {
-                val file = webDav.getFile(davPath)
-                if (file == null) {
-                    call.respond(HttpStatusCode.NotFound)
-                    return@propfind
-                }
-                val text = """
-                <D:multistatus xmlns:D="DAV:">
-                ${file.toXML(decodedPath)}
-                </D:multistatus>
-                """
-                call.respondXml(text)
+                respondRootFile(file)
                 return@propfind
             }
             val fileList = webDav.listFiles(davPath)
             if (fileList == null) {
-                call.respond(HttpStatusCode.NotFound)
+                respondRootFile(file)
                 return@propfind
             }
             val xmlFileList = fileList.toMutableList().apply {
@@ -233,9 +226,10 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             }.joinToString(separator = "") {
                 it.toXML(decodedPath)
             }
+            val rootFile = webDav.getFile(davPath) ?: WebDavFile("root", isFolder = true)
             val text = """
                 <D:multistatus xmlns:D="DAV:">
-                ${WebDavFile("root", isFolder = true).toXML("/api/webdav/")}
+                ${rootFile.toXML(decodedPath, true)}
                 $xmlFileList
                 </D:multistatus>
                 """
@@ -252,6 +246,19 @@ suspend fun ApplicationCall.respondXml(xml: String) {
             """<?xml version="1.0" encoding="UTF-8"?>$xml"""
         )
     )
+}
+
+suspend fun RoutingContext.respondRootFile(file: WebDavFile?) {
+    if (file == null) {
+        call.respond(HttpStatusCode.NotFound)
+        return
+    }
+    val text = """
+                <D:multistatus xmlns:D="DAV:">
+                ${file.toXML(decodedPath, true)}
+                </D:multistatus>
+                """
+    call.respondXml(text)
 }
 
 fun compressXml(xmlString: String): String {
