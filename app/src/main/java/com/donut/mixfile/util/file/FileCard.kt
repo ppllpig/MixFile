@@ -187,6 +187,7 @@ fun FileCardList(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.padding(0.dp)
     ) {
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()

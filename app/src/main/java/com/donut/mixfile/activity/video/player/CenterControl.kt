@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -74,8 +72,8 @@ fun CenterControl(
     AnimatedVisibility(
         isBuffering,
         modifier = modifier,
-        enter = scaleIn(),
-        exit = scaleOut(),
+        enter = fadeIn(),
+        exit = fadeOut(),
     ) {
         CircularProgressIndicator(
             strokeWidth = 2.dp,
@@ -118,8 +116,8 @@ fun CenterControl(
                 AnimatedVisibility(
                     !isBuffering,
                     modifier = Modifier,
-                    enter = scaleIn(),
-                    exit = scaleOut(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
                 ) {
                     Icon(
                         modifier = Modifier.size(100.dp),

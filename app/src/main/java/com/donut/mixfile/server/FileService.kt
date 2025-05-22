@@ -34,8 +34,11 @@ import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.favorites
 import com.donut.mixfile.util.showError
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -75,8 +78,20 @@ val mixFileServer = object : MixFileServer(
         get() = SERVER_PASSWORD
 
     override val webDav: WebDavManager = object : WebDavManager() {
+
+        val mutex = Mutex()
+        var saveTask: Job? = null
+
         override suspend fun saveWebDavData(data: ByteArray) {
-            kv.encode(WEB_DAV_KEY, data)
+            synchronized(this) {
+                saveTask?.cancel()
+                saveTask = appScope.launch(Dispatchers.Main) {
+                    mutex.withLock {
+                        delay(100)
+                        kv.encode(WEB_DAV_KEY, data)
+                    }
+                }
+            }
         }
     }
 
