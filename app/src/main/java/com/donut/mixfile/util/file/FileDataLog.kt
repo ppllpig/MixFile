@@ -3,7 +3,6 @@ package com.donut.mixfile.util.file
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,14 +31,12 @@ val FileDataLog.lanUrl: String
 fun FileDataLog.updateDataList(
     list: List<FileDataLog>,
     action: (FileDataLog) -> FileDataLog
-): List<FileDataLog> {
-    val index = list.indexOf(this)
-    if (index == -1) {
-        return list
+): List<FileDataLog> = list.map {
+    if (it == this) {
+        action(this)
+    } else {
+        it
     }
-    val result = list.toMutableList()
-    result[index] = action(this)
-    return result
 }
 
 fun FileDataLog.rename(callback: (FileDataLog) -> Unit = {}) {
@@ -47,12 +44,6 @@ fun FileDataLog.rename(callback: (FileDataLog) -> Unit = {}) {
     MixDialogBuilder("重命名文件").apply {
         var name by mutableStateOf(shareInfo.fileName)
         setContent {
-            LaunchedEffect(name) {
-                val sanitized = name.sanitizeFileName()
-                if (!sanitized.contentEquals(name)) {
-                    name = sanitized
-                }
-            }
             OutlinedTextField(
                 value = name,
                 onValueChange = {
@@ -70,9 +61,10 @@ fun FileDataLog.rename(callback: (FileDataLog) -> Unit = {}) {
                 showToast("文件名不能为空!")
                 return@setPositiveButton
             }
-            shareInfo = shareInfo.copy(fileName = name)
+            val sanitizedName = name.sanitizeFileName()
+            shareInfo = shareInfo.copy(fileName = sanitizedName)
             val renamedLog = copy(
-                name = name,
+                name = sanitizedName,
                 shareInfoData = shareInfo.toString()
             )
             favorites = updateDataList(favorites) {

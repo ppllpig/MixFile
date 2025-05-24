@@ -80,19 +80,20 @@ fun PreviewCard(
         modifier = Modifier
             .fillMaxSize()
             .padding(5.dp)
-            .combinedClickable(
-                onLongClick = {
-                    longClick(fileDataLog)
-                }
-            ) {
-                onClick(fileDataLog)
-            }
+
     ) {
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color),
+                .background(color)
+                .combinedClickable(
+                    onLongClick = {
+                        longClick(fileDataLog)
+                    }
+                ) {
+                    onClick(fileDataLog)
+                },
             verticalArrangement = Arrangement.Bottom
         ) {
             var loadImg by remember { mutableStateOf(false) }
