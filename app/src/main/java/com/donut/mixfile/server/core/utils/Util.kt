@@ -15,6 +15,7 @@ import io.ktor.server.request.header
 import io.ktor.server.routing.RoutingContext
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.InternalAPI
 import io.ktor.utils.io.jvm.javaio.toOutputStream
 import kotlinx.coroutines.delay
@@ -197,6 +198,7 @@ suspend fun <T> retry(
         try {
             return block()
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             delay(delay)
         }
     }
