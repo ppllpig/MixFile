@@ -89,11 +89,10 @@ dependencies {
     implementation(libs.androidx.media3.session) // [Required] MediaSession Extension dependency
     implementation(libs.androidx.media3.ui) // [Required] Base Player UI
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.firebase.analytics)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
-    implementation(libs.firebase.analytics)
     implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.network)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
