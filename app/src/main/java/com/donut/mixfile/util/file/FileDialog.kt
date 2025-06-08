@@ -22,8 +22,8 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.isImage
 import com.donut.mixfile.server.core.objects.isVideo
+import com.donut.mixfile.server.core.utils.extensions.isTrue
 import com.donut.mixfile.server.core.utils.hashSHA256
-import com.donut.mixfile.server.core.utils.isTrue
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
 import com.donut.mixfile.server.core.utils.toHex
@@ -107,14 +107,14 @@ fun showFileInfoDialog(
                             Text(text = "重命名", color = colorScheme.primary)
                         })
                         AssistChip(onClick = {
-                            openCategorySelect(log.category) { category ->
+                            openCategorySelect(log.getCategory()) { category ->
                                 favorites = log.updateDataList(favorites) {
                                     log.copy(category = category)
                                 }
                             }
                         }, label = {
                             Text(
-                                text = "分类: ${log.category}",
+                                text = "分类: ${log.getCategory()}",
                                 color = colorScheme.primary
                             )
                         })

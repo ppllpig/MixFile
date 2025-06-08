@@ -22,7 +22,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -37,7 +41,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.donut.mixfile.appScope
 import com.donut.mixfile.currentActivity
-import com.donut.mixfile.server.core.utils.isNotNull
+import com.donut.mixfile.server.core.utils.extensions.isNotNull
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.ui.theme.colorScheme
@@ -75,6 +79,18 @@ fun OnDispose(block: () -> Unit) {
         onDispose {
             block()
         }
+    }
+}
+
+class ForceUpdateMutable<T>(value: T) {
+    private var value by mutableStateOf(value)
+    var inc by mutableLongStateOf(0)
+
+    val get get() = value
+
+    fun set(value: T) {
+        this.value = value
+        inc++
     }
 }
 

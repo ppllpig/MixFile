@@ -66,7 +66,7 @@ fun DavFolder(file: WebDavFile, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = file.name.trim(),
+                    text = file.getName().trim(),
                     color = colorScheme.primary,
                     fontSize = 16.sp,
                     maxLines = 2,
@@ -117,7 +117,7 @@ fun showWebDavFileList(manager: WebDavManager) {
                         if (!isActive) {
                             throw Exception("排序取消")
                         }
-                        file1.name.compareByName(file2.name)
+                        file1.getName().compareByName(file2.getName())
                     }
                     withContext(Dispatchers.Main) {
                         fileList = sorted
@@ -165,7 +165,7 @@ fun showWebDavFileList(manager: WebDavManager) {
                         }
                         if (log.isFolder) {
                             DavFolder(log) {
-                                currentPath = normalizePath("${currentPath}/${log.name}")
+                                currentPath = normalizePath("${currentPath}/${log.getName()}")
                             }
                             return@items
                         }

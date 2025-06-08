@@ -6,6 +6,9 @@ import com.donut.mixfile.server.core.utils.isValidURL
 import com.donut.mixfile.server.core.utils.retry
 import io.ktor.client.HttpClient
 import io.ktor.http.URLBuilder
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 abstract class Uploader(val name: String) {
 

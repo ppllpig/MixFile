@@ -34,7 +34,6 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 
 fun clearWebDavData() {
     MixDialogBuilder("确定清空webdav数据?").apply {
@@ -59,7 +58,7 @@ fun clearWebDavData() {
                 showToast("请输入确认")
                 return@setPositiveButton
             }
-            mixFileServer.webDav.WEBDAV_DATA.clear()
+            mixFileServer.webDav.WEBDAV_DATA.files.clear()
             kv.remove(WEB_DAV_KEY)
             showToast("数据已清空")
             closeDialog()
@@ -112,17 +111,7 @@ fun importFileListToWebDav(url: String) {
                 errorDialog("解析文件失败", onError = { closeDialog() }) {
                     val dav = mixFileServer.webDav
                     val fileList = loadFileList(url, progress)
-                    fileList.forEach {
-                        //创建分类文件夹
-                        dav.addFileNode(
-                            "",
-                            WebDavFile(it.category, isFolder = true)
-                        )
-                        dav.addFileNode(
-                            it.category,
-                            WebDavFile(it.name, shareInfoData = it.shareInfoData, size = it.size)
-                        )
-                    }
+                    dav.importMixList(fileList)
                     dav.saveData()
                     showToast("导入完成")
                     withContext(Dispatchers.Main) {
@@ -192,14 +181,10 @@ fun tryImportWebDavData(code: String) {
     }
 }
 
-suspend fun importWebDavData(data: ConcurrentHashMap<String, MutableSet<WebDavFile>>) {
+suspend fun importWebDavData(data: WebDavFile) {
     val dav = mixFileServer.webDav
-    data.keys.forEach { key ->
-        val fileList = dav.WEBDAV_DATA.getOrDefault(key, mutableSetOf())
-        val dataFileList = data.getOrDefault(key, mutableSetOf())
-        fileList.removeAll(dataFileList)
-        fileList.addAll(dataFileList)
-        dav.WEBDAV_DATA[key] = fileList
+    data.files.forEach {
+        dav.WEBDAV_DATA.addFile(it.value)
     }
     dav.saveData()
 }

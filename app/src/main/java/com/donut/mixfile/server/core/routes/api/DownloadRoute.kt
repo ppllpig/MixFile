@@ -5,8 +5,8 @@ import com.donut.mixfile.server.core.objects.MixFile
 import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.SortedTask
 import com.donut.mixfile.server.core.utils.encodeURL
-import com.donut.mixfile.server.core.utils.ifNullOrBlank
-import com.donut.mixfile.server.core.utils.mb
+import com.donut.mixfile.server.core.utils.extensions.ifNullOrBlank
+import com.donut.mixfile.server.core.utils.extensions.mb
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import io.ktor.http.HttpStatusCode

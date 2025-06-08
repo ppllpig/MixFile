@@ -21,8 +21,8 @@ import com.donut.mixfile.MainActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.core.utils.StreamContent
-import com.donut.mixfile.server.core.utils.kb
-import com.donut.mixfile.server.core.utils.mb
+import com.donut.mixfile.server.core.utils.extensions.kb
+import com.donut.mixfile.server.core.utils.extensions.mb
 import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -87,7 +87,7 @@ suspend fun putUploadFile(
     add: Boolean = true,
     progressContent: ProgressContent = ProgressContent(),
 ): String {
-    return errorDialog("上传失败") {
+    return errorDialog<String>("上传失败") {
         val response = localClient.put {
             url("${getLocalServerAddress()}/api/upload")
             onUpload(progressContent.ktorListener)

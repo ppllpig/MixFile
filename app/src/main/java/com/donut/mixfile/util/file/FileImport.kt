@@ -56,7 +56,7 @@ fun showExportFileListDialog(fileList: Collection<FileDataLog>) {
                 OutlinedTextField(
                     value = listName,
                     onValueChange = {
-                        listName = it.sanitizeFileName()
+                        listName = it
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = {
@@ -69,7 +69,7 @@ fun showExportFileListDialog(fileList: Collection<FileDataLog>) {
         }
         setDefaultNegative()
         setPositiveButton("确定") {
-            exportFileList(fileList, listName)
+            exportFileList(fileList, listName.sanitizeFileName())
             closeDialog()
         }
         show()
@@ -138,7 +138,7 @@ fun showImportConfirmWindow(fileList: List<FileDataLog>) {
         val newFiles = mutableSetOf<FileDataLog>()
         val newCategories = mutableSetOf<String>()
         fileList.forEach {
-            newCategories += it.category
+            newCategories += it.getCategory()
             if (!fileMap.contains(it.shareInfoData)) {
                 newFiles += it
             }

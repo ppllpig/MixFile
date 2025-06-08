@@ -132,7 +132,7 @@ val Favorites = MixNavPage(
             favorites.asReversed()
         }
         result = result.filter {
-            currentCategory.isEmpty() || it.category == currentCategory
+            currentCategory.isEmpty() || it.getCategory() == currentCategory
         }
         when (favoriteSort) {
             "最新" -> result = result.sortedByDescending { it.time }
@@ -261,7 +261,7 @@ val Favorites = MixNavPage(
                                     selected = emptySet()
                                 },
                                 Pair("移动分类") {
-                                    openCategorySelect(selected.first().category) { category ->
+                                    openCategorySelect(selected.first().getCategory()) { category ->
                                         favorites = favorites.map {
                                             if (selected.contains(it))
                                                 it.copy(category = category)

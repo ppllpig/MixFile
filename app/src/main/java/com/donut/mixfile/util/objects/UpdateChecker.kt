@@ -1,6 +1,6 @@
 package com.donut.mixfile.util.objects
 
-import com.donut.mixfile.server.core.utils.isTrue
+import com.donut.mixfile.server.core.utils.extensions.isTrue
 import org.jetbrains.annotations.Contract
 import java.io.IOException
 import java.net.HttpURLConnection

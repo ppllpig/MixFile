@@ -81,7 +81,7 @@ fun editCategory(name: String, callback: (String) -> Unit = {}) {
             currentCategory = newName
             showToast("修改分类名称成功")
             favorites = favorites.map {
-                if (it.category.contentEquals(name)) {
+                if (it.getCategory().contentEquals(name)) {
                     it.copy(category = newName)
                 } else {
                     it
@@ -104,7 +104,7 @@ fun deleteCategory(name: String, callback: (String) -> Unit = {}) {
         setPositiveButton("确定") {
             favCategories -= name
             favorites = favorites.filter {
-                it.category != name
+                it.getCategory() != name
             }
             showToast("删除分类成功")
             closeDialog()

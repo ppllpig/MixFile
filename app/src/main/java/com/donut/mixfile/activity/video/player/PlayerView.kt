@@ -1,7 +1,6 @@
 package com.donut.mixfile.activity.video.player
 
 
-import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -9,14 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +31,7 @@ import androidx.media3.ui.PlayerView
 import com.donut.mixfile.activity.video.VideoHistory
 import com.donut.mixfile.activity.video.playHistory
 import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.util.ForceUpdateMutable
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.delay
 import java.util.Locale
@@ -58,20 +56,6 @@ val playerColorScheme
     )
 
 
-class ForceUpdateMutable<T>(value: T) {
-    private var value by mutableStateOf(value)
-    var inc by mutableLongStateOf(0)
-
-    val get get() = value
-
-    fun set(value: T) {
-        this.value = value
-        inc++
-    }
-}
-
-@SuppressLint("PrivateResource")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayerScreen(
     videoUris: List<Uri>,
@@ -99,7 +83,7 @@ fun VideoPlayerScreen(
 
     var currentMediaItem by remember { mutableIntStateOf(player.currentMediaItemIndex) }
 
-    var controlsVisible = remember { ForceUpdateMutable(true) }
+    val controlsVisible = remember { ForceUpdateMutable(true) }
 
 
     // 控制栏自动隐藏
