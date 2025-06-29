@@ -4,8 +4,7 @@ package com.donut.mixfile.activity.video.player
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -54,7 +54,6 @@ val playerColorScheme
         onSurface = Color.White.copy(0.8f),
         onSecondaryContainer = colorScheme.primary.copy(0.8f)
     )
-
 
 @Composable
 fun VideoPlayerScreen(
@@ -129,23 +128,23 @@ fun VideoPlayerScreen(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
-            .clickable(
-                //移除点击波浪效果
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) {
-                if (System.currentTimeMillis() - lastClick < 300L) {
-                    if (player.isPlaying) {
-                        player.pause()
-                        controlsVisible.set(true)
-                    } else {
-                        player.play()
-                        controlsVisible.set(false)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        if (System.currentTimeMillis() - lastClick < 300L) {
+                            if (player.isPlaying) {
+                                player.pause()
+                                controlsVisible.set(true)
+                            } else {
+                                player.play()
+                                controlsVisible.set(false)
+                            }
+                            return@detectTapGestures
+                        }
+                        lastClick = System.currentTimeMillis()
+                        controlsVisible.set(!controlsVisible.get)
                     }
-                    return@clickable
-                }
-                lastClick = System.currentTimeMillis()
-                controlsVisible.set(!controlsVisible.get)
+                )
             }
     ) {
         AndroidView(

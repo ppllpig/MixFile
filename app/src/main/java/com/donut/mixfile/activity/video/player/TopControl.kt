@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -119,13 +120,12 @@ fun TopControl(title: String, visible: Boolean, modifier: Modifier) {
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row {
-                    Text(
-                        fontSize = 12.sp,
-                        text = "电量: ${batteryLevel}%",
-                        color = if (isCharging) Color.Green.copy(0.6f) else colorScheme.primary,
-                    )
-                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    fontSize = 12.sp,
+                    text = "电量: ${batteryLevel}%",
+                    color = if (isCharging) Color.Green.copy(0.6f) else colorScheme.primary,
+                )
                 Text(
                     fontSize = 12.sp,
                     text = "时间: ${formatTime(Date(), "HH:mm")}",
