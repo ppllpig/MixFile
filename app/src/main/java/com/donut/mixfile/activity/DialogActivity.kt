@@ -38,7 +38,7 @@ class FileDialogActivity : MixActivity("file_dialog") {
 
         Dialog(
             onDismissRequest = {
-                currentActivity.finish()
+                currentActivity?.finish()
             },
             properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
         ) {

@@ -90,7 +90,7 @@ fun playVideoList(videoList: List<FileDataLog>) {
         )
         putExtra("hash", playList.hashSHA256())
     }
-    currentActivity.startActivity(intent)
+    currentActivity?.startActivity(intent)
 }
 
 fun showFileList(fileList: List<FileDataLog>) {

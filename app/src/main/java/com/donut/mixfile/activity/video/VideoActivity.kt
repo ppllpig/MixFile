@@ -39,13 +39,11 @@ class VideoActivity : MixActivity("video") {
                     Text(text = "视频url为空")
                     return@MainTheme
                 }
-                if (true) {
-                    VideoPlayerScreen(
-                        videoUris = videos,
-                        hash = videoHash
-                    )
-                    return@MainTheme
-                }
+                VideoPlayerScreen(
+                    videoUris = videos,
+                    hash = videoHash
+                )
+                return@MainTheme
             }
         }
     }

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.ui.component.common.CommonSwitch
@@ -183,7 +184,7 @@ fun openGithubLink() {
             Intent.ACTION_VIEW,
             "https://github.com/InvertGeek/MixFile".toUri()
         )
-    currentActivity.startActivity(intent)
+    currentActivity?.startActivity(intent)
 }
 
 suspend fun checkForUpdates(latest: String? = null, showUpdatedDialog: Boolean = false) {
@@ -192,7 +193,7 @@ suspend fun checkForUpdates(latest: String? = null, showUpdatedDialog: Boolean =
     if (latestVersion == null) {
         return
     }
-    if (latestVersion.contentEquals(getAppVersionName(currentActivity))) {
+    if (latestVersion.contentEquals(getAppVersionName(app))) {
         if (showUpdatedDialog) {
             MixDialogBuilder("已是最新版本").apply {
                 setPositiveButton("确定") { closeDialog() }

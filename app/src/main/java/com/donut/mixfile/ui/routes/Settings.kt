@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import com.donut.mixfile.currentActivity
+import com.donut.mixfile.app
 import com.donut.mixfile.server.CUSTOM_REFERER
 import com.donut.mixfile.server.CUSTOM_UPLOAD_URL
 import com.donut.mixfile.server.CustomUploader
@@ -102,13 +102,13 @@ fun SettingButton(
     }
 }
 
-fun isIgnoringBatteryOptimizations(context: Context = currentActivity): Boolean {
+fun isIgnoringBatteryOptimizations(context: Context = app): Boolean {
     val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     return powerManager.isIgnoringBatteryOptimizations(context.packageName)
 }
 
 @SuppressLint("BatteryLife")
-fun openBatteryOptimizationSettings(context: Context = currentActivity) {
+fun openBatteryOptimizationSettings(context: Context = app) {
     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
         data = "package:${context.packageName}".toUri()
     }

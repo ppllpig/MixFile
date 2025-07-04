@@ -196,7 +196,7 @@ class DownloadTask(
                     Intent.ACTION_VIEW,
                     finalUri
                 )
-            currentActivity.startActivity(intent)
+            currentActivity?.startActivity(intent)
             return
         }
         if (stopped) {

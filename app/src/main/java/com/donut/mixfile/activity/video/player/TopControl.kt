@@ -75,7 +75,7 @@ fun TopControl(title: String, visible: Boolean, modifier: Modifier) {
                     IconButton(
                         modifier = Modifier.size(20.dp),
                         onClick = {
-                            currentActivity.finish()
+                            currentActivity?.finish()
                         },
                     ) {
                         Icon(

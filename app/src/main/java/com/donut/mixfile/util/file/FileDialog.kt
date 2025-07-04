@@ -22,7 +22,7 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.isImage
 import com.donut.mixfile.server.core.objects.isVideo
-import com.donut.mixfile.server.core.utils.extensions.isTrue
+import com.donut.mixfile.server.core.utils.extensions.isNotNull
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
@@ -39,6 +39,12 @@ import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.showToast
 
+@Composable
+fun FileChip(text: String, operation: () -> Unit) {
+    AssistChip(onClick = operation, label = {
+        Text(text = text, color = colorScheme.primary)
+    })
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 fun showFileInfoDialog(
@@ -48,7 +54,9 @@ fun showFileInfoDialog(
     var isFav = false
 
     val log by CachedDelegate({ arrayOf(favorites) }) {
-        favorites.firstOrNull { it.isSimilar(dataLog).isTrue { isFav = true } } ?: dataLog
+        val firstSimilar = favorites.firstOrNull { it.isSimilar(dataLog) }
+        isFav = firstSimilar.isNotNull()
+        firstSimilar ?: dataLog
     }
 
     val shareInfo = resolveMixShareInfo(log.shareInfoData)
@@ -56,6 +64,7 @@ fun showFileInfoDialog(
         showToast("解析文件分享码失败")
         return
     }
+
     MixDialogBuilder("文件信息", tag = "file-info-${shareInfo.url}").apply {
         onDismiss(onDismiss)
         setNegativeButton("复制分享码") {
@@ -73,84 +82,60 @@ fun showFileInfoDialog(
                 InfoText(key = "密钥: ", value = shareInfo.key)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (fileName.endsWith(".mix_list")) {
-                        AssistChip(onClick = {
+                        FileChip("文件列表") {
                             importFileList(log.downloadUrl)
-                        }, label = {
-                            Text(text = "文件列表", color = colorScheme.primary)
-                        })
+                        }
                     }
                     if (fileName.endsWith(".mix_dav")) {
-                        AssistChip(onClick = {
+                        FileChip("查看文件") {
                             previewWebDavData(log.downloadUrl)
-                        }, label = {
-                            Text(text = "查看文件", color = colorScheme.primary)
-                        })
+                        }
                     }
                     if (!isFav) {
-                        AssistChip(onClick = {
+                        FileChip("收藏") {
                             addFavoriteLog(log)
-                        }, label = {
-                            Text(text = "收藏", color = colorScheme.primary)
-                        })
+                        }
                     } else {
-                        AssistChip(onClick = {
+                        FileChip("取消收藏") {
                             deleteFavoriteLog(log)
-                        }, label = {
-                            Text(text = "取消收藏", color = colorScheme.primary)
-                        })
-                        AssistChip(onClick = {
+                        }
+                        FileChip("重命名") {
                             log.rename {
                                 closeDialog()
                                 showFileInfoDialog(it, onDismiss)
                             }
-                        }, label = {
-                            Text(text = "重命名", color = colorScheme.primary)
-                        })
-                        AssistChip(onClick = {
+                        }
+                        FileChip("分类: ${log.getCategory()}") {
                             openCategorySelect(log.getCategory()) { category ->
                                 favorites = log.updateDataList(favorites) {
                                     log.copy(category = category)
                                 }
                             }
-                        }, label = {
-                            Text(
-                                text = "分类: ${log.getCategory()}",
-                                color = colorScheme.primary
-                            )
-                        })
-
+                        }
                     }
-
                     if (dataLog.isVideo) {
-                        AssistChip(onClick = {
+                        FileChip("播放视频") {
                             if (useSystemPlayer) {
                                 val intent = Intent(Intent.ACTION_VIEW)
                                 intent.setDataAndType(log.downloadUrl.toUri(), "video/*")
-                                currentActivity.startActivity(intent)
-                                return@AssistChip
+                                currentActivity?.startActivity(intent)
+                                return@FileChip
                             }
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 putExtra("url", log.downloadUrl)
                                 putExtra("hash", shareInfo.toString().hashSHA256().toHex())
                             }
-                            currentActivity.startActivity(intent)
-                        }, label = {
-                            Text(text = "播放视频", color = colorScheme.primary)
-                        })
+                            currentActivity?.startActivity(intent)
+                        }
                     }
                     if (dataLog.isImage) {
-                        AssistChip(onClick = {
+                        FileChip("查看图片") {
                             showImageDialog(log.downloadUrl)
-                        }, label = {
-                            Text(text = "查看图片", color = colorScheme.primary)
-                        })
+                        }
                     }
-
-                    AssistChip(onClick = {
+                    FileChip("复制局域网地址") {
                         log.lanUrl.copyToClipboard()
-                    }, label = {
-                        Text(text = "复制局域网地址", color = colorScheme.primary)
-                    })
+                    }
                 }
             }
         }

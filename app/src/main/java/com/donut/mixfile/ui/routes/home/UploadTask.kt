@@ -93,7 +93,7 @@ class UploadTask(
     val add: Boolean = true,
 ) : MixUploadTask {
 
-    override val onStop: MutableList<suspend () -> Unit> = mutableListOf()
+    override val stopFunc: MutableList<suspend () -> Unit> = mutableListOf()
 
     var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
 
@@ -167,9 +167,9 @@ class UploadTask(
         if (stopped) {
             return
         }
-        stopped = true
+        stop(null)
         appScope.launch(Dispatchers.IO) {
-            onStop.forEach { it() }
+            stopFunc.forEach { it() }
         }
     }
 

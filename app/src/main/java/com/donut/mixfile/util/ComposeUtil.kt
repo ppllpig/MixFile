@@ -45,7 +45,6 @@ import com.donut.mixfile.server.core.utils.extensions.isNotNull
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.objects.MixActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +52,7 @@ import kotlinx.coroutines.withContext
 
 
 fun addContentView(view: View): () -> Unit {
-    currentActivity.addContentView(
+    currentActivity?.addContentView(
         view,
         ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -98,11 +97,9 @@ fun addComposeView(
     scheme: ColorScheme? = null,
     content: @Composable (removeView: () -> Unit) -> Unit
 ): () -> Unit {
-    if (MixActivity.firstActiveActivity() == null) {
-        return {}
-    }
+    val context = currentActivity ?: return {}
     return addContentView(
-        ComposeView(currentActivity).apply {
+        ComposeView(context).apply {
             setContent {
                 MainTheme {
                     MaterialTheme(colorScheme = scheme ?: colorScheme) {
