@@ -9,11 +9,9 @@ import android.provider.MediaStore
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +27,7 @@ import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import com.donut.mixfile.ui.routes.home.tryResolveFile
 import com.donut.mixfile.ui.routes.home.uploadTasks
+import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.catchError
 import com.donut.mixfile.util.errorDialog
@@ -61,7 +60,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
@@ -110,7 +108,6 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
         "上传中",
         autoClose = false
     ).apply {
-        var job: Job? = null
         setContent {
             val progressContent = remember {
                 ProgressContent("上传中")
@@ -122,29 +119,21 @@ fun doUploadFile(data: Any?, name: String, add: Boolean = true) {
             ) {
                 progressContent.LoadingContent()
             }
-            val scope = rememberCoroutineScope()
-            LaunchedEffect(Unit) {
-                job = appScope.launch(Dispatchers.IO) {
-                    val message = putUploadFile(data, name, add, progressContent)
-                    if (message.isEmpty()) {
-                        return@launch
-                    }
-                    if (!scope.coroutineContext.isActive) {
-                        return@launch
-                    }
-                    withContext(Dispatchers.Main) {
-                        tryResolveFile(message)
-                    }
-                    showToast("上传成功!")
-                    closeDialog()
+            AsyncEffect {
+                val message = putUploadFile(data, name, add, progressContent)
+                if (message.isEmpty()) {
+                    showToast("上传失败")
+                    return@AsyncEffect
                 }
+
+                withContext(Dispatchers.Main) {
+                    tryResolveFile(message)
+                }
+                showToast("上传成功!")
+                closeDialog()
             }
         }
-        setPositiveButton("后台上传") {
-            closeDialog()
-        }
         setNegativeButton("取消") {
-            job?.cancel()
             showToast("上传已取消")
             closeDialog()
         }
