@@ -399,7 +399,7 @@ fun selectUploader() {
                 items = UPLOADERS,
                 getLabel = { it.name },
                 currentOption = UPLOADERS.firstOrNull {
-                    it.name == currentUploader
+                    it.name.contentEquals(currentUploader)
                 } ?: A1Uploader
             ) { option ->
                 currentUploader = option.name

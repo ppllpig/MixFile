@@ -24,7 +24,7 @@ val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
 var currentUploader by cachedMutableOf(A1Uploader.name, "current_uploader")
 
-fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name == currentUploader } ?: A1Uploader
+fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(currentUploader) } ?: A1Uploader
 
 object CustomUploader : Uploader("自定义") {
 
