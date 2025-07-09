@@ -9,6 +9,8 @@ buildscript {
         // Check that you have the following line (if not, add it):
 
         google()  // Google's Maven repository
+        maven("https://jitpack.io")
+
     }
     dependencies {
 

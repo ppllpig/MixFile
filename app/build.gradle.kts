@@ -64,22 +64,15 @@ android {
     }
 }
 
-val brotliVersion = "1.17.0"
-val operatingSystem: OperatingSystem = DefaultNativePlatform.getCurrentOperatingSystem()
 
 dependencies {
+    implementation(libs.mixfile.core)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.fastjson2.kotlin)
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.mmkv)
     implementation(libs.zoomable)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.status.pages)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.server.default.headers)
-    implementation(libs.ktor.server.cors)
-    implementation(libs.ktor.server.netty)
     implementation(libs.coil)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
