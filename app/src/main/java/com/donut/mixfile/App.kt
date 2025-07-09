@@ -50,6 +50,7 @@ class App : Application(), ImageLoaderFactory {
         super.onCreate()
         MMKV.initialize(this)
         kv = MMKV.defaultMMKV()
+        kv.enableCompareBeforeSet()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             showError(e)
             if (Looper.myLooper() == null) {

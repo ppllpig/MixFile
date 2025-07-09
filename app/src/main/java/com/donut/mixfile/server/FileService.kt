@@ -137,7 +137,7 @@ val mixFileServer = object : MixFileServer(
 }
 var serverStarted by mutableStateOf(false)
 
-val WEB_DAV_KEY = "mixfile_web_dav_data"
+const val WEB_DAV_KEY = "mixfile_web_dav_data"
 
 
 class FileService : Service() {

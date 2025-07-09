@@ -2,8 +2,8 @@ package com.donut.mixfile.server
 
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.uploaders.A3Uploader
-import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
-import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
+import com.donut.mixfile.server.core.uploaders.A1Uploader
+import com.donut.mixfile.server.core.uploaders.A2Uploader
 import com.donut.mixfile.util.cachedMutableOf
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get

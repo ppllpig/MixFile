@@ -126,7 +126,7 @@ val Favorites = MixNavPage(
     LaunchedEffect(searchVal, currentCategory, favorites, favoriteSort) {
         result = if (searchVal.trim().isNotEmpty()) {
             favorites.filter {
-                it.name.contains(searchVal)
+                it.name.contains(searchVal, true)
             }.asReversed()
         } else {
             favorites.asReversed()
