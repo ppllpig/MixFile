@@ -1,5 +1,4 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 plugins {
     alias(libs.plugins.android.application)

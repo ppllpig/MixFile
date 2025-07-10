@@ -1,9 +1,9 @@
 package com.donut.mixfile.server
 
 import com.donut.mixfile.server.core.Uploader
-import com.donut.mixfile.server.core.uploaders.A3Uploader
 import com.donut.mixfile.server.core.uploaders.A1Uploader
 import com.donut.mixfile.server.core.uploaders.A2Uploader
+import com.donut.mixfile.server.core.uploaders.A3Uploader
 import com.donut.mixfile.util.cachedMutableOf
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -24,7 +24,8 @@ val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
 var currentUploader by cachedMutableOf(A1Uploader.name, "current_uploader")
 
-fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(currentUploader) } ?: A1Uploader
+fun getCurrentUploader() =
+    UPLOADERS.firstOrNull { it.name.contentEquals(currentUploader) } ?: A1Uploader
 
 object CustomUploader : Uploader("自定义") {
 

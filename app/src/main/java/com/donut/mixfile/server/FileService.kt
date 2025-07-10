@@ -14,7 +14,6 @@ import androidx.core.app.NotificationCompat
 import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.R
-import com.donut.mixfile.app
 import com.donut.mixfile.appScope
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.core.MixFileServer
@@ -40,8 +39,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.FileNotFoundException
-import java.io.InputStream
 
 var DOWNLOAD_TASK_COUNT by cachedMutableOf(5, "download_task_count")
 var UPLOAD_TASK_COUNT by cachedMutableOf(10, "upload_task_count")
@@ -102,15 +99,6 @@ val mixFileServer = object : MixFileServer(
 
     override fun getUploader(): Uploader {
         return getCurrentUploader()
-    }
-
-    override suspend fun getStaticFile(path: String): InputStream? {
-        try {
-            val fileStream = app.assets.open(path)
-            return fileStream
-        } catch (e: FileNotFoundException) {
-            return null
-        }
     }
 
     override suspend fun genDefaultImage(): ByteArray {
