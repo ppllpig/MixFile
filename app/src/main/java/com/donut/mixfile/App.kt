@@ -13,7 +13,6 @@ import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
 import com.donut.mixfile.server.FileService
-import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.util.getAppVersionName
 import com.donut.mixfile.util.loopTask
 import com.donut.mixfile.util.objects.MixActivity
@@ -59,7 +58,6 @@ class App : Application(), ImageLoaderFactory {
             showErrorDialog(e)
         }
         innerApp = this
-        UPLOADERS
         updateChecker = UpdateChecker("InvertGeek", "MixFile", getAppVersionName(this) ?: "")
         startService(Intent(this, FileService::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
