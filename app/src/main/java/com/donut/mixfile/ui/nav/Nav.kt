@@ -63,8 +63,10 @@ fun NavComponent() {
                     NavigationDrawerItem(
                         selected = selected,
                         onClick = {
-                            controller.navigate(jumpTo) {
-                                launchSingleTop = true
+                            if (!selected) {
+                                controller.navigate(jumpTo) {
+                                    launchSingleTop = true
+                                }
                             }
                             scope.launch {
                                 drawerState.close()

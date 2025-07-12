@@ -22,7 +22,7 @@ var CUSTOM_REFERER by cachedMutableOf("", "CUSTOM_REFERER")
 
 val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
-var currentUploader by cachedMutableOf(A1Uploader.name, "current_uploader")
+var currentUploader by cachedMutableOf(A2Uploader.name, "current_uploader")
 
 fun getCurrentUploader() =
     UPLOADERS.firstOrNull { it.name.contentEquals(currentUploader) } ?: A1Uploader

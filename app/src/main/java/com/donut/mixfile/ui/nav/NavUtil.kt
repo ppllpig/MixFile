@@ -31,7 +31,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.donut.mixfile.server.core.utils.extensions.isNotNull
 import com.donut.mixfile.server.core.utils.genRandomString
 import java.lang.ref.WeakReference
 
@@ -102,8 +101,8 @@ fun NavTitle(showBackIcon: Boolean = false, title: String) {
 @Composable
 fun getNavController(): NavHostController {
     val cache = navControllerCache.get()
-    if (cache.isNotNull()) {
-        return cache!!
+    if (cache != null) {
+        return cache
     }
     val navController = rememberNavController()
     navControllerCache = WeakReference(navController)
