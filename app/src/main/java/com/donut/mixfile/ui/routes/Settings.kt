@@ -36,6 +36,7 @@ import com.donut.mixfile.app
 import com.donut.mixfile.server.CUSTOM_REFERER
 import com.donut.mixfile.server.CUSTOM_UPLOAD_URL
 import com.donut.mixfile.server.CustomUploader
+import com.donut.mixfile.server.DEFAULT_UPLOADER
 import com.donut.mixfile.server.DOWNLOAD_TASK_COUNT
 import com.donut.mixfile.server.MIXFILE_CHUNK_SIZE
 import com.donut.mixfile.server.SERVER_PASSWORD
@@ -400,7 +401,7 @@ fun selectUploader() {
                 getLabel = { it.name },
                 currentOption = UPLOADERS.firstOrNull {
                     it.name.contentEquals(currentUploader)
-                } ?: A1Uploader
+                } ?: DEFAULT_UPLOADER
             ) { option ->
                 currentUploader = option.name
                 closeDialog()
