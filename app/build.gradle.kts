@@ -68,8 +68,6 @@ dependencies {
     implementation(libs.mixfile.core)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.fastjson2.kotlin)
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.reflect)
     implementation(libs.mmkv)
     implementation(libs.zoomable)
     implementation(libs.coil)
