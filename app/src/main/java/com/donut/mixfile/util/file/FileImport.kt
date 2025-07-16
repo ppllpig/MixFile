@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.alibaba.fastjson2.into
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
 import com.donut.mixfile.currentActivity
@@ -21,6 +20,7 @@ import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.objects.toByteArray
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.hashSHA256
+import com.donut.mixfile.server.core.utils.parseJsonObject
 import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.core.utils.toHex
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -151,7 +151,7 @@ fun showImportConfirmWindow(fileList: List<FileDataLog>) {
 
 suspend fun loadFileList(url: String, progress: ProgressContent): List<FileDataLog> {
     val fileListData = loadDataWithMaxSize(url, progress)
-    return decompressGzip(fileListData).into()
+    return decompressGzip(fileListData).parseJsonObject()
 }
 
 fun importFileList(url: String) {

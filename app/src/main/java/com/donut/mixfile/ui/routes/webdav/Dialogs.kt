@@ -16,7 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
-import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
+import com.donut.mixfile.server.core.objects.WebDavFile
+
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer

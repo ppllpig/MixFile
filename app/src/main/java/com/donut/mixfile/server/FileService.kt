@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
-import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.MainActivity
 import com.donut.mixfile.R
 import com.donut.mixfile.appScope
@@ -22,6 +21,7 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.extensions.kb
 import com.donut.mixfile.server.core.utils.ignoreError
+import com.donut.mixfile.server.core.utils.toJsonString
 import com.donut.mixfile.server.image.createBlankBitmap
 import com.donut.mixfile.server.image.toGif
 import com.donut.mixfile.ui.routes.favorites.result
@@ -108,9 +108,9 @@ val mixFileServer = object : MixFileServer(
     override suspend fun getFileHistory(): String {
         return withContext(Dispatchers.Main) {
             if (result.isEmpty()) {
-                return@withContext favorites.asReversed().take(1000).toJSONString()
+                return@withContext favorites.asReversed().take(1000).toJsonString()
             }
-            result.take(1000).toJSONString()
+            result.take(1000).toJsonString()
         }
     }
 

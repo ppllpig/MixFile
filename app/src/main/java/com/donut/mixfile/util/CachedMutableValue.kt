@@ -3,10 +3,10 @@ package com.donut.mixfile.util
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
-import com.alibaba.fastjson2.into
-import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.appScope
 import com.donut.mixfile.kv
+import com.donut.mixfile.server.core.utils.parseJsonObject
+import com.donut.mixfile.server.core.utils.toJsonString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -53,13 +53,13 @@ inline fun <reified T, reified C : Iterable<T>> cachedMutableOf(value: C, key: S
     constructCachedMutableValue(
         value,
         {
-            kv.encode(key, it.toJSONString())
+            kv.encode(key, it.toJsonString())
         },
         getter@{
             var result = value
             catchError {
                 if (kv.containsKey(key)) {
-                    val json: C = kv.decodeString(key).into()
+                    val json: C = kv.decodeString(key)?.parseJsonObject() ?: value
                     result = json
                 }
             }

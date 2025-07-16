@@ -44,7 +44,6 @@ import com.donut.mixfile.server.UPLOADERS
 import com.donut.mixfile.server.UPLOAD_RETRY_COUNT
 import com.donut.mixfile.server.UPLOAD_TASK_COUNT
 import com.donut.mixfile.server.core.Uploader
-import com.donut.mixfile.server.core.uploaders.A1Uploader
 import com.donut.mixfile.server.currentUploader
 import com.donut.mixfile.server.getCurrentUploader
 import com.donut.mixfile.ui.component.common.CommonSwitch
