@@ -11,10 +11,12 @@ import com.donut.mixfile.activity.video.player.VideoPlayerScreen
 import com.donut.mixfile.ui.theme.MainTheme
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.objects.MixActivity
+import kotlinx.serialization.Serializable
 
 
 var playHistory by cachedMutableOf(listOf<VideoHistory>(), "video_player_history_v2")
 
+@Serializable
 data class VideoHistory(val time: Long, val hash: String, val episode: Int)
 
 class VideoActivity : MixActivity("video") {

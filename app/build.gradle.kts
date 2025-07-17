@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
     id("kotlin-parcelize")
+    kotlin("plugin.serialization") version "2.2.0"
 }
 
 android {

@@ -53,11 +53,13 @@ inline fun <reified T, reified C : Iterable<T>> cachedMutableOf(value: C, key: S
     constructCachedMutableValue(
         value,
         {
-            kv.encode(key, it.toJsonString())
+            errorDialog("保存数据失败 key=${key}") {
+                kv.encode(key, it.toJsonString())
+            }
         },
         getter@{
             var result = value
-            catchError {
+            errorDialog("读取数据失败 key=${key}") {
                 if (kv.containsKey(key)) {
                     val json: C = kv.decodeString(key)?.parseJsonObject() ?: value
                     result = json
