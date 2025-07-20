@@ -21,10 +21,6 @@
 #-renamesourcefileattribute SourceFile
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -dontwarn com.sun.nio.file.SensitivityWatchEventModifier
--dontwarn java.beans.BeanInfo
--dontwarn java.beans.IntrospectionException
--dontwarn java.beans.Introspector
--dontwarn java.beans.PropertyDescriptor
 -keep class xyz.doikki.videoplayer.** { *; }
 #-keep class com.donut.** { *; }
 -keep class com.tencent.mmkv.** {*;}
@@ -47,20 +43,9 @@
 
 # mixfile
 -keep class io.netty.** {*;}
--dontwarn io.netty.internal.tcnative.AsyncSSLPrivateKeyMethod
--dontwarn io.netty.internal.tcnative.AsyncTask
--dontwarn io.netty.internal.tcnative.Buffer
--dontwarn io.netty.internal.tcnative.CertificateCallback
--dontwarn io.netty.internal.tcnative.CertificateCompressionAlgo
--dontwarn io.netty.internal.tcnative.CertificateVerifier
--dontwarn io.netty.internal.tcnative.Library
--dontwarn io.netty.internal.tcnative.SSL
--dontwarn io.netty.internal.tcnative.SSLContext
--dontwarn io.netty.internal.tcnative.SSLPrivateKeyMethod
--dontwarn io.netty.internal.tcnative.SSLSessionCache
--dontwarn io.netty.internal.tcnative.SessionTicketKey
--dontwarn io.netty.internal.tcnative.SniHostNameMatcher
--dontwarn io.netty.pkitesting.**
+-dontwarn io.netty.**
+-dontwarn java.beans.**
+
 
 # 保留实现了 android.os.Parcelable 的类
 -keep class * implements android.os.Parcelable {
@@ -144,13 +129,5 @@
 -dontwarn org.jboss.marshalling.Unmarshaller
 -dontwarn org.osgi.annotation.bundle.Export
 -dontwarn reactor.blockhound.BlockHound$Builder
--dontwarn sun.security.x509.AlgorithmId
--dontwarn sun.security.x509.CertificateAlgorithmId
--dontwarn sun.security.x509.CertificateSerialNumber
--dontwarn sun.security.x509.CertificateSubjectName
--dontwarn sun.security.x509.CertificateValidity
--dontwarn sun.security.x509.CertificateVersion
--dontwarn sun.security.x509.CertificateX509Key
--dontwarn sun.security.x509.X500Name
--dontwarn sun.security.x509.X509CertImpl
--dontwarn sun.security.x509.X509CertInfo
+-dontwarn sun.security.x509.**
+

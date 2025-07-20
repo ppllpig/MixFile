@@ -5,6 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -351,10 +357,9 @@ fun selectFilePreview() {
     }
 }
 
-@Composable
-fun Uploader.SettingComponent() {
-    when (this) {
-        is CustomUploader -> {
+fun openCustomUploaderWindow() {
+    MixDialogBuilder("自定义线路设置").apply {
+        setContent {
             OutlinedTextField(
                 value = CUSTOM_UPLOAD_URL,
                 onValueChange = {
@@ -389,6 +394,21 @@ fun Uploader.SettingComponent() {
         """.trimIndent(),
             )
         }
+        setDefaultNegative("关闭")
+        show()
+    }
+}
+
+@Composable
+fun Uploader.SettingComponent() {
+    AnimatedVisibility(
+        this is CustomUploader,
+        enter = slideInVertically(),
+        exit = shrinkOut()
+    ) {
+        SettingButton(text = "自定义线路设置: ") {
+            openCustomUploaderWindow()
+        }
     }
 }
 
@@ -402,6 +422,9 @@ fun selectUploader() {
                     it.name.contentEquals(currentUploader)
                 } ?: DEFAULT_UPLOADER
             ) { option ->
+                if (option.name.contentEquals(CustomUploader.name)){
+                    openCustomUploaderWindow()
+                }
                 currentUploader = option.name
                 closeDialog()
             }
