@@ -34,7 +34,7 @@ val DEFAULT_UPLOADER = A2Uploader
 var currentUploader by cachedMutableOf(DEFAULT_UPLOADER.name, "current_uploader")
 
 fun getCurrentUploader(uploaders: List<Uploader> = UPLOADERS) =
-    uploaders.firstOrNull { it.name.contentEquals(currentUploader) } ?: A1Uploader
+    uploaders.firstOrNull { it.name.contentEquals(currentUploader) } ?: DEFAULT_UPLOADER
 
 object CustomUploader : Uploader("自定义") {
 
