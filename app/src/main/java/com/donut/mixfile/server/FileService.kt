@@ -18,8 +18,6 @@ import com.donut.mixfile.kv
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
-import com.donut.mixfile.server.core.uploaders.js.JSUploader
-import com.donut.mixfile.server.core.uploaders.js.runScript
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.extensions.kb
 import com.donut.mixfile.server.core.utils.ignoreError

@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import com.donut.mixfile.ui.routes.About
-import com.donut.mixfile.ui.routes.MixSettings
 import com.donut.mixfile.ui.routes.favorites.Favorites
 import com.donut.mixfile.ui.routes.home.Home
+import com.donut.mixfile.ui.routes.settings.MixSettings
 import com.donut.mixfile.ui.routes.webdav.WebDAV
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

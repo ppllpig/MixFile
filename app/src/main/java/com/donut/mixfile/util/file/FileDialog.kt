@@ -31,8 +31,8 @@ import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
 import com.donut.mixfile.ui.routes.home.DownloadTask
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
-import com.donut.mixfile.ui.routes.useShortCode
-import com.donut.mixfile.ui.routes.useSystemPlayer
+import com.donut.mixfile.ui.routes.settings.useShortCode
+import com.donut.mixfile.ui.routes.settings.useSystemPlayer
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.CachedDelegate
 import com.donut.mixfile.util.copyToClipboard

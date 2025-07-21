@@ -12,10 +12,10 @@ import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.routes.autoAddFavorite
 import com.donut.mixfile.ui.routes.favorites.currentCategory
 import com.donut.mixfile.ui.routes.home.getLocalServerAddress
 import com.donut.mixfile.ui.routes.home.serverAddress
+import com.donut.mixfile.ui.routes.settings.autoAddFavorite
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.getFileAccessUrl
 import com.donut.mixfile.util.showToast
