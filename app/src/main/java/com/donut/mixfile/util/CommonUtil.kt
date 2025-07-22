@@ -1,5 +1,6 @@
 package com.donut.mixfile.util
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -51,7 +52,7 @@ fun getClipBoard(context: Context = app.applicationContext): ClipboardManager {
 
 fun startActivity(intent: Intent) {
     val context = currentActivity ?: app
-    if (context == app) {
+    if (context !is Activity) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     context.startActivity(intent)
