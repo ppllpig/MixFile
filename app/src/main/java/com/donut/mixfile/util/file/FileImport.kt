@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
-import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.objects.toByteArray
@@ -33,6 +32,7 @@ import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showToast
+import com.donut.mixfile.util.startActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -90,7 +90,7 @@ fun playVideoList(videoList: List<FileDataLog>) {
         )
         putExtra("hash", playList.hashSHA256())
     }
-    currentActivity?.startActivity(intent)
+    startActivity(intent)
 }
 
 fun showFileList(fileList: List<FileDataLog>) {

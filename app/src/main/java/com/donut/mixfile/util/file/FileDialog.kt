@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
-import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.isImage
 import com.donut.mixfile.server.core.objects.isVideo
@@ -38,6 +37,7 @@ import com.donut.mixfile.util.CachedDelegate
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.showToast
+import com.donut.mixfile.util.startActivity
 
 @Composable
 fun FileChip(text: String, operation: () -> Unit) {
@@ -118,14 +118,14 @@ fun showFileInfoDialog(
                             if (useSystemPlayer) {
                                 val intent = Intent(Intent.ACTION_VIEW)
                                 intent.setDataAndType(log.downloadUrl.toUri(), "video/*")
-                                currentActivity?.startActivity(intent)
+                                startActivity(intent)
                                 return@FileChip
                             }
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 putExtra("url", log.downloadUrl)
                                 putExtra("hash", shareInfo.toString().hashSHA256().toHex())
                             }
-                            currentActivity?.startActivity(intent)
+                            startActivity(intent)
                         }
                     }
                     if (dataLog.isImage) {

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.donut.mixfile.app
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.CustomUploader
 import com.donut.mixfile.server.JavaScriptUploader
 import com.donut.mixfile.server.MIXFILE_CHUNK_SIZE
@@ -202,7 +203,8 @@ fun isIgnoringBatteryOptimizations(context: Context = app): Boolean {
 }
 
 @SuppressLint("BatteryLife")
-fun openBatteryOptimizationSettings(context: Context = app) {
+fun openBatteryOptimizationSettings() {
+    val context = currentActivity ?: return
     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
         data = "package:${context.packageName}".toUri()
     }

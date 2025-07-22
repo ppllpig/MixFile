@@ -1,5 +1,6 @@
 package com.donut.mixfile.ui.routes.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,6 +29,7 @@ import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.theme.Theme
 import com.donut.mixfile.ui.theme.currentTheme
 import com.donut.mixfile.ui.theme.enableAutoDarkMode
+import com.donut.mixfile.util.OnResume
 import com.donut.mixfile.util.TipText
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.file.filePreview
@@ -171,17 +174,25 @@ val MixSettings = MixNavPage(
     ) {
         enableAutoDarkMode = it
     }
+
     HorizontalDivider()
-    val batteryOptimization by remember {
+
+    var batteryOptimization by remember {
         mutableStateOf(isIgnoringBatteryOptimizations())
     }
-    if (!batteryOptimization) {
+
+    OnResume {
+        batteryOptimization = isIgnoringBatteryOptimizations()
+    }
+
+    AnimatedVisibility(!batteryOptimization) {
         ElevatedButton(onClick = {
             openBatteryOptimizationSettings()
         }, modifier = Modifier.fillMaxWidth()) {
             Text(text = "省电限制未设置!")
         }
     }
+
     ElevatedButton(onClick = {
         MixDialogBuilder("确定清除记录?").apply {
             setContent {

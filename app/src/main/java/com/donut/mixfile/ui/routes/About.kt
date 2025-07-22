@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.donut.mixfile.app
-import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
@@ -37,6 +36,7 @@ import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getAppVersionName
+import com.donut.mixfile.util.startActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -184,7 +184,7 @@ fun openGithubLink() {
             Intent.ACTION_VIEW,
             "https://github.com/InvertGeek/MixFile".toUri()
         )
-    currentActivity?.startActivity(intent)
+    startActivity(intent)
 }
 
 suspend fun checkForUpdates(latest: String? = null, showUpdatedDialog: Boolean = false) {

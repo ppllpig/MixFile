@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.appScope
-import com.donut.mixfile.currentActivity
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.InfoText
@@ -43,6 +42,7 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showConfirmDialog
 import com.donut.mixfile.util.showErrorDialog
 import com.donut.mixfile.util.showToast
+import com.donut.mixfile.util.startActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -196,7 +196,7 @@ class DownloadTask(
                     Intent.ACTION_VIEW,
                     finalUri
                 )
-            currentActivity?.startActivity(intent)
+            startActivity(intent)
             return
         }
         if (stopped) {

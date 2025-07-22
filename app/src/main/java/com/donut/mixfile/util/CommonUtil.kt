@@ -3,6 +3,7 @@ package com.donut.mixfile.util
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -11,6 +12,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import com.donut.mixfile.app
 import com.donut.mixfile.appScope
+import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.encodeURL
 import com.donut.mixfile.server.core.utils.genRandomString
 import com.donut.mixfile.server.core.utils.ignoreError
@@ -45,6 +47,14 @@ fun String.copyToClipboard(showToast: Boolean = true) {
 
 fun getClipBoard(context: Context = app.applicationContext): ClipboardManager {
     return context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+}
+
+fun startActivity(intent: Intent) {
+    val context = currentActivity ?: app
+    if (context == app) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(intent)
 }
 
 fun readClipBoardText(): String {
