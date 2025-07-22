@@ -45,6 +45,7 @@ lateinit var updateChecker: UpdateChecker
 
 class App : Application(), ImageLoaderFactory {
 
+
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
