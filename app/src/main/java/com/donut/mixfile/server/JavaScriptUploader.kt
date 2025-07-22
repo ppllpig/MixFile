@@ -46,9 +46,11 @@ fun showJSDocWindow() {
                 print(a,b,c) 在控制台输出内容
                 
                 submitForm(url,formData,headers) 提交表单
-                返回base64格式的响应数据
+                使用 [文件数据(base64),文件名,mime类型] 代表文件
+                返回base64格式响应体
                 
                 http(方法,url,body,headers) 发送http请求
+                body需要为base64格式
                 返回base64格式响应体
                 
                 setReferer(字符串) 设置下载时的referer请求头
