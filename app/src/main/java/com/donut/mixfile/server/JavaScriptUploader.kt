@@ -55,6 +55,16 @@ fun showJSDocWindow() {
                 
                 setReferer(字符串) 设置下载时的referer请求头
                 
+                全局内存缓存:
+                putCache(key,value,expire seconds) 
+                getCache(key)
+                value只支持字符串,expire为-1永不过期
+                
+                全局互斥锁:
+                lock(key,func) 返回func执行结果
+                例如lock("abc",()=>1)
+                
+                
                 代码例子:
                 const cookie = `cookie value`;
                 const referer = "https://example.com/";
