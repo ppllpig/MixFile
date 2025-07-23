@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1080719550151",
+    "project_id": "mixfile-3855d",
+    "storage_bucket": "mixfile-3855d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080719550151:android:4853696a684f093ce1c0e2",
+        "android_client_info": {
+          "package_name": "com.donut.mixfile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh_VEXvOcX25YwxBZh0GPyw2ffM7K47xo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
