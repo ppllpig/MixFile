@@ -4,18 +4,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import com.donut.mixfile.server.core.uploaders.js.JSUploader
+import com.donut.mixfile.server.core.uploaders.base.js.JSUploader
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.util.cachedMutableOf
 
 
 var JAVASCRIPT_UPLOADER_CODE by cachedMutableOf("", "JAVASCRIPT_UPLOADER_CODE")
 
-val JavaScriptUploader
-    get() = JSUploader(
-        "JS自定义线路",
-        scriptCode = JAVASCRIPT_UPLOADER_CODE
-    )
+val JavaScriptUploader = object : JSUploader("JS自定义线路") {
+    override val scriptCode: String
+        get() = JAVASCRIPT_UPLOADER_CODE
+}
 
 fun showJSDocWindow() {
     MixDialogBuilder("JS自定义线路教程").apply {
