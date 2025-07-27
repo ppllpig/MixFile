@@ -49,7 +49,7 @@ class App : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
-        kv = MMKV.defaultMMKV(MMKV.MULTI_PROCESS_MODE, null)
+        kv = MMKV.defaultMMKV()
         kv.enableCompareBeforeSet()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             showError(e)
