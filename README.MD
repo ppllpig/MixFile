@@ -54,10 +54,14 @@ mixfile-http线路例子(现在推荐使用js自定义线路): https://github.co
 
 mixfile-alist(使用Alist作为线路(http)): https://github.com/muxinxy/mixfile-alist
 
-### 关于分享码
+### 注意事项
 安卓端默认使用的是短分享码，其中填充了大量不可见的字符 \
 在tg github中发出会被过滤，所以issue反馈问题请使用长分享码 \
-测试qq 微信等软件不会屏蔽
+测试qq 微信等软件不会屏蔽 \
+WebDAV数据和收藏的文件是分开储存的，格式不同 \
+如果要在WebDAV中导入收藏数据 \
+导出收藏文件然后通过WebDAV安卓端界面或上传mix_list文件到WebDAV中导入即可
+
 
 
 ## 免责声明
