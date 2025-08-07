@@ -113,12 +113,15 @@ fun showWebDavFileList(manager: WebDavManager) {
                     withContext(Dispatchers.Main) {
                         fileList = files
                     }
-                    val sorted = files.sortedWith { file1, file2 ->
-                        if (!isActive) {
-                            throw Exception("排序取消")
-                        }
-                        file1.getName().compareByName(file2.getName())
-                    }
+                    val sorted = files.sortedWith(
+                        compareBy<WebDavFile> { !it.isFolder }
+                            .thenComparing { file1, file2 ->
+                                if (!isActive) {
+                                    throw Exception("排序取消")
+                                }
+                                file1.getName().compareByName(file2.getName())
+                            }
+                    )
                     withContext(Dispatchers.Main) {
                         fileList = sorted
                     }
