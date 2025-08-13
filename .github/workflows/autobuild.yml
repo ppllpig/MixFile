@@ -459,4 +459,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         VERSION_NAME=$(grep "versionName =" app/build.gradle.kts | sed 's/.*versionName = "\(.*\)"/\1/')
-        gh release upload "v$VERSION_NAME-mod" app/build/outputs/apk/release/*.apk --repo ${{ github.repository }} --clobber
+        gh release create "v$VERSION_NAME-mod" app/build/outputs/apk/release/*.apk --repo ${{ github.repository }} --title "v$VERSION_NAME (Patched)" --notes "Automated build with WebDAV download feature." || gh release upload "v$VERSION_NAME-mod" app/build/outputs/apk/release/*.apk --repo ${{ github.repository }} --clobber
