@@ -94,9 +94,11 @@ fun exportWebDavData() {
         }
         setDefaultNegative()
         setPositiveButton("确定") {
+            val data = mixFileServer.webDav.dataToBytes()
+            val finalFileName = "${fileName}.mix_dav".substringAfterLast('/') // Ensure only filename is used
             doUploadFile(
-                mixFileServer.webDav.dataToBytes(),
-                "${fileName}.mix_dav",
+                data,
+                finalFileName,
                 false
             )
             closeDialog()
