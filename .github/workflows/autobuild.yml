@@ -15,37 +15,25 @@ jobs:
     - name: Checkout your repository
       uses: actions/checkout@v4
 
-    # 步骤 2: 备份您修改过的文件
-    - name: Secure the modified files
-      run: |
-        MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
-        mkdir -p /tmp/mods
-        cp "${MOD_DIR}/Dialogs.kt" /tmp/mods/
-        # cp "${MOD_DIR}/WebDav.kt" /tmp/mods/ # We no longer copy the old WebDav.kt
-
-    # 步骤 3: 设置 Git 用户信息
+    # 步骤 2: 设置 Git 用户信息
     - name: Set up Git user
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    # 步骤 4: 同步上游最新代码
+    # 步骤 3: 同步上游最新代码
     - name: Sync with Upstream Latest
       run: |
         git remote add upstream https://github.com/InvertGeek/MixFile.git
         git fetch upstream master
         git reset --hard upstream/master
 
-    # 步骤 5: 恢复您的修改
-    - name: Apply modifications by overwriting
+    # 步骤 4: 注入修改后的代码
+    - name: Inject Modified Code
       run: |
         MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
-        # cp /tmp/mods/Dialogs.kt "${MOD_DIR}/" # We no longer copy the old Dialogs.kt
-
-    # 步骤 5.2: 注入修改后的 Dialogs.kt
-    - name: Inject Modified Dialogs.kt
-      run: |
-        MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
+        
+        # 注入 Dialogs.kt
         cat > "${MOD_DIR}/Dialogs.kt" << 'EOF'
         package com.donut.mixfile.ui.routes.webdav
 
@@ -143,9 +131,11 @@ jobs:
                 }
                 setDefaultNegative()
                 setPositiveButton("确定") {
+                    val data = mixFileServer.webDav.dataToBytes()
+                    val finalFileName = "${fileName}.mix_dav".substringAfterLast('/') // Ensure only filename is used
                     doUploadFile(
-                        mixFileServer.webDav.dataToBytes(),
-                        "${fileName}.mix_dav",
+                        data,
+                        finalFileName,
                         false
                     )
                     closeDialog()
@@ -327,10 +317,7 @@ jobs:
         }
         EOF
 
-    # 步骤 5.5: 注入修改后的 WebDav.kt
-    - name: Inject Modified WebDav.kt
-      run: |
-        MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
+        # 注入 WebDav.kt
         cat > "${MOD_DIR}/WebDav.kt" << 'EOF'
         package com.donut.mixfile.ui.routes.webdav
 
@@ -451,7 +438,7 @@ jobs:
         }
         EOF
 
-    # 步骤 6: 设置构建环境
+    # 步骤 5: 设置构建环境
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -462,18 +449,12 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 步骤 7: 修改包名以实现共存
-    - name: Modify Package Name for Coexistence
-      run: |
-        sed -i 's/applicationId = "com.donut.mixfile"/applicationId = "com.donut.mixfile.mod"/' app/build.gradle.kts
-        sed -i 's/"package_name": "com.donut.mixfile"/"package_name": "com.donut.mixfile.mod"/' app/google-services.json
-
-    # 步骤 8: 构建 APK
+    # 步骤 6: 构建 APK
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
-    # 步骤 9: 提取版本号并创建 Release
-    - name: Create Release and Upload APK
+    # 步骤 7: 提取版本号并创建/更新 Release
+    - name: Create or Update Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
