@@ -181,10 +181,11 @@ jobs:
     - name: Modify Package Name for Coexistence
       run: |
         sed -i 's/applicationId = "com.donut.mixfile"/applicationId = "com.donut.mixfile.mod"/' app/build.gradle.kts
+        sed -i 's/"package_name": "com.donut.mixfile"/"package_name": "com.donut.mixfile.mod"/' app/google-services.json
 
-    # 步骤 8: 构建 APK (跳过 Google 服务检查)
+    # 步骤 8: 构建 APK
     - name: Build with Gradle
-      run: ./gradlew assembleRelease -x processReleaseGoogleServices
+      run: ./gradlew assembleRelease
 
     # 步骤 9: 提取版本号并创建 Release
     - name: Create Release and Upload APK
