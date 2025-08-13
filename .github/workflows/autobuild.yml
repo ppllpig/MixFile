@@ -1,19 +1,22 @@
-name: Sync Latest, Patch, and Build APK
+name: Debug and Build
 
 on:
-  schedule:
-    # 每天 UTC 时间 0 点触发 (北京时间早上8点)
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch: # 只允许手动触发，方便调试
 
 jobs:
-  build:
+  debug-and-build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout your repository (with the patch file)
+    # 步骤 1: 检出您自己的仓库
+    - name: Checkout your repository
       uses: actions/checkout@v4
 
+    # 步骤 2: 关键调试步骤！列出所有文件
+    - name: List all files in the repository
+      run: ls -R
+
+    # 步骤 3: 后续步骤暂时保持不变
     - name: Set up Git user
       run: |
         git config --global user.name 'github-actions[bot]'
@@ -24,10 +27,6 @@ jobs:
         git remote add upstream https://github.com/InvertGeek/MixFile.git
         git fetch upstream master
         git reset --hard upstream/master
-
-    # 新增的调试步骤
-    - name: List all files for debugging
-      run: ls -R
 
     - name: Apply WebDAV Patch
       run: git apply --ignore-whitespace webdav_changes.patch
