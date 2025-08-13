@@ -45,6 +45,7 @@ jobs:
     # 步骤 5.5: 注入修改后的 WebDav.kt
     - name: Inject Modified WebDav.kt
       run: |
+        MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
         cat > "${MOD_DIR}/WebDav.kt" << 'EOF'
         package com.donut.mixfile.ui.routes.webdav
 
