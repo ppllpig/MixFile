@@ -40,7 +40,291 @@ jobs:
     - name: Apply modifications by overwriting
       run: |
         MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
-        cp /tmp/mods/Dialogs.kt "${MOD_DIR}/"
+        # cp /tmp/mods/Dialogs.kt "${MOD_DIR}/" # We no longer copy the old Dialogs.kt
+
+    # 步骤 5.2: 注入修改后的 Dialogs.kt
+    - name: Inject Modified Dialogs.kt
+      run: |
+        cat > "${MOD_DIR}/Dialogs.kt" << 'EOF'
+        package com.donut.mixfile.ui.routes.webdav
+
+        import android.content.Context
+        import androidx.compose.foundation.layout.Arrangement
+        import androidx.compose.foundation.layout.Column
+        import androidx.compose.foundation.layout.fillMaxSize
+        import androidx.compose.foundation.layout.fillMaxWidth
+        import androidx.compose.material3.CircularProgressIndicator
+        import androidx.compose.material3.OutlinedTextField
+        import androidx.compose.material3.Text
+        import androidx.compose.runtime.getValue
+        import androidx.compose.runtime.mutableStateOf
+        import androidx.compose.runtime.setValue
+        import androidx.compose.ui.Alignment
+        import androidx.compose.ui.Modifier
+        import androidx.compose.ui.platform.LocalContext
+        import androidx.compose.ui.text.style.TextOverflow
+        import androidx.compose.ui.unit.dp
+        import com.donut.mixfile.kv
+        import com.donut.mixfile.server.WEB_DAV_KEY
+        import com.donut.mixfile.server.core.objects.WebDavFile
+        import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
+        import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+        import com.donut.mixfile.server.mixFileServer
+        import com.donut.mixfile.ui.component.common.MixDialogBuilder
+        import com.donut.mixfile.ui.theme.colorScheme
+        import com.donut.mixfile.util.AsyncEffect
+        import com.donut.mixfile.util.errorDialog
+        import com.donut.mixfile.util.file.doUploadFile
+        import com.donut.mixfile.util.file.downloadUrl
+        import com.donut.mixfile.util.file.loadDataWithMaxSize
+        import com.donut.mixfile.util.file.loadFileList
+        import com.donut.mixfile.util.formatFileSize
+        import com.donut.mixfile.util.getCurrentTime
+        import com.donut.mixfile.util.objects.ProgressContent
+        import com.donut.mixfile.util.showToast
+        import kotlinx.coroutines.Dispatchers
+        import kotlinx.coroutines.withContext
+        import java.io.File
+
+        fun clearWebDavData() {
+            MixDialogBuilder("确定清空webdav数据?").apply {
+                var text by mutableStateOf("")
+                setContent {
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = {
+                            text = it
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = {
+                            Text(text = "请输入确认")
+                        },
+                        maxLines = 1,
+
+                        )
+                }
+                setDefaultNegative()
+                setPositiveButton("确认") {
+                    if (!text.contentEquals("确认")) {
+                        showToast("请输入确认")
+                        return@setPositiveButton
+                    }
+                    mixFileServer.webDav.WEBDAV_DATA.files.clear()
+                    kv.remove(WEB_DAV_KEY)
+                    showToast("数据已清空")
+                    closeDialog()
+                }
+                show()
+            }
+        }
+
+        fun exportWebDavData() {
+            MixDialogBuilder("确定导出?").apply {
+                var fileName by mutableStateOf("webdav存档-${getCurrentTime()}")
+                setContent {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = fileName,
+                            onValueChange = {
+                                fileName = it
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = {
+                                Text(text = "存档备注")
+                            },
+                            maxLines = 1,
+                        )
+                        Text(text = "将会导出当前webdav存档")
+                    }
+                }
+                setDefaultNegative()
+                setPositiveButton("确定") {
+                    doUploadFile(
+                        mixFileServer.webDav.dataToBytes(),
+                        "${fileName}.mix_dav",
+                        false
+                    )
+                    closeDialog()
+                }
+                show()
+            }
+        }
+
+
+        fun importFileListToWebDav(url: String) {
+            val progress = ProgressContent()
+            MixDialogBuilder("解析中").apply {
+                setContent {
+                    AsyncEffect {
+                        errorDialog("解析文件失败", onError = { closeDialog() }) {
+                            val dav = mixFileServer.webDav
+                            val fileList = loadFileList(url, progress)
+                            dav.importMixList(fileList)
+                            dav.saveData()
+                            showToast("导入完成")
+                            withContext(Dispatchers.Main) {
+                                closeDialog()
+                            }
+                        }
+                    }
+                    progress.LoadingContent()
+                }
+                setDefaultNegative()
+                show()
+            }
+
+        }
+
+        fun tryImportWebDavData(code: String) {
+            val shareInfo = resolveMixShareInfo(code)
+            if (shareInfo == null) {
+                showToast("解析分享码失败")
+                return
+            }
+            val url = shareInfo.toDataLog().downloadUrl
+            if (shareInfo.fileName.endsWith(".mix_list")) {
+                MixDialogBuilder("确定导入文件列表?").apply {
+                    setContent {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                "文件列表: ${shareInfo.fileName}",
+                                color = colorScheme.primary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text("大小: ${formatFileSize(shareInfo.fileSize)}", color = colorScheme.primary)
+                        }
+                    }
+                    setPositiveButton("确定") {
+                        closeDialog()
+                        importFileListToWebDav(url)
+                    }
+                    setDefaultNegative()
+                    show()
+                }
+                return
+            }
+            if (!shareInfo.fileName.endsWith(".mix_dav")) {
+                showToast("错误的文件格式")
+                return
+            }
+            MixDialogBuilder("确定导入存档?").apply {
+                setContent {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "存档: ${shareInfo.fileName}",
+                            color = colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text("大小: ${formatFileSize(shareInfo.fileSize)}", color = colorScheme.primary)
+                    }
+                }
+                setPositiveButton("确定") {
+                    closeDialog()
+                    importWebDavData(url)
+                }
+                setDefaultNegative()
+                show()
+            }
+        }
+
+        suspend fun importWebDavData(data: WebDavFile) {
+            val dav = mixFileServer.webDav
+            data.files.forEach {
+                dav.WEBDAV_DATA.addFile(it.value)
+            }
+            dav.saveData()
+        }
+
+        fun importWebDavData(manager: WebDavManager) {
+            MixDialogBuilder(
+                "导入中",
+                autoClose = false
+            ).apply {
+                setContent {
+                    AsyncEffect {
+                        importWebDavData(manager.WEBDAV_DATA)
+                        showToast("导入成功")
+                        closeDialog()
+                    }
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                show()
+            }
+        }
+
+        fun importWebDavData(url: String) {
+            val progress = ProgressContent()
+            MixDialogBuilder("导入中").apply {
+                setContent {
+                    AsyncEffect {
+                        errorDialog("导入失败", onError = { closeDialog() }) {
+                            val webDavData = loadDataWithMaxSize(url, progress)
+                            val dav = mixFileServer.webDav
+                            val data = dav.parseDataFromBytes(webDavData)
+                            importWebDavData(data)
+                            showToast("导入成功!")
+                        }
+                        withContext(Dispatchers.Main) {
+                            closeDialog()
+                        }
+                    }
+                    progress.LoadingContent()
+                }
+                setDefaultNegative()
+                show()
+            }
+        }
+
+        fun downloadToWebDav(url: String) {
+            val progress = ProgressContent()
+            MixDialogBuilder("下载并导入中").apply {
+                setContent {
+                    // 修复 #1: 通过 LocalContext.current 获取 Context
+                    val context = LocalContext.current
+                    AsyncEffect {
+                        errorDialog("下载失败", onError = { closeDialog() }) {
+                            val data = loadDataWithMaxSize(url, progress)
+                            val dav = mixFileServer.webDav
+                            val fileName = url.substringAfterLast("/")
+                            
+                            val tempDir = File(context.cacheDir, "webtemp")
+                            if (!tempDir.exists()) {
+                                tempDir.mkdirs()
+                            }
+                            val tempFile = File(tempDir, fileName)
+                            tempFile.writeBytes(data)
+
+                            // 修复 #2: 传入文件路径字符串，而不是 File 对象
+                            val newFile = WebDavFile(tempFile.name)
+                            dav.WEBDAV_DATA.addFile(newFile)
+                            dav.saveData()
+                            
+                            tempFile.delete()
+                            
+                            showToast("下载并导入成功!")
+                        }
+                        withContext(Dispatchers.Main) {
+                            closeDialog()
+                        }
+                    }
+                    progress.LoadingContent()
+                }
+                setDefaultNegative()
+                show()
+            }
+        }
+        EOF
 
     # 步骤 5.5: 注入修改后的 WebDav.kt
     - name: Inject Modified WebDav.kt
@@ -193,7 +477,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         VERSION_NAME=$(grep "versionName =" app/build.gradle.kts | sed 's/.*versionName = "\(.*\)"/\1/')
-        gh release delete "v$VERSION_NAME-mod" -y || true
-        git push origin --delete "v$VERSION_NAME-mod" || true
-        git tag -d "v$VERSION_NAME-mod" || true
-        gh release create "v$VERSION_NAME-mod" app/build/outputs/apk/release/*.apk --repo ${{ github.repository }} --title "v$VERSION_NAME (Patched)" --notes "Automated build with WebDAV download feature."
+        gh release upload "v$VERSION_NAME-mod" app/build/outputs/apk/release/*.apk --repo ${{ github.repository }} --clobber
