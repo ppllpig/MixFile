@@ -250,7 +250,8 @@ fun downloadToWebDav(url: String) {
                 errorDialog("下载失败", onError = { closeDialog() }) {
                     val data = loadDataWithMaxSize(url, progress)
                     val dav = mixFileServer.webDav
-                    val fileName = url.substringAfterLast("/")
+                    val encodedFileName = url.substringAfterLast("/")
+                    val fileName = java.net.URLDecoder.decode(encodedFileName, "UTF-8")
                     
                     val tempDir = File(context.cacheDir, "webtemp")
                     if (!tempDir.exists()) {
