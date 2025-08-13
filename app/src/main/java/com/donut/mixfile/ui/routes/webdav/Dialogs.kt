@@ -245,7 +245,9 @@ fun downloadToWebDav(url: String) {
                     val data = loadDataWithMaxSize(url, progress)
                     val dav = mixFileServer.webDav
                     val fileName = url.substringAfterLast("/")
-                    dav.WEBDAV_DATA.addFile(fileName, data)
+                    // 修复：创建一个 WebDavFile 对象再传入
+                    val newFile = WebDavFile(name = fileName, data = data)
+                    dav.WEBDAV_DATA.addFile(newFile)
                     dav.saveData()
                     showToast("下载并导入成功!")
                 }
