@@ -1,36 +1,41 @@
-name: Debug and Build
+name: Sync, Patch, and Build
 
 on:
-  workflow_dispatch: # 只允许手动触发，方便调试
+  workflow_dispatch:
 
 jobs:
-  debug-and-build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    # 步骤 1: 检出您自己的仓库
     - name: Checkout your repository
       uses: actions/checkout@v4
 
-    # 步骤 2: 关键调试步骤！列出所有文件
-    - name: List all files in the repository
-      run: ls -R
+    # 步骤 1: 将补丁文件复制到安全地带
+    - name: Secure the patch file
+      run: cp webdav_changes.patch /tmp/webdav_changes.patch
 
-    # 步骤 3: 后续步骤暂时保持不变
     - name: Set up Git user
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    # 步骤 2: 与上游仓库同步 (这会删除工作区内的所有文件)
     - name: Sync with Upstream Latest
       run: |
         git remote add upstream https://github.com/InvertGeek/MixFile.git
         git fetch upstream master
         git reset --hard upstream/master
 
+    # 步骤 3: 从安全地带恢复补丁文件
+    - name: Restore the patch file
+      run: cp /tmp/webdav_changes.patch .
+
+    # 步骤 4: 现在应用补丁
     - name: Apply WebDAV Patch
       run: git apply --ignore-whitespace webdav_changes.patch
 
+    # --- 后续构建步骤 ---
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
