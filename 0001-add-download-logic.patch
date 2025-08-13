@@ -1,0 +1,6 @@
+--- a/app/src/main/java/com/donut/mixfile/ui/routes/webdav/Dialogs.kt
++++ b/app/src/main/java/com/donut/mixfile/ui/routes/webdav/Dialogs.kt
+@@ -236,3 +236,25 @@
+         show()
+     }
+ }
