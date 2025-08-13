@@ -1,36 +1,67 @@
-name: Build Patched APK
+name: Sync, Patch, Build and Release
 
 on:
-  workflow_dispatch:
+  schedule:
+    # 每天 UTC 时间 0 点触发 (北京时间早上8点)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # 步骤 1: 直接检出您已经修改过的仓库
+    # 步骤 1: 检出您自己的仓库
     - name: Checkout your repository
       uses: actions/checkout@v4
 
-    # 步骤 2: 设置环境并构建
+    # 步骤 2: 备份您修改过的文件
+    - name: Secure the modified files
+      run: |
+        MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
+        mkdir -p /tmp/mods
+        cp "${MOD_DIR}/Dialogs.kt" /tmp/mods/
+        cp "${MOD_DIR}/WebDav.kt" /tmp/mods/
+
+    # 步骤 3: 设置 Git 用户信息
+    - name: Set up Git user
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    # 步骤 4: 同步上游最新代码
+    - name: Sync with Upstream Latest
+      run: |
+        git remote add upstream https://github.com/InvertGeek/MixFile.git
+        git fetch upstream master
+        git reset --hard upstream/master
+
+    # 步骤 5: 恢复您的修改
+    - name: Apply modifications by overwriting
+      run: |
+        MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
+        cp /tmp/mods/Dialogs.kt "${MOD_DIR}/"
+        cp /tmp/mods/WebDav.kt "${MOD_DIR}/"
+
+    # 步骤 6: 设置构建环境
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    # 步骤 7: 构建 APK
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
-    # 步骤 3: 上传构建产物
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: MixFile-patched-apk
-        path: app/build/outputs/apk/release/app-release.apk
+    # 步骤 8: 提取版本号并创建 Release
+    - name: Create Release and Upload APK
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        VERSION_NAME=$(grep "versionName =" app/build.gradle.kts | sed 's/.*versionName = "\(.*\)"/\1/')
+        gh release create "v$VERSION_NAME-mod" app/build/outputs/apk/release/app-release-unsigned.apk --title "v$VERSION_NAME (Patched)" --notes "Automated build with WebDAV download feature."
