@@ -1,3 +1,6 @@
+这是 `.github/workflows/autobuild.yml` 文件的完整内容，您可以复制并保存到您项目的 `.github/workflows/` 目录下：
+
+```yaml
 name: Sync Latest, Patch, and Build APK
 
 on:
@@ -11,23 +14,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    # 步骤 1: 检出您自己的仓库，确保 webdav_changes.patch 文件存在
+    - name: Checkout your repository (with the patch file)
       uses: actions/checkout@v4
+      # 这个动作会检出运行此 workflow 的仓库
 
     - name: Set up Git user
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    # 步骤 2: 与上游仓库同步，获取最新代码
     - name: Sync with Upstream Latest
       run: |
         git remote add upstream https://github.com/InvertGeek/MixFile.git
         git fetch upstream master
         git reset --hard upstream/master
 
+    # 步骤 3: 应用补丁
     - name: Apply WebDAV Patch
       run: git apply --ignore-whitespace webdav_changes.patch
 
+    # 步骤 4: 设置构建环境并构建
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -43,8 +51,10 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
+    # 步骤 5: 上传构建产物
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: MixFile-patched-apk
         path: app/build/outputs/apk/release/app-release.apk
+```
