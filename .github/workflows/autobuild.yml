@@ -180,7 +180,7 @@ jobs:
     # 步骤 7: 修改包名以实现共存
     - name: Modify Package Name for Coexistence
       run: |
-        sed -i 's/\(applicationId\s*=\s*".*"\)/\1.mod/' app/build.gradle.kts
+        sed -i 's/\(applicationId\s*=\s*".*"\)/\1.mod"/' app/build.gradle.kts
 
     # 步骤 8: 构建 APK
     - name: Build with Gradle
