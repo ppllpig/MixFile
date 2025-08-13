@@ -235,3 +235,27 @@ fun importWebDavData(url: String) {
         show()
     }
 }
+
+fun downloadToWebDav(url: String) {
+    val progress = ProgressContent()
+    MixDialogBuilder("下载并导入中").apply {
+        setContent {
+            AsyncEffect {
+                errorDialog("下载失败", onError = { closeDialog() }) {
+                    val data = loadDataWithMaxSize(url, progress)
+                    val dav = mixFileServer.webDav
+                    val fileName = url.substringAfterLast("/")
+                    dav.WEBDAV_DATA.addFile(fileName, data)
+                    dav.saveData()
+                    showToast("下载并导入成功!")
+                }
+                withContext(Dispatchers.Main) {
+                    closeDialog()
+                }
+            }
+            progress.LoadingContent()
+        }
+        setDefaultNegative()
+        show()
+    }
+}
