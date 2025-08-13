@@ -258,7 +258,7 @@ fun downloadToWebDav(url: String) {
                     tempFile.writeBytes(data)
 
                     // 修复 #2: 传入文件路径字符串，而不是 File 对象
-                    val newFile = WebDavFile(tempFile.absolutePath)
+                    val newFile = WebDavFile(tempFile.name)
                     dav.WEBDAV_DATA.addFile(newFile)
                     dav.saveData()
                     
