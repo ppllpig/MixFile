@@ -182,9 +182,9 @@ jobs:
       run: |
         sed -i 's/applicationId = "com.donut.mixfile"/applicationId = "com.donut.mixfile.mod"/' app/build.gradle.kts
 
-    # 步骤 8: 构建 APK
+    # 步骤 8: 构建 APK (跳过 Google 服务检查)
     - name: Build with Gradle
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease -x processReleaseGoogleServices
 
     # 步骤 9: 提取版本号并创建 Release
     - name: Create Release and Upload APK
