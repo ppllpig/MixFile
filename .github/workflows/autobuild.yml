@@ -21,7 +21,7 @@ jobs:
         MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
         mkdir -p /tmp/mods
         cp "${MOD_DIR}/Dialogs.kt" /tmp/mods/
-        cp "${MOD_DIR}/WebDav.kt" /tmp/mods/
+        # cp "${MOD_DIR}/WebDav.kt" /tmp/mods/ # We no longer copy the old WebDav.kt
 
     # 步骤 3: 设置 Git 用户信息
     - name: Set up Git user
@@ -41,7 +41,129 @@ jobs:
       run: |
         MOD_DIR="app/src/main/java/com/donut/mixfile/ui/routes/webdav"
         cp /tmp/mods/Dialogs.kt "${MOD_DIR}/"
-        cp /tmp/mods/WebDav.kt "${MOD_DIR}/"
+
+    # 步骤 5.5: 注入修改后的 WebDav.kt
+    - name: Inject Modified WebDav.kt
+      run: |
+        cat > "${MOD_DIR}/WebDav.kt" << 'EOF'
+        package com.donut.mixfile.ui.routes.webdav
+
+        import androidx.compose.foundation.ExperimentalFoundationApi
+        import androidx.compose.foundation.clickable
+        import androidx.compose.foundation.interaction.MutableInteractionSource
+        import androidx.compose.foundation.layout.ExperimentalLayoutApi
+        import androidx.compose.foundation.layout.Row
+        import androidx.compose.foundation.layout.fillMaxWidth
+        import androidx.compose.foundation.layout.padding
+        import androidx.compose.material.icons.Icons
+        import androidx.compose.material.icons.outlined.Close
+        import androidx.compose.material3.Button
+        import androidx.compose.material3.Icon
+        import androidx.compose.material3.OutlinedButton
+        import androidx.compose.material3.OutlinedTextField
+        import androidx.compose.material3.Text
+        import androidx.compose.runtime.getValue
+        import androidx.compose.runtime.mutableStateOf
+        import androidx.compose.runtime.remember
+        import androidx.compose.runtime.setValue
+        import androidx.compose.ui.Alignment
+        import androidx.compose.ui.Modifier
+        import androidx.compose.ui.unit.dp
+        import com.donut.mixfile.ui.nav.MixNavPage
+        import com.donut.mixfile.ui.routes.UploadDialogCard
+        import com.donut.mixfile.ui.routes.home.serverAddress
+        import com.donut.mixfile.ui.theme.colorScheme
+        import com.donut.mixfile.util.copyToClipboard
+        import com.donut.mixfile.util.readClipBoardText
+
+        @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+        val WebDAV = MixNavPage(
+            gap = 10.dp,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            var text by remember {
+                mutableStateOf("")
+            }
+            val webDavAddress = "$serverAddress/api/webdav"
+            Text(
+                text = "WebDAV局域网连接地址: $webDavAddress",
+                color = colorScheme.primary,
+                modifier = Modifier.clickable {
+                    webDavAddress.copyToClipboard()
+                })
+            UploadDialogCard()
+            Button(onClick = {
+                exportWebDavData()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("导出文件")
+            }
+            OutlinedButton(onClick = {
+                clearWebDavData()
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("清空文件")
+            }
+            OutlinedTextField(
+                value = text,
+                onValueChange = {
+                    text = it
+                },
+                modifier = Modifier.fillMaxWidth(), label = {
+                    Text(text = "请输入分享码")
+                },
+                maxLines = 3,
+                trailingIcon = {
+                    if (text.isNotEmpty()) {
+                        Icon(
+                            Icons.Outlined.Close,
+                            tint = colorScheme.primary,
+                            contentDescription = "clear",
+
+                            modifier = Modifier.clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }) {
+                                text = ""
+                            })
+                    }
+                }
+            )
+
+            Text("支持webdav存档文件和mix_list文件导入", color = colorScheme.primary)
+
+            Row {
+                OutlinedButton(
+                    onClick = { text = readClipBoardText() },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("粘贴内容")
+                }
+                Button(
+                    onClick = { tryImportWebDavData(text) },
+                    modifier = Modifier.weight(1f).padding(start = 10.dp)
+                ) {
+                    Text("导入文件")
+                }
+            }
+
+            var downloadUrl by remember { mutableStateOf("") }
+            OutlinedTextField(
+                value = downloadUrl,
+                onValueChange = { downloadUrl = it },
+                label = { Text("请输入下载链接") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    if (downloadUrl.isNotEmpty()) {
+                        downloadToWebDav(downloadUrl)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("下载到 WebDAV")
+            }
+
+        }
+        EOF
 
     # 步骤 6: 设置构建环境
     - name: Set up JDK 17
@@ -54,11 +176,16 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 步骤 7: 构建 APK
+    # 步骤 7: 修改包名以实现共存
+    - name: Modify Package Name for Coexistence
+      run: |
+        sed -i 's/\(applicationId\s*=\s*".*"\)/\1.mod/' app/build.gradle.kts
+
+    # 步骤 8: 构建 APK
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
-    # 步骤 8: 提取版本号并创建 Release
+    # 步骤 9: 提取版本号并创建 Release
     - name: Create Release and Upload APK
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
