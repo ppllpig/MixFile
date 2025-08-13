@@ -241,9 +241,9 @@ fun importWebDavData(url: String) {
 fun downloadToWebDav(url: String) {
     val progress = ProgressContent()
     MixDialogBuilder("下载并导入中").apply {
-        // 修复 #1: 通过 LocalContext.current 获取 Context
-        val context = LocalContext.current
         setContent {
+            // 修复 #1: 通过 LocalContext.current 获取 Context
+            val context = LocalContext.current
             AsyncEffect {
                 errorDialog("下载失败", onError = { closeDialog() }) {
                     val data = loadDataWithMaxSize(url, progress)
