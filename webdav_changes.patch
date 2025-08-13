@@ -51,33 +51,4 @@
           Button(
               onClick = {
 
---- a/app/src/main/java/com/donut/mixfile/ui/routes/webdav/Dialogs.kt
-+++ b/app/src/main/java/com/donut/mixfile/ui/routes/webdav/Dialogs.kt
-@@ -236,3 +236,25 @@
-         show()
-     }
- }
-+
-+fun downloadToWebDav(url: String) {
-+    val progress = ProgressContent()
-+    MixDialogBuilder("下载并导入中").apply {
-+        setContent {
-+            AsyncEffect {
-+                errorDialog("下载失败", onError = { closeDialog() }) {
-+                    val data = loadDataWithMaxSize(url, progress)
-+                    val dav = mixFileServer.webDav
-+                    val fileName = url.substringAfterLast("/")
-+                    dav.WEBDAV_DATA.addFile(fileName, data)
-+                    dav.saveData()
-+                    showToast("下载并导入成功!")
-+                }
-+                withContext(Dispatchers.Main) {
-+                    closeDialog()
-+                }
-+            }
-+            progress.LoadingContent()
-+        }
-+        setDefaultNegative()
-+        show()
-+    }
-+}
+--- a/app/src/main
