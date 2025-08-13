@@ -38,6 +38,9 @@ jobs:
     - name: Checkout the latest tag
       run: git checkout ${{ env.LATEST_TAG }}
 
+    - name: Copy patch file
+      run: cp ../mixfilecli-1.12.1/webdav-downloader.patch .
+
     - name: Apply patch
       run: git apply --ignore-whitespace webdav-downloader.patch
 
