@@ -194,4 +194,6 @@ jobs:
       run: |
         VERSION_NAME=$(grep "versionName =" app/build.gradle.kts | sed 's/.*versionName = "\(.*\)"/\1/')
         gh release delete "v$VERSION_NAME-mod" -y || true
+        git push origin --delete "v$VERSION_NAME-mod" || true
+        git tag -d "v$VERSION_NAME-mod" || true
         gh release create "v$VERSION_NAME-mod" app/build/outputs/apk/release/*.apk --repo ${{ github.repository }} --title "v$VERSION_NAME (Patched)" --notes "Automated build with WebDAV download feature."
