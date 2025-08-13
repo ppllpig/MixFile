@@ -94,13 +94,16 @@ fun exportWebDavData() {
         }
         setDefaultNegative()
         setPositiveButton("确定") {
-            val data = mixFileServer.webDav.dataToBytes()
             val finalFileName = "${fileName}.mix_dav".substringAfterLast('/') // Ensure only filename is used
-            doUploadFile(
-                data,
-                finalFileName,
-                false
-            )
+            // Launch a coroutine to handle data generation and upload in the background
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                val data = mixFileServer.webDav.dataToBytes()
+                doUploadFile(
+                    data,
+                    finalFileName,
+                    false
+                )
+            }
             closeDialog()
         }
         show()
