@@ -1,4 +1,4 @@
-name: Sync Upstream, Patch, and Build APK
+name: Sync Latest, Patch, and Build APK
 
 on:
   schedule:
@@ -13,21 +13,17 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # 拉取所有历史记录以便 rebase
 
     - name: Set up Git user
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Add upstream repository
-      run: git remote add upstream https://github.com/InvertGeek/MixFile.git
-
-    - name: Fetch and Rebase from Upstream
+    - name: Sync with Upstream Latest
       run: |
-        git fetch upstream
-        git rebase upstream/master
+        git remote add upstream https://github.com/InvertGeek/MixFile.git
+        git fetch upstream master
+        git reset --hard upstream/master
 
     - name: Apply WebDAV Patch
       run: git apply --ignore-whitespace webdav_changes.patch
