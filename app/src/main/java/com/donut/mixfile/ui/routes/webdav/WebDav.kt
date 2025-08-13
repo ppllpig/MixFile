@@ -36,9 +36,6 @@ val WebDAV = MixNavPage(
     var text by remember {
         mutableStateOf("")
     }
-    var url by remember {
-        mutableStateOf("")
-    }
     val webDavAddress = "$serverAddress/api/webdav"
     Text(
         text = "WebDAV局域网连接地址: $webDavAddress",
@@ -86,57 +83,35 @@ val WebDAV = MixNavPage(
 
     Row {
         OutlinedButton(
-            onClick = {
-                text = readClipBoardText()
-                tryImportWebDavData(text)
-            }, modifier = Modifier
-                .weight(1.0f)
-                .padding(10.dp, 0.dp)
+            onClick = { text = readClipBoardText() },
+            modifier = Modifier.weight(1f)
         ) {
-            Text(text = "粘贴内容")
-            OutlinedTextField(
-                value = url,
-                onValueChange = {
-                    url = it
-                },
-                modifier = Modifier.fillMaxWidth(), label = {
-                    Text(text = "请输入文件链接")
-                },
-                maxLines = 3,
-                trailingIcon = {
-                    if (url.isNotEmpty()) {
-                        Icon(
-                            Icons.Outlined.Close,
-                            tint = colorScheme.primary,
-                            contentDescription = "clear",
-        
-                            modifier = Modifier.clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }) {
-                                url = ""
-                            })
-                    }
-                }
-            )
-            Button(
-                onClick = {
-                    downloadToWebDav(url)
-                },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(text = "从链接下载")
-            }
+            Text("粘贴内容")
         }
         Button(
-            onClick = {
-                tryImportWebDavData(text)
-            },
-            modifier = Modifier
-                .weight(1.0f)
-                .padding(10.dp, 0.dp),
+            onClick = { tryImportWebDavData(text) },
+            modifier = Modifier.weight(1f).padding(start = 10.dp)
         ) {
-            Text(text = "导入文件")
+            Text("导入文件")
         }
+    }
+
+    var downloadUrl by remember { mutableStateOf("") }
+    OutlinedTextField(
+        value = downloadUrl,
+        onValueChange = { downloadUrl = it },
+        label = { Text("请输入下载链接") },
+        modifier = Modifier.fillMaxWidth()
+    )
+    Button(
+        onClick = {
+            if (downloadUrl.isNotEmpty()) {
+                downloadToWebDav(downloadUrl)
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("下载到 WebDAV")
     }
 
 }
