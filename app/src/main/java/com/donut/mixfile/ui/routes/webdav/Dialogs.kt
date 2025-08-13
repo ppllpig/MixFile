@@ -14,10 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.donut.mixfile.App.Companion.app
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
 import com.donut.mixfile.server.core.objects.WebDavFile
-
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer
@@ -35,6 +35,7 @@ import com.donut.mixfile.util.objects.ProgressContent
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 fun clearWebDavData() {
     MixDialogBuilder("确定清空webdav数据?").apply {
@@ -245,10 +246,22 @@ fun downloadToWebDav(url: String) {
                     val data = loadDataWithMaxSize(url, progress)
                     val dav = mixFileServer.webDav
                     val fileName = url.substringAfterLast("/")
-                    // 修复：创建一个 WebDavFile 对象再传入
-                    val newFile = WebDavFile(name = fileName, data = data)
+                    
+                    // 修复：先写入临时文件，再用文件路径创建 WebDavFile 对象
+                    val tempDir = File(app.cacheDir, "webtemp")
+                    if (!tempDir.exists()) {
+                        tempDir.mkdirs()
+                    }
+                    val tempFile = File(tempDir, fileName)
+                    tempFile.writeBytes(data)
+
+                    val newFile = WebDavFile(tempFile)
                     dav.WEBDAV_DATA.addFile(newFile)
                     dav.saveData()
+                    
+                    // 清理临时文件
+                    tempFile.delete()
+                    
                     showToast("下载并导入成功!")
                 }
                 withContext(Dispatchers.Main) {
