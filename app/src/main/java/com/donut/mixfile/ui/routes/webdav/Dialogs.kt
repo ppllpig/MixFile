@@ -1,5 +1,6 @@
 package com.donut.mixfile.ui.routes.webdav
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +13,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.donut.mixfile.App.Companion.app
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
 import com.donut.mixfile.server.core.objects.WebDavFile
@@ -240,6 +241,8 @@ fun importWebDavData(url: String) {
 fun downloadToWebDav(url: String) {
     val progress = ProgressContent()
     MixDialogBuilder("下载并导入中").apply {
+        // 修复 #1: 通过 LocalContext.current 获取 Context
+        val context = LocalContext.current
         setContent {
             AsyncEffect {
                 errorDialog("下载失败", onError = { closeDialog() }) {
@@ -247,19 +250,18 @@ fun downloadToWebDav(url: String) {
                     val dav = mixFileServer.webDav
                     val fileName = url.substringAfterLast("/")
                     
-                    // 修复：先写入临时文件，再用文件路径创建 WebDavFile 对象
-                    val tempDir = File(app.cacheDir, "webtemp")
+                    val tempDir = File(context.cacheDir, "webtemp")
                     if (!tempDir.exists()) {
                         tempDir.mkdirs()
                     }
                     val tempFile = File(tempDir, fileName)
                     tempFile.writeBytes(data)
 
-                    val newFile = WebDavFile(tempFile)
+                    // 修复 #2: 传入文件路径字符串，而不是 File 对象
+                    val newFile = WebDavFile(tempFile.absolutePath)
                     dav.WEBDAV_DATA.addFile(newFile)
                     dav.saveData()
                     
-                    // 清理临时文件
                     tempFile.delete()
                     
                     showToast("下载并导入成功!")
