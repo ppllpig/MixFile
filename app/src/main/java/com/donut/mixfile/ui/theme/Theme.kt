@@ -107,7 +107,7 @@ fun MainTheme(
     }
 
     MaterialTheme(
-        colorScheme = mainColorScheme.colors(),
+        colorScheme = mainColorScheme,
         typography = Typography,
         content = content
     )
