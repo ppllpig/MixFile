@@ -16,6 +16,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,7 +35,6 @@ import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.routes.UploadDialogCard
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.file.FileCardList
 import com.donut.mixfile.util.file.deleteUploadLog

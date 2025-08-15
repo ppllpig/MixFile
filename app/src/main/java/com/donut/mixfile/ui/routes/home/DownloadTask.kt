@@ -20,6 +20,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,9 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.donut.mixfile.appScope
+import com.donut.mixfile.ui.component.common.InfoText
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.file.InfoText
+import com.donut.mixfile.ui.theme.mainColorScheme
 import com.donut.mixfile.util.file.saveFileToStorage
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.objects.AnimatedLoadingBar
@@ -103,7 +104,7 @@ class DownloadTask(
     val fileSize: Long,
     val url: String,
 ) {
-    var progress = ProgressContent("下载中", 14.sp, colorScheme.secondary, false)
+    var progress = ProgressContent("下载中", 14.sp, mainColorScheme.secondary, false)
 
     var job: Job? = null
     var fileUri: Uri? = null

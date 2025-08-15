@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.donut.mixfile.ui.nav.MixNavPage
 import com.donut.mixfile.ui.routes.UploadDialogCard
 import com.donut.mixfile.ui.routes.home.serverAddress
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.readClipBoardText
 

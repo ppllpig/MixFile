@@ -44,7 +44,7 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.extensions.isNotNull
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.theme.MainTheme
-import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.ui.theme.mainColorScheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -102,7 +102,7 @@ fun addComposeView(
         ComposeView(context).apply {
             setContent {
                 MainTheme {
-                    MaterialTheme(colorScheme = scheme ?: colorScheme) {
+                    MaterialTheme(colorScheme = scheme ?: mainColorScheme) {
                         content {
                             this.removeView()
                         }

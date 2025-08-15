@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,9 +24,9 @@ import androidx.compose.ui.unit.sp
 import com.donut.mixfile.appScope
 import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.MixUploadTask
+import com.donut.mixfile.ui.component.common.InfoText
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.theme.colorScheme
-import com.donut.mixfile.util.file.InfoText
+import com.donut.mixfile.ui.theme.mainColorScheme
 import com.donut.mixfile.util.file.addUploadLog
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.objects.ProgressContent
@@ -95,7 +96,7 @@ class UploadTask(
 
     override val stopFunc: MutableList<suspend () -> Unit> = mutableListOf()
 
-    var progress = ProgressContent("上传中", 14.sp, colorScheme.secondary, false)
+    var progress = ProgressContent("上传中", 14.sp, mainColorScheme.secondary, false)
 
     override suspend fun updateProgress(size: Long, total: Long) {
         withContext(Dispatchers.Main) {

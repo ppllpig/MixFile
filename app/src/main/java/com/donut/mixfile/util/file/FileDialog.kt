@@ -6,15 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.donut.mixfile.activity.video.VideoActivity
 import com.donut.mixfile.app
@@ -26,25 +20,19 @@ import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.core.utils.shareCode
 import com.donut.mixfile.server.core.utils.toHex
+import com.donut.mixfile.ui.component.common.Chip
+import com.donut.mixfile.ui.component.common.InfoText
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.favorites.openCategorySelect
 import com.donut.mixfile.ui.routes.home.DownloadTask
 import com.donut.mixfile.ui.routes.home.showDownloadTaskWindow
 import com.donut.mixfile.ui.routes.settings.useShortCode
 import com.donut.mixfile.ui.routes.settings.useSystemPlayer
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.CachedDelegate
 import com.donut.mixfile.util.copyToClipboard
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.showToast
 import com.donut.mixfile.util.startActivity
-
-@Composable
-fun FileChip(text: String, operation: () -> Unit) {
-    AssistChip(onClick = operation, label = {
-        Text(text = text, color = colorScheme.primary)
-    })
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 fun showFileInfoDialog(
@@ -82,30 +70,30 @@ fun showFileInfoDialog(
                 InfoText(key = "密钥: ", value = shareInfo.key)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (fileName.endsWith(".mix_list")) {
-                        FileChip("文件列表") {
+                        Chip("文件列表") {
                             importFileList(log.downloadUrl)
                         }
                     }
                     if (fileName.endsWith(".mix_dav")) {
-                        FileChip("查看文件") {
+                        Chip("查看文件") {
                             previewWebDavData(log.downloadUrl)
                         }
                     }
                     if (!isFav) {
-                        FileChip("收藏") {
+                        Chip("收藏") {
                             addFavoriteLog(log)
                         }
                     } else {
-                        FileChip("取消收藏") {
+                        Chip("取消收藏") {
                             deleteFavoriteLog(log)
                         }
-                        FileChip("重命名") {
+                        Chip("重命名") {
                             log.rename {
                                 closeDialog()
                                 showFileInfoDialog(it, onDismiss)
                             }
                         }
-                        FileChip("分类: ${log.getCategory()}") {
+                        Chip("分类: ${log.getCategory()}") {
                             openCategorySelect(log.getCategory()) { category ->
                                 favorites = log.updateDataList(favorites) {
                                     log.copy(category = category)
@@ -114,12 +102,12 @@ fun showFileInfoDialog(
                         }
                     }
                     if (dataLog.isVideo) {
-                        FileChip("播放视频") {
+                        Chip("播放视频") {
                             if (useSystemPlayer) {
                                 val intent = Intent(Intent.ACTION_VIEW)
                                 intent.setDataAndType(log.downloadUrl.toUri(), "video/*")
                                 startActivity(intent)
-                                return@FileChip
+                                return@Chip
                             }
                             val intent = Intent(app, VideoActivity::class.java).apply {
                                 putExtra("url", log.downloadUrl)
@@ -129,11 +117,11 @@ fun showFileInfoDialog(
                         }
                     }
                     if (dataLog.isImage) {
-                        FileChip("查看图片") {
+                        Chip("查看图片") {
                             showImageDialog(log.downloadUrl)
                         }
                     }
-                    FileChip("复制局域网地址") {
+                    Chip("复制局域网地址") {
                         log.lanUrl.copyToClipboard()
                     }
                 }
@@ -145,20 +133,6 @@ fun showFileInfoDialog(
             showDownloadTaskWindow()
         }
         show()
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun InfoText(key: String, value: String) {
-    FlowRow {
-        Text(text = key, fontSize = 14.sp, color = Color(117, 115, 115, 255))
-        Text(
-            text = value,
-            color = colorScheme.primary.copy(alpha = 0.8f),
-            textDecoration = TextDecoration.Underline,
-            fontSize = 14.sp,
-        )
     }
 }
 

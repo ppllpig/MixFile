@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -30,7 +31,6 @@ import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.ui.component.common.CommonSwitch
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.nav.MixNavPage
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.updateChecker
 import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.cachedMutableOf

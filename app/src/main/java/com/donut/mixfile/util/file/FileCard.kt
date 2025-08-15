@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +40,7 @@ import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.isImage
 import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.serverStarted
-import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.ui.component.common.InfoText
 import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.cachedMutableOf
 import com.donut.mixfile.util.formatFileSize

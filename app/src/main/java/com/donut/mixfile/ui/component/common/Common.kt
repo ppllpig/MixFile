@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,9 +30,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+@Composable
+fun Chip(text: String, operation: () -> Unit) {
+    AssistChip(onClick = operation, label = {
+        Text(text = text, color = colorScheme.primary)
+    })
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun InfoText(key: String, value: String) {
+    FlowRow {
+        Text(text = key, fontSize = 14.sp, color = Color(117, 115, 115, 255))
+        Text(
+            text = value,
+            color = colorScheme.primary.copy(alpha = 0.8f),
+            textDecoration = TextDecoration.Underline,
+            fontSize = 14.sp,
+        )
+    }
+}
 
 @Composable
 fun CommonColumn(

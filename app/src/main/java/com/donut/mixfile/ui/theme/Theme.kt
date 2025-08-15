@@ -43,7 +43,7 @@ val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
 )
 
-var colorScheme by mutableStateOf(LightColorScheme)
+var mainColorScheme by mutableStateOf(LightColorScheme)
 var currentTheme by cachedMutableOf(Theme.DEFAULT.name, "app_theme")
 
 enum class Theme(
@@ -85,7 +85,7 @@ fun MainTheme(
 ) {
     val context = LocalContext.current
     val theme = Theme.valueOf(currentTheme)
-    colorScheme =
+    mainColorScheme =
         if (enableAutoDarkMode && darkTheme) theme.night(context) else theme.light(
             context
         )
@@ -97,8 +97,8 @@ fun MainTheme(
                 return@SideEffect
             }
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.surface.toArgb()
-            window.navigationBarColor = colorScheme.surface.toArgb()
+            window.statusBarColor = mainColorScheme.surface.toArgb()
+            window.navigationBarColor = mainColorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = true
                 isAppearanceLightNavigationBars = false
@@ -107,7 +107,7 @@ fun MainTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme.colors(),
+        colorScheme = mainColorScheme.colors(),
         typography = Typography,
         content = content
     )

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.home.UploadTaskCard
 import com.donut.mixfile.ui.routes.home.uploadTasks
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.cancelAllMultiUpload
 import com.donut.mixfile.util.file.totalUploadFileCount
 import com.donut.mixfile.util.file.uploadQueue

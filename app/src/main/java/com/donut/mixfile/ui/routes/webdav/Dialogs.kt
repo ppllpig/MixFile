@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -17,18 +18,19 @@ import androidx.compose.ui.unit.dp
 import com.donut.mixfile.kv
 import com.donut.mixfile.server.WEB_DAV_KEY
 import com.donut.mixfile.server.core.objects.WebDavFile
-
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.server.mixFileServer
+import com.donut.mixfile.ui.component.common.Chip
+import com.donut.mixfile.ui.component.common.InfoText
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.AsyncEffect
 import com.donut.mixfile.util.errorDialog
 import com.donut.mixfile.util.file.doUploadFile
 import com.donut.mixfile.util.file.downloadUrl
 import com.donut.mixfile.util.file.loadDataWithMaxSize
 import com.donut.mixfile.util.file.loadFileList
+import com.donut.mixfile.util.file.previewWebDavData
 import com.donut.mixfile.util.formatFileSize
 import com.donut.mixfile.util.getCurrentTime
 import com.donut.mixfile.util.objects.ProgressContent
@@ -163,14 +165,15 @@ fun tryImportWebDavData(code: String) {
     }
     MixDialogBuilder("确定导入存档?").apply {
         setContent {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "存档: ${shareInfo.fileName}",
-                    color = colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text("大小: ${formatFileSize(shareInfo.fileSize)}", color = colorScheme.primary)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                InfoText("存档: ", shareInfo.fileName)
+                InfoText("大小: ", formatFileSize(shareInfo.fileSize))
+                Chip("查看文件") {
+                    previewWebDavData(shareInfo.toDataLog().downloadUrl)
+                }
             }
         }
         setPositiveButton("确定") {

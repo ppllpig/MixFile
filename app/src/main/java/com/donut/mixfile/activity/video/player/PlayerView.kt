@@ -30,7 +30,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.donut.mixfile.activity.video.VideoHistory
 import com.donut.mixfile.activity.video.playHistory
-import com.donut.mixfile.ui.theme.colorScheme
+import com.donut.mixfile.ui.theme.mainColorScheme
 import com.donut.mixfile.util.ForceUpdateMutable
 import com.donut.mixfile.util.showToast
 import kotlinx.coroutines.delay
@@ -48,11 +48,11 @@ fun formatTime(milliseconds: Long): String {
 }
 
 val playerColorScheme
-    get() = colorScheme.copy(
+    get() = mainColorScheme.copy(
         onSurfaceVariant = Color.White.copy(0.8f),
         surface = Color.Black.copy(0.3f),
         onSurface = Color.White.copy(0.8f),
-        onSecondaryContainer = colorScheme.primary.copy(0.8f)
+        onSecondaryContainer = mainColorScheme.primary.copy(0.8f)
     )
 
 @Composable

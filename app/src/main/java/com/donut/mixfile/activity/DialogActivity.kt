@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +28,6 @@ import com.donut.mixfile.currentActivity
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import com.donut.mixfile.ui.component.common.CommonColumn
 import com.donut.mixfile.ui.theme.MainTheme
-import com.donut.mixfile.ui.theme.colorScheme
 import com.donut.mixfile.util.file.showFileInfoDialog
 import com.donut.mixfile.util.objects.MixActivity
 
