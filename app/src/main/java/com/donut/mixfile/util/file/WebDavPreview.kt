@@ -32,8 +32,8 @@ import com.donut.mixfile.server.core.objects.FileDataLog
 import com.donut.mixfile.server.core.objects.WebDavFile
 import com.donut.mixfile.server.core.objects.isVideo
 import com.donut.mixfile.server.core.objects.toDataLog
-import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
-import com.donut.mixfile.server.core.routes.api.webdav.objects.normalizePath
+import com.donut.mixfile.server.core.routes.api.routes.webdav.objects.WebDavManager
+import com.donut.mixfile.server.core.routes.api.routes.webdav.objects.normalizePath
 import com.donut.mixfile.ui.component.common.MixDialogBuilder
 import com.donut.mixfile.ui.routes.webdav.importWebDavData
 import com.donut.mixfile.util.AsyncEffect

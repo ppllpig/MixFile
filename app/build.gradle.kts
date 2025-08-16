@@ -12,11 +12,11 @@ plugins {
 
 android {
     namespace = "com.donut.mixfile"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.donut.mixfile"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 144
         versionName = "1.19.2"
 
@@ -84,9 +84,6 @@ dependencies {
     implementation(libs.androidx.media3.ui) // [Required] Base Player UI
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.analytics)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.content.negotiation)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
