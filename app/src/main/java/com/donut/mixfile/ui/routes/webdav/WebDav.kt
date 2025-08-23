@@ -54,6 +54,15 @@ val WebDAV = MixNavPage(
     }, modifier = Modifier.fillMaxWidth()) {
         Text("清空文件")
     }
+    var showRestoreDialog by remember { mutableStateOf(false) }
+    if (showRestoreDialog) {
+        WebDavRestoreDialog(onClose = { showRestoreDialog = false })
+    }
+    Button(onClick = {
+        showRestoreDialog = true
+    }, modifier = Modifier.fillMaxWidth()) {
+        Text("从外部 WebDAV 恢复")
+    }
     OutlinedTextField(
         value = text,
         onValueChange = {
