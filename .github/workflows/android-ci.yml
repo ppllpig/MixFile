@@ -1,14 +1,21 @@
 name: Android CI
 
 on:
-  # 当有代码被推送到 main 分支时，自动触发此流程
+name: Android CI
+
+on:
+  # 触发条件1：当有代码推送到 main 分支时
   push:
     branches: [ "main" ] # 如果你的主分支是 master，请修改这里
 
+  # 触发条件2：允许在 Actions 页面手动触发
+  workflow_dispatch:
+
 jobs:
   build:
-    # 使用一台虚拟的 Ubuntu 服务器来执行构建
     runs-on: ubuntu-latest
+    # ... 后面的内容保持不变 ...
+
 
     steps:
       # 第 1 步：下载你的仓库代码
